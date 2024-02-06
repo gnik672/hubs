@@ -306,168 +306,168 @@
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "german_lang_off-hover.png": {
+    "de_lang_off-hover.png": {
       "frame": { "x": 260, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "german_lang_off.png": {
+    "de_lang_off.png": {
       "frame": { "x": 344, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "german_lang_on-hover.png": {
+    "de_lang_on-hover.png": {
       "frame": { "x": 428, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "german_lang_on.png": {
+    "de_lang_on.png": {
       "frame": { "x": 512, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "dutch_lang_off-hover.png": {
+    "du_lang_off-hover.png": {
       "frame": { "x": 596, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "dutch_lang_off.png": {
+    "du_lang_off.png": {
       "frame": { "x": 680, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "dutch_lang_on-hover.png": {
+    "du_lang_on-hover.png": {
       "frame": { "x": 764, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "dutch_lang_on.png": {
+    "du_lang_on.png": {
       "frame": { "x": 848, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "greek_lang_off-hover.png": {
+    "el_lang_off-hover.png": {
       "frame": { "x": 932, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "greek_lang_off.png": {
+    "el_lang_off.png": {
       "frame": { "x": 1016, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "greek_lang_on-hover.png": {
+    "el_lang_on-hover.png": {
       "frame": { "x": 1100, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "greek_lang_on.png": {
+    "el_lang_on.png": {
       "frame": { "x": 1184, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "english_lang_off-hover.png": {
+    "en_lang_off-hover.png": {
       "frame": { "x": 1268, "y": 1180, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "english_lang_off.png": {
+    "en_lang_off.png": {
       "frame": { "x": 8, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "english_lang_on-hover.png": {
+    "en_lang_on-hover.png": {
       "frame": { "x": 92, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "english_lang_on.png": {
+    "en_lang_on.png": {
       "frame": { "x": 176, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "spanish_lang_off-hover.png": {
+    "es_lang_off-hover.png": {
       "frame": { "x": 260, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "spanish_lang_off.png": {
+    "es_lang_off.png": {
       "frame": { "x": 344, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "spanish_lang_on-hover.png": {
+    "es_lang_on-hover.png": {
       "frame": { "x": 428, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "spanish_lang_on.png": {
+    "es_lang_on.png": {
       "frame": { "x": 512, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "italian_lang_off-hover.png": {
+    "it_lang_off-hover.png": {
       "frame": { "x": 596, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "italian_lang_off.png": {
+    "it_lang_off.png": {
       "frame": { "x": 680, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "italian_lang_on-hover.png": {
+    "it_lang_on-hover.png": {
       "frame": { "x": 764, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 68, "h": 68 },
       "sourceSize": { "w": 68, "h": 68 }
     },
-    "italian_lang_on.png": {
+    "it_lang_on.png": {
       "frame": { "x": 848, "y": 1264, "w": 68, "h": 68 },
       "rotated": false,
       "trimmed": false,
