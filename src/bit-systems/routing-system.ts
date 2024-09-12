@@ -1,14 +1,28 @@
-import { Color, DiscreteInterpolant, Material, Mesh, Object3D, Vector, Vector2, Vector3 } from "three";
+import {
+  Camera,
+  Color,
+  DiscreteInterpolant,
+  Euler,
+  Material,
+  Mesh,
+  Object3D,
+  PerspectiveCamera,
+  Vector,
+  Vector2,
+  Vector3,
+  WebGLRenderTarget
+} from "three";
 import VirtualAgent, { avatarDirection, avatarPos, virtualAgent } from "./agent-system";
 import { NavigationProperties, PropertyType, roomPropertiesReader } from "../utils/rooms-properties";
 import { element, node, number, object } from "prop-types";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { removeEntity } from "bitecs";
 import { NavigationCues } from "../prefabs/nav-line";
-import { HubsWorld } from "../app";
+import { App, HubsWorld } from "../app";
 import { clamp, radToDeg } from "three/src/math/MathUtils";
 import { COLORS } from "html2canvas/dist/types/css/types/color";
 import { copySittingToStandingTransform } from "../systems/userinput/devices/copy-sitting-to-standing-transform";
+import { AElement, AScene } from "aframe";
 
 //------------------------------ interfaces ----------------------------------//
 interface RoomObjectDetails {
@@ -258,6 +272,7 @@ export class NavigationSystem {
   activeDest: boolean;
   nodeObjs: Array<Mesh>;
   roomPolygon: Array<Vector2>;
+  snapCalledTimes: number;
 
   constructor() {
     this.allowed = false;
@@ -268,6 +283,43 @@ export class NavigationSystem {
     this.mapped = false;
     this.dest = { active: false };
     this.objects = {};
+    this.snapCalledTimes = 0;
+  }
+
+  SnapPOV() {
+    const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+    APP.scene?.renderer.setRenderTarget(renderTarget);
+    APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
+    const canvas = APP.scene!.renderer.domElement;
+    APP.scene?.renderer.setRenderTarget(null);
+
+    const dataUrl = canvas.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `test_${this.snapCalledTimes}.png`;
+    link.click();
+  }
+
+  moveInNode(node: Node) {
+    // this.nodes.forEach(node =>{
+    //   node.vector
+    // })
+
+    var i = 0;
+
+    APP.scene!.emit("clear-scene");
+    var avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
+    var avatarHeight = avatarRig.position.y;
+    var nodeVec = node.vector.clone();
+    avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+    avatarRig.rotation.set(0, i, 0);
+    avatarRig.updateMatrix();
+    this.SnapPOV();
+
+    // const camera = APP.scene!.camera;
+    // console.log(camera.isCamera);
+    // console.log(APP.scene!.renderer);
   }
 
   calculateCorridors(direction: "vertical" | "horizontal") {
@@ -452,7 +504,7 @@ export class NavigationSystem {
     for (let j = 0; j < this.nodeCount; j++) this.paths[j] = [];
 
     this.findCorners();
-    RenderNodes(this.nodes, 0xfffff);
+    // RenderNodes(this.nodes, 0xfffff);
   }
 
   GetDestIndex(salientName: string): number {
@@ -706,6 +758,8 @@ export class NavigationSystem {
     const stopIndex = this.GetDestIndex(stopName);
 
     if (stopIndex < 0 || !this.allowed) return { path: [], instructions: [], knowledge: "no location", valid: false };
+
+    if (stopName === "conference room") this.moveInNode(this.nodes[stopIndex]);
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();

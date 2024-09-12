@@ -1,5 +1,5 @@
 declare module "aframe" {
-  import { Scene, Clock, Object3D, Mesh, WebGLRenderer } from "three";
+  import { Scene, Clock, Object3D, Mesh, WebGLRenderer, Camera } from "three";
 
   interface AElement extends HTMLElement {
     object3D: Object3D;
@@ -102,6 +102,7 @@ declare module "aframe" {
   }
 
   interface AScene extends AElement {
+    camera: Camera;
     object3D: Scene;
     renderStarted: boolean;
     renderer: WebGLRenderer;
