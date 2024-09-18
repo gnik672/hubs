@@ -1,17 +1,4 @@
-import {
-  Camera,
-  Color,
-  DiscreteInterpolant,
-  Euler,
-  Material,
-  Mesh,
-  Object3D,
-  PerspectiveCamera,
-  Vector,
-  Vector2,
-  Vector3,
-  WebGLRenderTarget
-} from "three";
+import { Mesh, Object3D, Vector2, Vector3, WebGLRenderTarget } from "three";
 import VirtualAgent, { avatarDirection, avatarPos, virtualAgent } from "./agent-system";
 import { NavigationProperties, PropertyType, roomPropertiesReader } from "../utils/rooms-properties";
 import { element, node, number, object } from "prop-types";
@@ -19,11 +6,12 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { removeEntity } from "bitecs";
 import { NavigationCues } from "../prefabs/nav-line";
 import { App, HubsWorld } from "../app";
-import { clamp, radToDeg } from "three/src/math/MathUtils";
+import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 import { COLORS } from "html2canvas/dist/types/css/types/color";
 import { copySittingToStandingTransform } from "../systems/userinput/devices/copy-sitting-to-standing-transform";
 import { AElement, AScene } from "aframe";
-
+import { start } from "@popperjs/core";
+import { MediaBrowser } from "../react-components/room/MediaBrowser";
 //------------------------------ interfaces ----------------------------------//
 interface RoomObjectDetails {
   angle: Array<number>;
@@ -35,6 +23,12 @@ export interface Navigation {
   instructions: Array<Record<string, any>>;
   knowledge: string;
   valid: boolean;
+}
+
+export interface DatasetNavItem {
+  destination: string;
+  filename: string;
+  instructions: string;
 }
 
 //------------------------------ constansts ----------------------------------//
@@ -283,10 +277,9 @@ export class NavigationSystem {
     this.mapped = false;
     this.dest = { active: false };
     this.objects = {};
-    this.snapCalledTimes = 0;
   }
 
-  SnapPOV() {
+  SnapPOV(nodeNo: number, angleNo: number) {
     const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
     APP.scene?.renderer.setRenderTarget(renderTarget);
     APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
@@ -297,29 +290,41 @@ export class NavigationSystem {
 
     const link = document.createElement("a");
     link.href = dataUrl;
-    link.download = `test_${this.snapCalledTimes}.png`;
+    link.download = `image_${nodeNo}_${angleNo}.png`;
     link.click();
   }
 
-  moveInNode(node: Node) {
+  waitForSeconds(secs: number): Promise<any> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(null);
+      }, secs * 1000);
+    });
+  }
+
+  async snapAnglesInNode(i: number) {
     // this.nodes.forEach(node =>{
     //   node.vector
     // })
 
-    var i = 0;
+    const node = this.nodes[i];
+    var j = 0;
+    while (j < 360) {
+      APP.scene!.emit("clear-scene");
+      var avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
+      var avatarHeight = avatarRig.position.y;
+      var nodeVec = node.vector.clone();
+      avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
 
-    APP.scene!.emit("clear-scene");
-    var avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
-    var avatarHeight = avatarRig.position.y;
-    var nodeVec = node.vector.clone();
-    avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
-    avatarRig.rotation.set(0, i, 0);
-    avatarRig.updateMatrix();
-    this.SnapPOV();
+      avatarRig.rotation.set(0, degToRad(j), 0);
+      avatarRig.updateMatrix();
 
-    // const camera = APP.scene!.camera;
-    // console.log(camera.isCamera);
-    // console.log(APP.scene!.renderer);
+      await this.waitForSeconds(5);
+      this.SnapPOV(i, j);
+
+      j += 20;
+      console.log(j);
+    }
   }
 
   calculateCorridors(direction: "vertical" | "horizontal") {
@@ -579,7 +584,10 @@ export class NavigationSystem {
     return minDistanceIndex;
   }
 
-  GetNewInstructions(path: Array<number>, playerForward: Vector3) {
+  GetInstructionsString(
+    path: Array<number>,
+    playerForward: Vector3
+  ): { destination: string | null; instructions: string | null } {
     // ------------------- get line object ------------------- //
     const nodeLines: Array<Array<Node>> = [];
     const instructions: Array<string> = [];
@@ -749,7 +757,117 @@ export class NavigationSystem {
       }
     }
 
-    console.log(`dataset`, instructions.filter(value => value !== "").join(", "));
+    const inst = instructions.filter(value => value !== "").join(", ");
+    return { destination: null, instructions: inst };
+  }
+
+  async CreateVLDataset() {
+    const targets = [
+      "conference room",
+      "business room",
+      "social area",
+      "booth 1",
+      "booth 2",
+      "booth 3",
+      "booth 4",
+      "tradeshows"
+    ];
+
+    const instructions: Object[] = [];
+    const photoNames: number[] = [];
+    var avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
+
+    for (let j = 0; j < 360; j += 45) {
+      for (let i = 0; i < this.nodes.length; i++) {
+        const node = this.nodes[i];
+
+        APP.scene!.emit("clear-scene");
+        var avatarHeight = avatarRig.position.y;
+        var nodeVec = node.vector.clone();
+        avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+
+        avatarRig.rotation.set(0, degToRad(j), 0);
+        avatarRig.updateMatrix();
+
+        try {
+          targets.forEach(targetName => {
+            const inst = this.GetOnlyInstructionsKnowledege(i, j, targetName);
+            instructions.push({ inst });
+          });
+        } catch (e) {
+          console.log(`didn't add to batch for node ${i}`);
+          continue;
+        }
+
+        if (j === 0) photoNames.push(i);
+
+        // await this.waitForSeconds(5);
+        // this.SnapPOV(i, j);
+      }
+
+      // console.log(`exporting json file for angle: ${j}`);
+      // const serializedJSONData = JSON.stringify(instructions);
+      // const filename = `instructions_${j}.json`;
+      // await this.downloadFile(filename, serializedJSONData);
+      instructions.length = 0;
+    }
+
+    console.log(`waiting for a bit`);
+    await this.waitForSeconds(10);
+    console.log(`continuing`);
+
+    for (let j = 270; j < 360; j += 45) {
+      avatarRig.rotation.set(0, degToRad(j), 0);
+      avatarRig.updateMatrix();
+      for (let i = 0; i < photoNames.length; i++) {
+        const nodeIndex = photoNames[i];
+        const node = this.nodes[nodeIndex];
+
+        var avatarHeight = avatarRig.position.y;
+        var nodeVec = node.vector.clone();
+        avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+        avatarRig.updateMatrix();
+        await this.waitForSeconds(0.005);
+        this.SnapPOV(nodeIndex, j);
+      }
+    }
+  }
+
+  downloadFile(filename: string, data: string) {
+    return new Promise((resolve, reject) => {
+      const a = document.createElement("a");
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = filename;
+
+      a.click();
+      resolve(null);
+    });
+  }
+
+  //only for dataset creation purposes
+  GetOnlyInstructionsKnowledege(startIndex: number, angle: number, stopName: string) {
+    const stopIndex = this.GetDestIndex(stopName);
+
+    if (!this.mappedNodes[startIndex]) {
+      if (this.mapped) this.Reset();
+      this.Dijkstra(startIndex);
+    }
+
+    const path = this.paths[startIndex][stopIndex];
+    const pathVectors: Array<Vector3> = [];
+
+    path.forEach(index => {
+      pathVectors.push(this.nodes[index].vector);
+    });
+
+    const playerForward = avatarDirection();
+
+    const instObj = this.GetInstructionsString(path, playerForward);
+    instObj.destination = stopName;
+
+    return { index: startIndex, angle: angle, ...instObj };
   }
 
   GetInstructions(startPos: Vector3, stopName: string) {
@@ -758,8 +876,6 @@ export class NavigationSystem {
     const stopIndex = this.GetDestIndex(stopName);
 
     if (stopIndex < 0 || !this.allowed) return { path: [], instructions: [], knowledge: "no location", valid: false };
-
-    if (stopName === "conference room") this.moveInNode(this.nodes[stopIndex]);
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
@@ -785,7 +901,8 @@ export class NavigationSystem {
 
     let distanceSum = 0;
 
-    this.GetNewInstructions(path, playerForward);
+    const instObj = this.GetInstructionsString(path, playerForward);
+    instObj.destination = stopName;
 
     for (let i = 0; i < path.length - 1; i++) {
       const current = this.nodes[path[i]].vector;

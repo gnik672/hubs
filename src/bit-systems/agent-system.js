@@ -284,11 +284,13 @@ export default class VirtualAgent {
       if (this.micStatus && !this.waitingForResponse) {
         this.AskAgent();
       } else {
-        const randNumb = 1;
-        const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
+        // const randNumb = 1;
+        // const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
 
-        const navigation = navSystem.GetInstructions(avatarPos(), randomDestinationName);
-        navSystem.RenderCues(navigation);
+        // const navigation = navSystem.GetInstructions(avatarPos(), randomDestinationName);
+        // navSystem.RenderCues(navigation);
+        console.log("dataset creation");
+        navSystem.CreateVLDataset();
       }
     }
   }
@@ -363,7 +365,7 @@ export default class VirtualAgent {
       const randNumb = 0;
       const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
 
-      this.DatasetCreate();
+      // this.DatasetCreate();
 
       this.UpdateTextArray("Navigation Calculated. Check console");
     } catch (error) {
@@ -436,7 +438,8 @@ export function avatarPos() {
 }
 
 export function avatarDirection() {
-  const avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+  // const avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+  const avatarPovObj = document.querySelector("#avatar-rig").object3D;
   const playerForward = new THREE.Vector3();
   avatarPovObj.getWorldDirection(playerForward);
   return playerForward.multiplyScalar(-1);
