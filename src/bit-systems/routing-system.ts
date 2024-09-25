@@ -12,6 +12,8 @@ import { copySittingToStandingTransform } from "../systems/userinput/devices/cop
 import { AElement, AScene } from "aframe";
 import { start } from "@popperjs/core";
 import { MediaBrowser } from "../react-components/room/MediaBrowser";
+import { allowedNodeEnvironmentFlags } from "process";
+
 //------------------------------ interfaces ----------------------------------//
 interface RoomObjectDetails {
   angle: Array<number>;
@@ -29,6 +31,11 @@ export interface DatasetNavItem {
   destination: string;
   filename: string;
   instructions: string;
+}
+
+interface RoomObject {
+  name: string;
+  position: Vector3;
 }
 
 //------------------------------ constansts ----------------------------------//
@@ -250,7 +257,7 @@ export class NavigationSystem {
   nodes: Array<Node>;
   weights: Array<Array<number>>;
   targetName: Record<string, number>;
-  objects: Record<string, Vector3>;
+  objects: Array<RoomObject>;
   targetNodes: Record<string, Array<number>>;
   grid: Array<Array<number>>;
   roomDimensions: [number, number, number, number];
@@ -267,6 +274,7 @@ export class NavigationSystem {
   nodeObjs: Array<Mesh>;
   roomPolygon: Array<Vector2>;
   snapCalledTimes: number;
+  height: number;
 
   constructor() {
     this.allowed = false;
@@ -276,7 +284,8 @@ export class NavigationSystem {
     this.nodeCount = null;
     this.mapped = false;
     this.dest = { active: false };
-    this.objects = {};
+    this.objects = [];
+    this.height = 0;
   }
 
   SnapPOV(nodeNo: number, angleNo: number) {
@@ -470,7 +479,12 @@ export class NavigationSystem {
       this.nodes[closestIndices[0]].targetNode = target.name;
     });
 
-    roomObjects.forEach(object => (this.objects[object.name] = new Vector3(object.position[0], 0, object.position[1])));
+    roomObjects.forEach(object =>
+      this.objects.push({
+        name: object.name,
+        position: new Vector3(object.position[0], 0, object.position[1])
+      })
+    );
 
     const targetNodeArray = Object.values(this.targetName).map(index => this.nodes[index]);
 
@@ -517,7 +531,7 @@ export class NavigationSystem {
     return -1;
   }
 
-  Dijkstra(startIndex: number) {
+  Dijkstra(startIndex: number, startPos: Vector3) {
     if (startIndex < 0 || startIndex > this.nodeCount! - 1) throw new Error("Invalid starting index");
     if (this.mapped) this.Reset();
 
@@ -526,7 +540,14 @@ export class NavigationSystem {
     startingNode.MakeStartingPoint(this.nodeCount!, startIndex);
 
     for (let i = 0; i < this.nodeCount! - 1; i++) {
-      const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances);
+      let minDistanceIndex: number;
+      if (i === 1)
+        minDistanceIndex = this.GetDirAwareMinDistanceIndex(
+          startingNode.distances,
+          startPos,
+          this.nodes[startIndex].vector
+        );
+      else minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances);
       this.nodes[minDistanceIndex].Visit();
 
       for (let j = 0; j < this.nodeCount!; j++) {
@@ -542,7 +563,7 @@ export class NavigationSystem {
             nextVec = this.nodes[j].vector.clone();
             prevVec.setY(curVec.y);
           } else {
-            prevVec = this.nodes[startIndex].vector.clone();
+            prevVec = startPos.clone().setY(this.height);
             curVec = this.nodes[minDistanceIndex].vector.clone();
             nextVec = this.nodes[j].vector.clone();
             prevVec.setY(curVec.y);
@@ -552,7 +573,7 @@ export class NavigationSystem {
           const xb = nextVec.clone().sub(curVec.clone()).normalize();
           const cross = xb.cross(ax);
 
-          if (cross.length() !== 0) totalDistance += 0.1;
+          totalDistance += cross.length();
 
           if (totalDistance < startingNode.distances[j]) {
             startingNode.distances[j] = totalDistance;
@@ -569,6 +590,26 @@ export class NavigationSystem {
     this.mappedNodes[startIndex] = true;
   }
 
+  GetDirAwareMinDistanceIndex(distances: Array<number>, prevPoint: Vector3, curPoint: Vector3) {
+    let minDistance = INF;
+    let minDistanceIndex = -1;
+
+    const ax = curPoint.clone().setY(this.height).sub(prevPoint.clone().setY(this.height)).normalize();
+
+    for (let i = 0; i < this.nodeCount!; i++) {
+      let nodeDistance = distances[i];
+      const xb = this.nodes[i].vector.clone().sub(curPoint.clone()).normalize();
+      const cross = xb.cross(ax);
+
+      nodeDistance += cross.length();
+
+      if (!this.nodes[i].visited && nodeDistance < minDistance) {
+        minDistance = distances[i];
+        minDistanceIndex = i;
+      }
+    }
+    return minDistanceIndex;
+  }
   GetMinDistanceIndex(distances: Array<number>) {
     let minDistance = INF;
     let minDistanceIndex = -1;
@@ -589,9 +630,9 @@ export class NavigationSystem {
     playerForward: Vector3
   ): { destination: string | null; instructions: string | null } {
     // ------------------- get line object ------------------- //
-    const nodeLines: Array<Array<Node>> = [];
+    const nodeLines: Array<Array<Node>> = []; // each element represent the line. each element has all nodes of the line
     const instructions: Array<string> = [];
-    const turnArray: Array<"turn right" | "turn left" | "turn around" | "go forward"> = [];
+    const turnArray: Array<"turn right" | "turn left" | "turn around" | "go forward"> = []; // this element has all sequencial turns
 
     let nodeLineArray: Array<Node> = [];
     for (let i = 0; i < path.length - 1; i++) {
@@ -625,129 +666,134 @@ export class NavigationSystem {
     nodeLines.push(nodeLineArray);
     const vectorLines: Array<Array<Vector3>> = nodeLines.map(innerLine => innerLine.map(node => node.vector));
 
-    const targetVectors: Record<string, Vector3> = {};
+    const targetVectors: RoomObject[] = [];
     for (let key in this.targetName) {
-      targetVectors[key] = this.nodes[this.targetName[key]].vector;
+      targetVectors.push({ name: key, position: this.nodes[this.targetName[key]].vector });
     }
 
-    const allObjects = { ...this.objects, ...targetVectors };
+    const allObjects = [...this.objects, ...targetVectors];
+
+    const allCrossingIndexes: Array<number> = [];
+    const arrivingIndexes: Array<number> = [];
 
     for (let lineIndex = 0; lineIndex < nodeLines.length; lineIndex++) {
       const line = vectorLines[lineIndex];
 
       // ------------------- get closest object of every point in line ------------------- //
 
-      const objArray: Array<Vector3> = new Array(line.length);
-      const objNameArray: Array<string> = new Array(line.length);
+      const closestLineItemIndices: Array<number> = new Array(line.length);
       const lineDirection = line[line.length - 1].clone().sub(line[0]).normalize();
 
       line.forEach((point, index) => {
-        const closestInd = GetClosestIndex(point, Object.values(allObjects));
-        objArray[index] = Object.values(allObjects)[closestInd];
-        objNameArray[index] = Object.keys(allObjects)[closestInd];
+        const closestItemIndex = GetClosestIndex(
+          point,
+          allObjects.map(object => object.position)
+        );
+        closestLineItemIndices[index] = closestItemIndex;
       });
 
-      const crossingObjects: Array<Array<string>> = [];
+      const crossingIndexes: Array<number> = [];
+      const crossingAngles: Array<number> = [];
 
       let location = "";
       let prevAngle = 0;
       let prevVisibility = false;
+      let prevBehind = false;
       let visibilityCount = 0;
-      let prevDistance = 0;
-      let approachingCount = 0;
-      let visibleIndex = line.length - 1;
       let inCorner = false;
       let inCorridor = false;
-      let sameClosestObjCount = 0;
-      let currentDistance = 0;
       let invisibilityCount = 0;
+      let behindCount = 0;
 
-      // ------------------- get last point index that has visible closest point  ------------------- //
-      while (CrossingTimes(GetVector2(line[visibleIndex]), this.roomPolygon, GetVector2(objArray[visibleIndex])) !== 0)
-        visibleIndex--;
+      const filteredIndices = closestLineItemIndices.reduce((prev: number[], curr: number) => {
+        if (!prev.includes(curr)) prev.push(curr);
+        return prev;
+      }, []);
 
-      // ------------------- get array of all closest points in line  ------------------- //
-
-      const initSet: Set<Vector3> = new Set();
-      const filteredIndices: Array<number> = [];
-
-      objArray.forEach((vector, index) => {
-        if (!initSet.has(vector)) {
-          initSet.add(vector);
-          filteredIndices.push(index);
-        }
-      });
-
-      const ObjVectorSet = filteredIndices.map(index => objArray[index]);
-      const ObjNameSet = filteredIndices.map(index => objNameArray[index]);
+      const itemsOfLine = closestLineItemIndices.map(index => allObjects[index]);
 
       // ------------------- iterate objects || iterate once points to calculate all metrics  ------------------- //
 
-      const visibleIndexName = objNameArray[visibleIndex];
+      line.forEach((_, nodeIndex) => {
+        if (nodeLines[lineIndex][nodeIndex].corridorMember) inCorridor = true;
+      });
 
-      for (let objectIndex = 0; objectIndex < ObjVectorSet.length; objectIndex++) {
-        const object = ObjVectorSet[objectIndex];
+      inCorner = nodeLines[lineIndex][line.length - 1].corner;
+
+      const lastClosestItem = itemsOfLine[line.length - 1];
+      const lastNodeVec = line[line.length - 1];
+
+      if (lastClosestItem.position.clone().sub(lastNodeVec).length() <= 3) {
+        let isVisibleFromLine = false;
+
+        line.forEach(lineNode => {
+          const isVisibleFromNode =
+            CrossingTimes(GetVector2(lineNode), this.roomPolygon, GetVector2(lastClosestItem.position.clone())) === 0;
+          if (isVisibleFromNode) isVisibleFromLine = true;
+        });
+
+        if (isVisibleFromLine) {
+          location = itemsOfLine[line.length - 1].name;
+          arrivingIndexes.push(closestLineItemIndices[line.length - 1]);
+        }
+      }
+
+      // for every item in line
+      filteredIndices.forEach(filteredIndex => {
+        const object = allObjects[filteredIndex].position;
+
         visibilityCount = 0;
+        invisibilityCount = 0;
+        behindCount = 0;
 
-        for (let pointIndex = 0; pointIndex < line.length; pointIndex++) {
-          const point = line[pointIndex];
-          const pointToObj = object.clone().sub(point);
+        // for every node in line
+        for (let nodeIndex = 0; nodeIndex < line.length; nodeIndex++) {
+          const nodeVec = line[nodeIndex];
+          const nodeToObj = object.clone().sub(nodeVec);
 
-          const angle = GetSingedAngle(lineDirection, pointToObj.clone().normalize());
-          const crossing = CrossingTimes(GetVector2(point), this.roomPolygon, GetVector2(object)) !== 0;
+          const angle = GetSingedAngle(lineDirection, nodeToObj.clone().normalize());
+          const crossing = CrossingTimes(GetVector2(nodeVec), this.roomPolygon, GetVector2(object)) !== 0;
 
-          if (Math.abs(angle) < 75 && !crossing) {
-            visibilityCount++;
-            prevVisibility = true;
-            invisibilityCount = 0;
+          const isVisible = Math.abs(angle) < 75 && !crossing;
+          let isBehind;
+
+          if (isVisible) {
+            visibilityCount = prevVisibility ? visibilityCount + 1 : 1;
+            isBehind = false;
           } else {
             invisibilityCount = prevVisibility ? 1 : invisibilityCount + 1;
-            prevVisibility = false;
+            isBehind = Math.abs(angle) > 90;
           }
 
+          behindCount = isBehind ? (prevBehind ? behindCount + 1 : 1) : 0;
+
+          prevVisibility = isVisible;
+          prevBehind = isBehind;
           prevAngle = angle;
-
-          if (objectIndex > 0) continue;
-
-          const pointToclosest = objArray[visibleIndex].clone().sub(point);
-          const closestObjAngle = GetSingedAngle(lineDirection, pointToclosest.normalize());
-
-          if (nodeLines[lineIndex][pointIndex].corridorMember) inCorridor = true;
-
-          if (pointIndex <= visibleIndex) {
-            sameClosestObjCount = objNameArray[pointIndex] === visibleIndexName ? sameClosestObjCount + 1 : 0;
-            currentDistance = pointToclosest.length();
-
-            if (sameClosestObjCount > 0) approachingCount = currentDistance <= prevDistance ? approachingCount + 1 : 0;
-            if (sameClosestObjCount >= 0) prevDistance = currentDistance;
-          }
-
-          if (pointIndex === line.length - 1) {
-            inCorner = nodeLines[lineIndex][pointIndex].corner;
-
-            if (
-              approachingCount > Math.min(0, sameClosestObjCount) &&
-              line.length >= 4 &&
-              ((currentDistance < 7 && Math.abs(closestObjAngle) < 75) || currentDistance <= 2)
-            ) {
-              location = objNameArray[pointIndex];
-            }
-          }
         }
 
-        if (visibilityCount > 0 && invisibilityCount > 2 && Math.abs(prevAngle) > 90)
-          crossingObjects.push([
-            ObjNameSet[objectIndex],
-            `${ObjNameSet[objectIndex] === "wall opening" ? "" : prevAngle < 0 ? "right" : "left"}`
-          ]);
-      }
+        if (
+          visibilityCount > 2 &&
+          behindCount > 2 &&
+          !allCrossingIndexes.includes(filteredIndex) &&
+          !arrivingIndexes.includes(filteredIndex)
+        ) {
+          allCrossingIndexes.push(filteredIndex);
+          crossingIndexes.push(filteredIndex);
+          crossingAngles.push(prevAngle);
+
+          console.log(allObjects[filteredIndex].name, visibilityCount, behindCount);
+        }
+      });
 
       instructions.push(turnArray[lineIndex]);
       if (line.length > 5) {
         if (inCorridor) instructions.push("pass corridor");
 
-        crossingObjects.forEach(object => {
-          instructions.push(`crossing ${object[0]} ${object[1]}`);
+        crossingIndexes.forEach((objectIndex, angleIndex) => {
+          instructions.push(
+            `crossing ${allObjects[objectIndex].name} ${crossingAngles[angleIndex] < 0 ? "right" : "left"}`
+          );
         });
         let arriving;
         if (inCorner) arriving = "corner";
@@ -852,7 +898,7 @@ export class NavigationSystem {
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
-      this.Dijkstra(startIndex);
+      this.Dijkstra(startIndex, avatarPos());
     }
 
     const path = this.paths[startIndex][stopIndex];
@@ -870,7 +916,8 @@ export class NavigationSystem {
     return { index: startIndex, angle: angle, ...instObj };
   }
 
-  GetInstructions(startPos: Vector3, stopName: string) {
+  GetInstructions(stopName: string) {
+    const startPos = avatarPos().clone();
     this.RemoveCues();
     const startIndex = this.GetClosestIndices(startPos)[0];
     const stopIndex = this.GetDestIndex(stopName);
@@ -879,7 +926,7 @@ export class NavigationSystem {
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
-      this.Dijkstra(startIndex);
+      this.Dijkstra(startIndex, startPos);
     }
 
     const path = this.paths[startIndex][stopIndex];
@@ -920,7 +967,10 @@ export class NavigationSystem {
       }
 
       let closestObject;
-      let closestObjectIndex = GetClosestIndex(current, Object.values(this.objects));
+      let closestObjectIndex = GetClosestIndex(
+        current,
+        this.objects.map(object => object.position)
+      );
       if (closestObjectIndex > 0) closestObject = Object.values(this.objects)[closestObjectIndex];
 
       const turn = Orient(prevLine.clone().normalize(), nextLine.clone().normalize());
@@ -960,6 +1010,7 @@ export class NavigationSystem {
       .join(", ");
 
     navigation.valid = true;
+    // navigation.knowledge = newKnowledge;
     this.dest.pos = this.nodes[stopIndex];
     return navigation;
   }
@@ -996,6 +1047,148 @@ export class NavigationSystem {
       }
     }
     return indices;
+  }
+  GetDirAwareClosestIndices(position: Vector3, direction: Vector3): number[] {
+    let indices = new Array<number>();
+    let max = INF;
+    const ax = direction.normalize();
+    for (let i = 0; i < this.nodes.length; i++) {
+      const distance = this.nodes[i].vector.manhattanDistanceTo(position);
+
+      if (distance < 1) {
+        indices.push(i);
+      }
+    }
+
+    if (indices.length > 0) return indices;
+
+    for (let i = 0; i < this.nodes.length; i++) {
+      const distance = this.nodes[i].vector.manhattanDistanceTo(position);
+
+      if (distance === max) {
+        indices.push(i);
+      } else if (distance < max) {
+        max = distance;
+        indices = [i];
+      }
+    }
+
+    // max = INF;
+
+    // const weights = indices.map(index => {
+    //   const xb = this.nodes[index].vector.clone().sub(position.clone()).normalize();
+    //   const cross = xb.cross(ax);
+    //   const yAxis = new Vector3(0, 1, 0);
+    //   const sign = yAxis.dot(cross) >= 0 ? 0 : 0.5;
+    //   const distance = cross.length() + sign;
+    //   return distance;
+    // });
+    // for (let i = 0; i < indices.length; i++) {
+    //   if (distance === max) {
+    //     indices.push(i);
+    //   } else if (distance < max) {
+    //     max = distance;
+    //     indices = [i];
+    //   }
+    // }
+
+    return indices;
+  }
+
+  GetNodeIndexByPosition(position: Vector3) {
+    for (let i = 0; i < this.nodes.length; i++) {
+      if (position === this.nodes[i].vector) return i;
+    }
+    return -1;
+  }
+
+  GetNClosestIndices(position: Vector3, n: number): number[] {
+    let indices = new Array<number>();
+    let distances = new Map<number, number>();
+
+    for (let i = 0; i < this.nodes.length; i++) {
+      const distance = this.nodes[i].vector.manhattanDistanceTo(position);
+      distances.set(i, distance);
+    }
+
+    const sortedDistances = Array.from(distances.entries()).sort((a, b) => a[1] - b[1]);
+
+    for (let i = 0; i < n; i++) {
+      indices.push(sortedDistances[i][0]);
+    }
+
+    return indices;
+  }
+
+  GetBoundingBoxIndices(position: Vector3, n: number) {
+    const bb: number[] = [];
+    const closestNodeIndex = this.GetClosestIndices(position);
+    const examiningNode = this.nodes[closestNodeIndex[0]];
+    const closestIndices = this.GetClosestIndices(examiningNode.vector);
+
+    bb.push(...closestIndices);
+
+    let xCoords: number[] = [];
+    let zCoords: number[] = [];
+
+    closestIndices.forEach(ind => {
+      const node = this.nodes[ind];
+      if (!xCoords.includes(node.x)) xCoords.push(node.x);
+      if (!zCoords.includes(node.z)) zCoords.push(node.z);
+    });
+
+    xCoords.forEach(x => {
+      zCoords.forEach(z => {
+        const newNode = new Node(x, this.height, z);
+        const nodeInd = this.GetNodeIndexByPosition(newNode.vector);
+        if (nodeInd > -1 && !bb.includes(nodeInd)) bb.push(nodeInd);
+      });
+    });
+
+    if (bb.length >= n * n || closestIndices.length < 3) return bb;
+
+    let aloneIndex: number = -1;
+
+    for (let i = 1; i < closestIndices.length; i++) {
+      const iNode = this.nodes[closestIndices[i]];
+      let isAlone = true;
+      for (let j = i + 1; j < closestIndices.length; j++) {
+        const jNode = this.nodes[closestIndices[j]];
+        if (iNode.x === jNode.x || iNode.z === jNode.z) {
+          isAlone = false;
+          break;
+        }
+      }
+      if (!isAlone) continue;
+      aloneIndex = i;
+      break;
+    }
+
+    if (aloneIndex < 0) {
+      console.error("did not find an alone index");
+      return bb;
+    }
+
+    const closestHelperIndices = this.GetClosestIndices(this.nodes[aloneIndex].vector);
+
+    xCoords = [];
+    zCoords = [];
+
+    closestHelperIndices.forEach(ind => {
+      const node = this.nodes[ind];
+      if (!xCoords.includes(node.x)) xCoords.push(node.x);
+      if (!zCoords.includes(node.z)) zCoords.push(node.z);
+    });
+
+    xCoords.forEach(x => {
+      zCoords.forEach(z => {
+        const newNode = new Node(x, this.height, z);
+        const nodeInd = this.GetNodeIndexByPosition(newNode.vector);
+        if (nodeInd > -1 && !bb.includes(nodeInd)) bb.push(nodeInd);
+      });
+    });
+
+    return bb;
   }
 
   RenderCues(navigation: Navigation) {
