@@ -3,15 +3,7 @@ import { Agent, CursorRaycastable, Hidden, Interacted, LookAtUser } from "../bit
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
-import {
-  audioModules,
-  intentionModule,
-  dsResponseModule,
-  vlModule,
-  textModule,
-  RecordQuestion,
-  stopRecording
-} from "../utils/ml-adapters";
+import { dsResponseModule, vlModule } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";

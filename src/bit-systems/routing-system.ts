@@ -808,16 +808,7 @@ export class NavigationSystem {
   }
 
   async CreateVLDataset() {
-    const targets = [
-      "conference room",
-      "business room",
-      "social area",
-      "booth 1",
-      "booth 2",
-      "booth 3",
-      "booth 4",
-      "tradeshows"
-    ];
+    const targets = ["conference room", "business room", "social area", "booth 1", "booth 2", "booth 3", "booth 4"];
 
     const instructions: Object[] = [];
     const photoNames: number[] = [];
@@ -851,10 +842,10 @@ export class NavigationSystem {
         // this.SnapPOV(i, j);
       }
 
-      // console.log(`exporting json file for angle: ${j}`);
-      // const serializedJSONData = JSON.stringify(instructions);
-      // const filename = `instructions_${j}.json`;
-      // await this.downloadFile(filename, serializedJSONData);
+      console.log(`exporting json file for angle: ${j}`);
+      const serializedJSONData = JSON.stringify(instructions);
+      const filename = `instructions_${j}.json`;
+      await this.downloadFile(filename, serializedJSONData);
       instructions.length = 0;
     }
 
@@ -862,21 +853,21 @@ export class NavigationSystem {
     await this.waitForSeconds(10);
     console.log(`continuing`);
 
-    for (let j = 270; j < 360; j += 45) {
-      avatarRig.rotation.set(0, degToRad(j), 0);
-      avatarRig.updateMatrix();
-      for (let i = 0; i < photoNames.length; i++) {
-        const nodeIndex = photoNames[i];
-        const node = this.nodes[nodeIndex];
+    // for (let j = 270; j < 360; j += 45) {
+    //   avatarRig.rotation.set(0, degToRad(j), 0);
+    //   avatarRig.updateMatrix();
+    //   for (let i = 0; i < photoNames.length; i++) {
+    //     const nodeIndex = photoNames[i];
+    //     const node = this.nodes[nodeIndex];
 
-        var avatarHeight = avatarRig.position.y;
-        var nodeVec = node.vector.clone();
-        avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
-        avatarRig.updateMatrix();
-        await this.waitForSeconds(0.005);
-        this.SnapPOV(nodeIndex, j);
-      }
-    }
+    //     var avatarHeight = avatarRig.position.y;
+    //     var nodeVec = node.vector.clone();
+    //     avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+    //     avatarRig.updateMatrix();
+    //     await this.waitForSeconds(0.005);
+    //     this.SnapPOV(nodeIndex, j);
+    //   }
+    // }
   }
 
   downloadFile(filename: string, data: string) {
