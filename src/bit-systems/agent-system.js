@@ -368,7 +368,7 @@ export default class VirtualAgent {
 
       t1 = Date.now();
       const nmtResponse = await audioModules(
-        COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
+        COMPONENT_ENDPOINTS.TRANSLATE_LOCAL_AUDIO_FILES,
         recordedQuestion.data.file,
         nmtAudioParams
       );
