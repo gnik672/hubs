@@ -3,12 +3,13 @@ import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef, ArrayVe
 import spotSrc from "../assets/images/pointer.png";
 import { textureLoader } from "../utils/media-utils";
 import nametagSrc from "../assets/hud/nametag.9.png";
-import { BUTTON_TYPES, TextButton3D } from "./button3D";
+import { BUTTON_TYPES, StaticButton3D, TextButton3D } from "./button3D";
 import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
 import { degToRad, radToDeg } from "three/src/math/MathUtils";
 import { FollowFov } from "../bit-components";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 
 const tutorialSchema = "https://kontopoulosdm.github.io/tutorial_";
 
@@ -21,6 +22,11 @@ export function HelpImagePanel(slides: Array<string>, ratio: number) {
   const clickRef = createRef();
 
   const slideEntities = [] as Array<EntityDef>;
+
+  const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
+  const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
+  const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
+  const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
 
   slides.forEach((slide, index) => {
     slideEntities.push(
@@ -54,33 +60,28 @@ export function HelpImagePanel(slides: Array<string>, ratio: number) {
     >
       {slideEntities}
 
-      <TextButton3D
+      <StaticButton3D
         ref={nextRef}
-        position={[0.5, 0, 0.3]}
+        position={[0.57, 0, 0]}
+        scale={[0.3, 0.3, 0.3]}
+        name={"next_button"}
         width={0.2}
         height={0.2}
-        scale={[0.5, 0.5, 0.5]}
         type={BUTTON_TYPES.DEFAULT}
-        text={">"}
+        ratio={1}
+        image={nextIcon}
       />
 
-      <TextButton3D
+      <StaticButton3D
         ref={prevRef}
-        position={[-0.5, 0, 0.3]}
-        scale={[0.5, 0.5, 0.5]}
+        position={[-0.57, 0, 0]}
+        scale={[0.3, 0.3, 0.3]}
+        name={"prev_button"}
         width={0.2}
         height={0.2}
         type={BUTTON_TYPES.DEFAULT}
-        text={"<"}
-      />
-
-      <TextButton3D
-        ref={resetRef}
-        position={[0, -1, 0.3]}
-        width={0.5}
-        height={0.2}
-        type={BUTTON_TYPES.DEFAULT}
-        text={"Click me!"}
+        ratio={1}
+        image={prevIcon}
       />
     </entity>
   );

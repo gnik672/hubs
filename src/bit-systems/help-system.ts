@@ -120,9 +120,9 @@ class HelpButton {
 
     this.prevObj = APP.world.eid2obj.get(this.prevRef)!;
     this.nextObj = APP.world.eid2obj.get(this.nextRef)!;
-    this.testObj = APP.world.eid2obj.get(this.clickRef)!;
+    // this.testObj = APP.world.eid2obj.get(this.clickRef)!;
 
-    this.testObj.visible = false;
+    // this.testObj.visible = false;
 
     this.slideLinks.forEach((_, index) => {
       this.slidesObjs.push(this.panelObj.getObjectByName(`slide_${index}`)!);

@@ -2,7 +2,7 @@ import { audioModules } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { removeEntity } from "bitecs";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { FixedPanel } from "../prefabs/fixed-panel";
+import { FixedPanel, FixedText } from "../prefabs/fixed-panel";
 import { setLocale } from "../utils/i18n";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { degToRad } from "three/src/math/MathUtils";
@@ -383,7 +383,7 @@ export class TranslationSystem {
 
   showPresenterPanel() {
     const pos = this.transProperties.panel.data;
-    const eid = renderAsEntity(APP.world, FixedPanel({ pos }));
+    const eid = renderAsEntity(APP.world, FixedText({ pos }));
 
     this.fixedPanelObj = APP.world.eid2obj.get(eid);
     this.fixedPanelObj.rotation.set(0, degToRad(180), 0);

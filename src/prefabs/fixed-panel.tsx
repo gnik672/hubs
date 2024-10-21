@@ -19,7 +19,7 @@ export function FixedPanel({ pos }: FixedPanelParams) {
       name="fixedPanel"
       ref={panelRef}
       fixedTextPanel={{ textRef: textRef }}
-      slice9={{ size: [6.9, 2.1], insets: [60, 60, 60, 60], texture: panelTexture }}
+      slice9={{ size: [9.35, 1.95], insets: [60, 60, 60, 60], texture: panelTexture }}
       position={pos}
     >
       <entity
@@ -28,21 +28,38 @@ export function FixedPanel({ pos }: FixedPanelParams) {
         ref={textRef}
         text={{
           value: "This is a test",
-          color: "#000000",
+          color: "#ffffff",
           textAlign: "center",
           anchorX: "center",
           anchorY: "middle",
           fontSize: 0.35,
-          maxWidth: 6.5
+          maxWidth: 9
         }}
       />
     </entity>
   );
 }
-
-export function RenderFixedPanel(world: HubsWorld, pos: [number, number, number]) {
-  const eid = renderAsEntity(world, FixedPanel({ pos }));
-  const obj = world.eid2obj.get(eid)!;
-  world.scene.add(obj);
-  return eid;
+export function FixedText({ pos }: FixedPanelParams) {
+  const panelRef = createRef();
+  const textRef = createRef();
+  return (
+    <entity
+      name={`text`}
+      position={pos}
+      ref={textRef}
+      text={{
+        value:
+          "This is a really long test so that we can test what happens when and if the produced by the LLM translation is long and might not fit inside the designed for this excact purpose screen",
+        color: "#ffffff",
+        textAlign: "center",
+        anchorX: "center",
+        anchorY: "middle",
+        fontSize: 0.35,
+        outlineColor: "ffffff",
+        outlineOpacity: 1,
+        outlineWidth: 0.001,
+        maxWidth: 9
+      }}
+    />
+  );
 }
