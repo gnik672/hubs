@@ -127,10 +127,12 @@ class RoomPropertiesReader {
     else {
       try {
         this.hubId = HubID;
-        console.log(`hubid`, this.hubId);
+        console.log(`hubid: ${this.hubId}`);
+
         const response = await fetch(this.url, { method: "GET" });
         if (!response.ok) throw new Error("Response not OK");
         const roomArray = (await response.json()) as RoomProperties[];
+        console.log("room array", roomArray);
 
         for (let i = 0; i < roomArray.length; i++) {
           for (let j = 0; j < roomArray[i].id.length; j++) {

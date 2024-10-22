@@ -1,4 +1,4 @@
-import { AxesHelper, Object3D, Vector3 } from "three";
+import { Object3D, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { AElement, AScene } from "aframe";
@@ -16,11 +16,7 @@ import {
   removeEntity
 } from "bitecs";
 import { languageCodes, translationSystem } from "./translation-system";
-import { navSystem } from "./routing-system";
-import { avatarPos, virtualAgent } from "./agent-system";
 import { changeHub } from "../change-hub";
-import { preload } from "../utils/preload";
-import { loadTexture } from "../utils/load-texture";
 // import { logger } from "./logging-system";
 
 const CONGRATS_SLIDE_COUNT = 4;
@@ -41,6 +37,12 @@ interface StepObject {
   cleanUpFunc?: Function;
 }
 
+interface RoomTutorial {
+  steps: StepCategory[];
+  resetFunc: Function;
+  clickFunc: Function;
+}
+
 class TutorialManager {
   Ascene: AScene;
   allowed: boolean;
@@ -57,7 +59,7 @@ class TutorialManager {
   activeCategoryIndex: number;
 
   categoriesArray: Array<StepCategory>;
-  roomTutorial: Array<StepCategory>;
+  roomTutorial: RoomTutorial;
 
   panelRef: number;
   prevRef: number;
@@ -73,6 +75,9 @@ class TutorialManager {
   resetButtonObj: Object3D;
   clickButtonObj: Object3D;
   centerButtonText: Text;
+
+  resetButtonFunc: Function;
+  clickButtonFunc: Function;
 
   room: string;
   changeRoomID: string;
@@ -121,7 +126,7 @@ class TutorialManager {
     this.categoriesArray = [];
     console.log(navString);
 
-    this.roomTutorial.forEach(stepCategory => {
+    this.roomTutorial.steps.forEach(stepCategory => {
       if (stepCategory.type === "both" || stepCategory.type === navString) this.categoriesArray.push(stepCategory);
     });
 
@@ -149,14 +154,8 @@ class TutorialManager {
     floatingPanelQuery(world).forEach(_ => {
       if (hasComponent(world, Interacted, this.nextRef)) this.Next();
       if (hasComponent(world, Interacted, this.prevRef)) this.Prev();
-      if (hasComponent(world, Interacted, this.resetRef)) {
-        this.Next();
-        this.resetButtonObj.visible = false;
-      }
-      if (hasComponent(world, Interacted, this.clickRef)) {
-        this.Next(true);
-        this.clickButtonObj.visible = false;
-      }
+      if (hasComponent(world, Interacted, this.resetRef)) this.roomTutorial.resetFunc();
+      if (hasComponent(world, Interacted, this.clickRef)) this.roomTutorial.clickFunc();
 
       if (this.activeStep["loopFunc"]) this.activeStep.loopFunc();
     });
@@ -170,14 +169,14 @@ class TutorialManager {
     const cSlides: Array<string> = [];
 
     for (let i = 0; i < slidesCount; i++) {
-      const url = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/gif/${languageCode}_tutorial_${i}.png`;
+      const url = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/${languageCode}_tutorial_${i}.png`;
       slides.push(url);
     }
 
     const gifSlides: Array<string> = new Array(slidesCount).fill("");
 
     for (let i = 0; i < slidesCount; i++) {
-      const url = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/gif/tutorial_${i}.gif`;
+      const url = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/tutorial_${i}.gif`;
       const response = await fetch(url);
       if (response.ok) gifSlides[i] = url;
     }
@@ -436,40 +435,6 @@ const OnMapToggle = () => {
   );
 };
 
-function ChangeSlidein5() {
-  tutorialManager.activeTimeout = setTimeout(() => {
-    tutorialManager.Next();
-  }, 10000);
-}
-
-function welcomeSteps(time: number): Array<StepObject> {
-  return [
-    {
-      onceFunc: () => {
-        targetPos = navSystem.nodes[navSystem.GetDestIndex("social area")].vector;
-        tutorialManager.activeTimeout = setTimeout(() => {
-          tutorialManager.HidePanel();
-        }, time);
-
-        tutorialManager.redirectionTimeout = setTimeout(() => {
-          tutorialManager.ChangeCategory(timeOutCategory);
-        }, 4 * 60000);
-      },
-      loopFunc: () => {
-        if (avatarPos().distanceTo(targetPos) < 3) {
-          tutorialManager.Next(true);
-          // logger.AddAnnouncementInteraction("step_achieved", "navigation to social area");
-        }
-      },
-      cleanUpFunc: () => {
-        setTimeout(() => {
-          tutorialManager.panelObj.visible = true;
-        });
-      }
-    }
-  ];
-}
-
 const timeOutCategory: StepCategory = {
   name: "timeout",
   type: "both",
@@ -611,12 +576,10 @@ const LobbySteps: Array<StepCategory> = [
       },
       {
         onceFunc: () => {
-          tutorialManager.ToggleArrowVisibility(false);
           tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting, { once: true });
         },
         cleanUpFunc: () => {
           tutorialManager.Ascene.removeEventListener("action_enable_mic", onUnmuting);
-          tutorialManager.ToggleArrowVisibility(true);
         }
       }
     ]
@@ -657,32 +620,30 @@ const TradeshowSteps: Array<StepCategory> = [
     name: "welcome",
     type: "nav",
     slides: [0],
-    steps: welcomeSteps(10000)
+    steps: [
+      {
+        onceFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.ToggleArrowVisibility(false);
+          tutorialManager.activeTimeout = setTimeout(() => {
+            tutorialManager.HidePanel();
+          }, 30000);
+        }
+      }
+    ]
   },
   {
     name: "welcome",
     type: "noNav",
     slides: [1],
-    steps: welcomeSteps(changeTime)
-  },
-  {
-    name: "nextStep",
-    type: "both",
-    slides: [2],
     steps: [
       {
         onceFunc: () => {
-          targetPos = navSystem.nodes[navSystem.GetDestIndex("conference room")].vector;
-
+          tutorialManager.ToggleArrowVisibility(false);
+          tutorialManager.resetButtonObj.visible = true;
           tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.HidePanel();
-          }, changeTime);
-        },
-        loopFunc: () => {
-          if (avatarPos().distanceTo(targetPos) < 3) {
-            tutorialManager.ChangeCategory(WellDoneCategory());
-            // logger.AddAnnouncementInteraction("step_achieved", "navigation to conference room");
-          }
+          }, 30000);
         }
       }
     ]
@@ -697,6 +658,8 @@ const ConferenceSteps: Array<StepCategory> = [
     steps: [
       {
         onceFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.ToggleArrowVisibility(false);
           tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.HidePanel();
           }, changeTime);
@@ -706,4 +669,32 @@ const ConferenceSteps: Array<StepCategory> = [
   }
 ];
 
-const RoomSteps = { conference_room: ConferenceSteps, lobby: LobbySteps, tradeshows: TradeshowSteps };
+const RoomSteps: { conference_room: RoomTutorial; lobby: RoomTutorial; tradeshows: RoomTutorial } = {
+  conference_room: {
+    steps: ConferenceSteps,
+    resetFunc: () => {
+      tutorialManager.HidePanel();
+      tutorialManager.resetButtonObj.visible = false;
+    },
+    clickFunc: () => {}
+  },
+  lobby: {
+    steps: LobbySteps,
+    resetFunc: () => {
+      tutorialManager.Next();
+      tutorialManager.resetButtonObj.visible = false;
+    },
+    clickFunc: () => {
+      tutorialManager.Next(true);
+      tutorialManager.clickButtonObj.visible = false;
+    }
+  },
+  tradeshows: {
+    steps: TradeshowSteps,
+    resetFunc: () => {
+      tutorialManager.HidePanel();
+      tutorialManager.resetButtonObj.visible = false;
+    },
+    clickFunc: () => {}
+  }
+};

@@ -15,6 +15,11 @@ import { preload } from "../utils/preload";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 
 const tutorialSchema = "https://kontopoulosdm.github.io/tutorial_";
+const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
+const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
+const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
+const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
+const closeIcon = `${roomPropertiesReader.serverURL}/assets/close_icon.png`;
 
 export async function MovingTutorialImagePanel(
   slides: Array<string>,
@@ -50,47 +55,50 @@ export async function MovingTutorialImagePanel(
     >
       {slideEntities}
       {cSlideEntities}
-      <entity
-        name={`text`}
-        position={[0, 0, -0.03]}
-        ref={textRef}
-        text={{
-          value: "This is a test",
-          color: "#000000",
-          textAlign: "center",
-          anchorX: "center",
-          anchorY: "middle",
-          fontSize: 0.05,
-          maxWidth: 1
-        }}
+
+      <StaticButton3D
+        ref={resetRef}
+        position={[0, -ratio - 0.1, 0.1]}
+        name={"reset_button"}
+        width={0.2}
+        height={0.2}
+        scale={[0.5, 0.5, 0.5]}
+        type={BUTTON_TYPES.DEFAULT}
+        ratio={1}
+        image={closeIcon}
+      />
+      <StaticButton3D
+        ref={clickRef}
+        position={[0, -2, 0]}
+        name={"click_button"}
+        width={0.2}
+        height={0.2}
+        type={BUTTON_TYPES.DEFAULT}
+        ratio={1}
+        image={clickIcon}
         visible={false}
       />
-      <TextButton3D
-        ref={nextRef}
-        position={[2, 0, 0.3]}
-        width={0.2}
-        height={0.2}
-        type={BUTTON_TYPES.DEFAULT}
-        scale={[2, 2, 2]}
-        text={">"}
-      />
-
-      <TextButton3D
+      <StaticButton3D
         ref={prevRef}
-        position={[-2, 0, 0.3]}
-        scale={[2, 2, 2]}
+        position={[0, -2, 0]}
+        name={"prev_button"}
         width={0.2}
         height={0.2}
         type={BUTTON_TYPES.DEFAULT}
-        text={"<"}
+        ratio={1}
+        image={prevIcon}
+        visible={false}
       />
-      <TextButton3D
-        ref={resetRef}
-        position={[0, -1, 0.3]}
-        width={0.5}
+      <StaticButton3D
+        visible={false}
+        ref={nextRef}
+        position={[0, -2, 0]}
+        name={"next_button"}
+        width={0.2}
         height={0.2}
         type={BUTTON_TYPES.DEFAULT}
-        text={"Click me!"}
+        ratio={1}
+        image={nextIcon}
       />
     </entity>
   );
@@ -113,11 +121,6 @@ export async function StaticTutorialImagePanel(
   const clickRef = createRef();
 
   const [slideEntities, cSlideEntities] = await TutorialPanelInit(slides, cSlides, gifSlides, ratio, scale);
-
-  const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
-  const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
-  const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
-  const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
 
   return (
     <entity
@@ -247,32 +250,6 @@ async function TutorialPanelInit(
     }
 
     slideEntities.push(slideEntity);
-
-    /*<entity
-        name={`slide_${index}`}
-        image={{
-          texture: texture,
-          ratio: ratio,
-          projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
-          cacheKey: slide
-        }}
-        visible={false}
-        scale={[scale, scale, scale]}
-      >
-        <entity
-          name={`gif_slide_slide_${index}`}
-          image={{
-            texture: gifTexture,
-            ratio: ratio,
-            projection: ProjectionMode.FLAT,
-            alphaMode: AlphaMode.Blend,
-            cacheKey: slide
-          }}
-          visible={true}
-          position={[0, 0, 0.001]}
-        ></entity>
-      </entity>*/
   }
 
   for (let index = 0; index < congratsSlides.length; index++) {
