@@ -1,7 +1,7 @@
 export enum COMPONENT_ENDPOINTS {
   TRANSLATE_AUDIO = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio",
   TRANSLATE_TEXT = "https://dev.speech-voxreality.maggioli-research.gr/translate_text",
-  TRANSCRIBE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/transcribe_audio_files",
+  TRANSCRIBE_AUDIO_FILES = "https://audiotranslation.vox.lab.synelixis.com/transcribe_audio_files",
   TRANSLATE_AUDIO_FILES = "https://audiotranslation.vox.lab.synelixis.com/translate_audio_files",
   TRANSLATE_LOCAL_AUDIO_FILES = "http://127.0.0.1:8080/translate_audio_files",
   LXMERT = "https://dev.voxreality.maggioli-research.gr/lxmert/",

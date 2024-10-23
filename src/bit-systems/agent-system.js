@@ -211,10 +211,8 @@ export default class VirtualAgent {
     if (!APP.scene.is("agent")) {
       APP.scene.emit("clear-scene");
       this.Enable();
-      // logger.AddUiInteraction("agent_toggle", "activate_agent");
     } else {
       this.Disable();
-      // logger.AddUiInteraction("agent_toggle", "deactivate_agent");
     }
   }
 
@@ -258,6 +256,7 @@ export default class VirtualAgent {
       return sentence !== "" && sentence !== " ";
     });
   }
+
   NextSentence() {
     this.slideIndex += 1;
     this.nextArrow.obj.visible = this.slideIndex !== this.textArray.length - 1;
@@ -355,60 +354,28 @@ export default class VirtualAgent {
     this.setMicStatus();
 
     const agentDataObj = [];
-    let t1, t2;
 
     try {
-      t1 = Date.now();
       const recordedQuestion = await RecordQuestion();
-      t2 = Date.now();
-
       this.isProccessing = true;
       const sourceLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
       const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
-      t1 = Date.now();
       const nmtResponse = await audioModules(
         COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
         recordedQuestion.data.file,
         nmtAudioParams
       );
-      t2 = Date.now();
-      agentDataObj.push({
-        start_time: t1.toString(),
-        stop_time: t2.toString(),
-        source_language: translationSystem.mylanguage,
-        target_language: "english",
-        transcription: nmtResponse.data.transcriptions[0],
-        translation: nmtResponse.data.translations[0]
-      });
 
-      t1 = Date.now();
       const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
-      t2 = Date.now();
-      agentDataObj.push({
-        start_time: t1.toString(),
-        stop_time: t2.toString(),
-        input: nmtResponse.data.translations[0],
-        intent: intentResponse.data.intent,
-        destination: intentResponse.data.destination
-      });
 
-      t1 = Date.now();
       const navigation = navSystem.GetInstructions(intentResponse.data.destination);
-      agentLogger.response.start = new Date();
+
       const response = await dsResponseModule(
         nmtResponse.data.translations[0],
         intentResponse.data.intent,
         navigation.knowledge
       );
-      t2 = Date.now();
-      agentDataObj.push({
-        start_time: t1.toString(),
-        stop_time: t2.toString(),
-        instructions: navigation.instructions,
-        knowledge: navigation.knowledge,
-        ds_output: response.data.response
-      });
 
       const targetLang = languageCodes[translationSystem.mylanguage];
       const nmtTextParams = { source_language: "en", target_language: targetLang };
@@ -416,32 +383,18 @@ export default class VirtualAgent {
 
       if (nmtTextParams.source_language === nmtTextParams.target_language) this.UpdateTextArray(outputArray);
       else {
-        t1 = Date.now();
         const translatePromises = [];
         outputArray.forEach(sentence =>
           translatePromises.push(textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams))
         );
 
         const translatedResponses = await Promise.all(translatePromises);
-        console.log(translatePromises);
         const TranslatedOutputArray = translatedResponses.map(element => {
           return element.data.translations[0];
         });
 
         this.UpdateTextArray(TranslatedOutputArray);
-        t2 = Date.now();
-        agentDataObj.push({
-          start_time: t1.toString(),
-          stop_time: t2.toString(),
-          source_language: "english",
-          target_language: translationSystem.mylanguage,
-          translated_text: TranslatedOutputArray.join("\n")
-        });
       }
-
-      const stringData = JSON.stringify(agentDataObj);
-      const jsonDataBlob = new Blob([stringData], { type: "application/json" });
-      // logger.AddAgentInteraction(recordedQuestion.data.file, jsonDataBlob);
 
       if (intentResponse.data.intent.includes("navigation") && navigation.valid) {
         this.successResult = true;
@@ -457,21 +410,9 @@ export default class VirtualAgent {
     } finally {
       this.isProccessing = false;
       this.infoPanel.obj.visible = false;
-
       this.setMicStatus();
       this.waitingForResponse = false;
     }
-  }
-
-  DatasetCreate() {
-    const destNames = ["conference room", "business room", "social area", "booth 1", "booth 2", "booth 3", "booth 4"];
-    destNames.forEach(destination =>
-      console.log(
-        `{"destination": "${destination}", "intent":"navigation", "mozilla_input":${
-          navSystem.GetInstructions(avatarPos(), destination).knowledge
-        }},`
-      )
-    );
   }
 
   async SnapActions() {
@@ -503,14 +444,6 @@ export default class VirtualAgent {
 
     this.UpdateTextArray(phrases.length === 1 ? [phrases[0]] : [phrases.join(" ")]);
     this.currentOccasion = occasion;
-  }
-
-  GetTypingObj() {
-    return typingObj;
-  }
-
-  get exists() {
-    return !!this.agent.eid;
   }
 }
 
