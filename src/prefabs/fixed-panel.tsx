@@ -18,7 +18,6 @@ export function FixedPanel({ pos }: FixedPanelParams) {
     <entity
       name="fixedPanel"
       ref={panelRef}
-      fixedTextPanel={{ textRef: textRef }}
       slice9={{ size: [9.35, 1.95], insets: [60, 60, 60, 60], texture: panelTexture }}
       position={pos}
     >
@@ -40,12 +39,12 @@ export function FixedPanel({ pos }: FixedPanelParams) {
   );
 }
 export function FixedText({ pos }: FixedPanelParams) {
-  const panelRef = createRef();
   const textRef = createRef();
   return (
     <entity
       name={`text`}
       position={pos}
+      fixedTextPanel={{ textRef: textRef }}
       ref={textRef}
       text={{
         value:

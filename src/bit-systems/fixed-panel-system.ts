@@ -54,6 +54,7 @@ export function FixedPanelSystem(world: HubsWorld) {
 
 function onTranslationAvailable(event: any) {
   const details = event.detail as TranslateEventParams;
+  console.log(details);
   if (!details.text) return;
   UpdateText(details.text);
 }
