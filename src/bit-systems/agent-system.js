@@ -399,7 +399,10 @@ export default class VirtualAgent {
       if (intentResponse.data.intent.includes("navigation") && navigation.valid) {
         this.successResult = true;
         navSystem.RenderCues(navigation);
-      } else if (intentResponse.data.intent.includes("program_info")) {
+      } else if (
+        intentResponse.data.intent.includes("program_info") ||
+        intentResponse.data.intent.includes("trade_show")
+      ) {
         this.successResult = true;
       } else {
         this.successResult = false;
