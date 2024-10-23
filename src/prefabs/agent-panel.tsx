@@ -3,8 +3,9 @@
 import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef } from "../utils/jsx-entity";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
-import { TextButton3D, BUTTON_TYPES } from "./button3D";
+import { TextButton3D, BUTTON_TYPES, StaticButton3D } from "./button3D";
 import { IconButton } from "./icon-button";
+import { nextIcon, prevIcon, resetIcon } from "./tutorial-panels";
 
 const panelTexture = textureLoader.load(nametagSrc);
 
@@ -81,15 +82,26 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
         text={"<"}
       />
 
-      <TextButton3D
+      <StaticButton3D
+        ref={nextRef}
+        position={[0.3, 0, 0.03]}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+        name={"next_button"}
+        type={BUTTON_TYPES.DEFAULT}
+        width={buttonHeight}
+        height={buttonHeight}
+        ratio={1}
+        image={nextIcon}
+      />
+
+      {/* <IconButton
         ref={nextRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.DEFAULT}
         position={[0.3, 0, 0.03]}
         width={buttonHeight}
         height={buttonHeight}
-        text={">"}
-      />
+      /> */}
       <IconButton
         ref={micRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
@@ -173,36 +185,39 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
         slice9={{ size: [0.8, 0.6], insets: [64, 66, 64, 66], texture: panelTexture }}
         position={[0, -0.3, 0.3]}
       >
-        <TextButton3D
-          name="clear"
+        <StaticButton3D
           ref={clearRef}
+          position={[0.7, 0, 0]}
           scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
-          width={0.5}
-          height={buttonHeight}
+          name="reset"
           type={BUTTON_TYPES.DEFAULT}
-          text={"Reset"}
-          visible={false}
+          width={buttonHeight}
+          height={buttonHeight}
+          ratio={1}
+          image={resetIcon}
+        />
+        <StaticButton3D
+          ref={nextRef}
+          position={[0.7, 0, 0]}
+          scale={[0.5, 0.5, 0.5]}
+          name="next"
+          type={BUTTON_TYPES.DEFAULT}
+          width={buttonHeight}
+          height={buttonHeight}
+          ratio={1}
+          image={nextIcon}
         />
 
-        <TextButton3D
-          name="next"
-          ref={nextRef}
-          scale={[0.5, 0.5, 0.5]}
-          position={[0.7, 0, 0]}
-          width={0.2}
-          height={0.2}
-          type={BUTTON_TYPES.DEFAULT}
-          text={">"}
-        />
-        <TextButton3D
-          name="prev"
+        <StaticButton3D
           ref={prevRef}
+          position={[0.7, 0, 0]}
           scale={[0.5, 0.5, 0.5]}
-          position={[-0.7, 0, 0]}
-          width={0.2}
-          height={0.2}
+          name="prev"
           type={BUTTON_TYPES.DEFAULT}
-          text={"<"}
+          width={buttonHeight}
+          height={buttonHeight}
+          ratio={1}
+          image={prevIcon}
         />
 
         <entity

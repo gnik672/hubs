@@ -395,7 +395,6 @@ export default class VirtualAgent {
 
       t1 = Date.now();
       const navigation = navSystem.GetInstructions(intentResponse.data.destination);
-      console.log(navigation);
       agentLogger.response.start = new Date();
       const response = await dsResponseModule(
         nmtResponse.data.translations[0],

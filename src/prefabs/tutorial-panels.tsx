@@ -15,11 +15,11 @@ import { preload } from "../utils/preload";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 
 const tutorialSchema = "https://kontopoulosdm.github.io/tutorial_";
-const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
-const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
-const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
-const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
-const closeIcon = `${roomPropertiesReader.serverURL}/assets/close_icon.png`;
+export const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
+export const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
+export const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
+export const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
+export const closeIcon = `${roomPropertiesReader.serverURL}/assets/close_icon.png`;
 
 export async function MovingTutorialImagePanel(
   slides: Array<string>,
