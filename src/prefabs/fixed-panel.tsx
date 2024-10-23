@@ -47,8 +47,7 @@ export function FixedText({ pos }: FixedPanelParams) {
       fixedTextPanel={{ textRef: textRef }}
       ref={textRef}
       text={{
-        value:
-          "This is a really long test so that we can test what happens when and if the produced by the LLM translation is long and might not fit inside the designed for this excact purpose screen",
+        value: "",
         color: "#ffffff",
         textAlign: "center",
         anchorX: "center",

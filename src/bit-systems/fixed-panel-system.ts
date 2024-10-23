@@ -36,15 +36,16 @@ export function FixedPanelSystem(world: HubsWorld) {
       fixedPanelObj = world.eid2obj.get(fixedPanelEid)!;
       textRef = FixedTextPanel.textRef[fixedPanelEid];
       textObj = world.eid2obj.get(textRef)! as Text;
-      textObj.addEventListener("synccomplete", updateTextSize);
+      // textObj.addEventListener("synccomplete", updateTextSize);
 
       myLanguage = translationSystem.mylanguage;
       textObj.text = GreetingPhrases[myLanguage];
+      console.log(textObj);
     }
   });
   panelExitQuery(world).forEach(() => {
     APP.scene!.removeEventListener("translation_available", onTranslationAvailable);
-    textObj!.removeEventListener("synccomplete", updateTextSize);
+    // textObj!.removeEventListener("synccomplete", updateTextSize);
     fixedPanelRef = null;
     fixedPanelObj = null;
     textRef = null;
