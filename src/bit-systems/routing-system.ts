@@ -469,6 +469,15 @@ export class NavigationSystem {
   }
 
   GetDestIndex(salientName: string): number {
+    console.log(salientName);
+    const lowerCaseKey = salientName.toLowerCase();
+    for (const [k, v] of Object.entries(this.targetName)) {
+      if (k.toLowerCase() === lowerCaseKey) {
+        return v;
+      }
+    }
+    return -1;
+
     if (Object.keys(this.targetName).includes(salientName)) return this.targetName[salientName];
     return -1;
   }

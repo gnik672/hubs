@@ -427,7 +427,7 @@ export class TranslationSystem {
         };
 
         const translateRespone = await audioModules(
-          COMPONENT_ENDPOINTS.TRANSLATE_LOCAL_AUDIO_FILES,
+          COMPONENT_ENDPOINTS.TRANSCRIBE_AUDIO_FILES,
           recordingBlob,
           inferenceParams,
           abortController.signal
