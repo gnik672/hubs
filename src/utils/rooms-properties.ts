@@ -5,8 +5,7 @@ import { keyboardDebuggingBindings } from "../systems/userinput/bindings/keyboar
 
 interface RoomDescription {
   room: string;
-  nav: Array<string>;
-  no_nav: Array<string>;
+  id: Array<string>;
 }
 
 interface RoomProperties {
@@ -167,18 +166,14 @@ class RoomPropertiesReader {
     const roomArrays = (await response.json()) as RoomDescription[];
 
     let myHubIndex: number = -1;
-    const hubIDsKeys = this.AllowsNav ? "nav" : "no_nav";
+
     console.log(this.AllowsNav);
 
-    console.log(`hubkeys`, hubIDsKeys);
-
     for (let i = 0; i < roomArrays.length; i++) {
-      console.log("searching for hubIndexNumber");
       const room = roomArrays[i];
       if (room.room === this.Room) {
         console.log(`room is `, room.room, this.Room);
-        const hubIds = room[hubIDsKeys];
-        console.log(hubIds);
+        const hubIds = room["id"];
         for (let j = 0; j < hubIds.length; j++) {
           if (hubIds[j] === this.hubId) {
             myHubIndex = j;
@@ -194,7 +189,7 @@ class RoomPropertiesReader {
     let result: string[] = [];
     if (myHubIndex >= 0)
       roomArrays.forEach(room => {
-        const hubIds = room[hubIDsKeys];
+        const hubIds = room["id"];
         if (room.room !== this.Room) result.push(hubIds[myHubIndex]);
       });
     else {
