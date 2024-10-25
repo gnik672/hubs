@@ -70,8 +70,7 @@ AFRAME.registerComponent("open-media-button", {
         } else if (isLocalHubsUrl(this.src)) {
           const waypoint = url.hash && url.hash.substring(1);
           // move to new room without page load or entry flow
-          if (roomPropertiesReader.Room === "lobby") changeHub(roomPropertiesReader.redirectionHubId);
-          else changeHub(hubId, true, waypoint);
+          changeHub(hubId, true, waypoint);
         } else {
           await exitImmersive();
           location.href = this.src;
