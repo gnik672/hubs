@@ -568,7 +568,7 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "speak",
-    type: "nav",
+    type: "both",
     slides: [7, 8],
     steps: [
       {
@@ -586,16 +586,16 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "panel",
-    type: "nav",
+    type: "both",
     slides: [10, 12],
     steps: MapPanelSteps
   },
-  {
-    name: "panel",
-    type: "noNav",
-    slides: [11, 13],
-    steps: MapPanelSteps
-  },
+  // {
+  //   name: "panel",
+  //   type: "noNav",
+  //   slides: [11, 13],
+  //   steps: MapPanelSteps
+  // },
   {
     name: "finish",
     type: "both",
