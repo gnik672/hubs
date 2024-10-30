@@ -362,7 +362,7 @@ export default class VirtualAgent {
       const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
       const nmtResponse = await audioModules(
-        COMPONENT_ENDPOINTS.TRANSLATE_LOCAL_AUDIO_FILES,
+        COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
         recordedQuestion.data.file,
         nmtAudioParams
       );
