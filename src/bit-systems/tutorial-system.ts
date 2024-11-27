@@ -15,8 +15,9 @@ import {
   removeComponent,
   removeEntity
 } from "bitecs";
-import { languageCodes, translationSystem } from "./translation-system";
+import { oldTranslationSystem } from "./old-translation-system";
 import { changeHub } from "../change-hub";
+import { languageCodes } from "./localization-system";
 // import { logger } from "./logging-system";
 
 const CONGRATS_SLIDE_COUNT = 4;
@@ -162,7 +163,13 @@ class TutorialManager {
   }
 
   async AddTutorialPanel(slidesCount: number, pos: ArrayVec3, rot: ArrayVec3, ratio: number) {
-    const language = translationSystem.mylanguage as "english" | "spanish" | "german" | "dutch" | "greek" | "italian";
+    const language = oldTranslationSystem.mylanguage as
+      | "english"
+      | "spanish"
+      | "german"
+      | "dutch"
+      | "greek"
+      | "italian";
     const languageCode = languageCodes[language];
 
     const slides: Array<string> = [];

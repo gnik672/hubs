@@ -2,12 +2,13 @@ import { AScene } from "aframe";
 import { Object3D } from "three";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { HelpImagePanel } from "../prefabs/help-panel";
-import { languageCodes, translationSystem } from "./translation-system";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { FloatingTextPanel, Interacted } from "../bit-components";
 import { hasComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
 import { logger } from "./logging-system";
+import { oldTranslationSystem } from "./old-translation-system";
+import { languageCodes } from "./localization-system";
 
 class HelpButton {
   Ascene: AScene;
@@ -66,7 +67,13 @@ class HelpButton {
     }
 
     const helpProps = roomPropertiesReader.helpProps;
-    const language = translationSystem.mylanguage as "english" | "spanish" | "german" | "dutch" | "greek" | "italian";
+    const language = oldTranslationSystem.mylanguage as
+      | "english"
+      | "spanish"
+      | "german"
+      | "dutch"
+      | "greek"
+      | "italian";
     const languageCode = languageCodes[language];
 
     this.slidesCount = helpProps.slides!;

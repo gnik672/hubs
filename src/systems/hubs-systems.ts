@@ -87,11 +87,13 @@ import { FloorMapSystem } from "../bit-systems/map-system";
 import { FlagPanelSystem } from "../bit-systems/language-panel";
 import { followFovSystem } from "../components/follow-user";
 import { NavigatingSystem } from "../bit-systems/routing-system";
-import { translationSystem } from "../bit-systems/translation-system";
+import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { FixedPanelSystem } from "../bit-systems/fixed-panel-system";
 import { tutorialManager } from "../bit-systems/tutorial-system";
 import { helpButton } from "../bit-systems/help-system";
 import { logger } from "../bit-systems/logging-system";
+import { presentationSystem } from "../bit-systems/presentation-system";
+import { translationSystem } from "../bit-systems/translation-system";
 
 declare global {
   interface Window {
@@ -295,7 +297,9 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   // All systems that update text properties should run before this
   PanelIndexSystem(world);
-  translationSystem.tick();
+  oldTranslationSystem.tick();
+  translationSystem.Tick();
+  presentationSystem.Tick();
   logger.Tick();
   textSystem(world);
 

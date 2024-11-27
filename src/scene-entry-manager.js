@@ -31,13 +31,15 @@ import { getCurrentHubId, isLockedDownDemoRoom } from "./utils/hub-utils";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
 import { navSystem } from "./bit-systems/routing-system";
-import { translationSystem } from "./bit-systems/translation-system";
+import { oldTranslationSystem } from "./bit-systems/old-translation-system";
 import { languagePanel } from "./bit-systems/language-panel";
 import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
 import { helpButton } from "./bit-systems/help-system";
 import { logger } from "./bit-systems/logging-system";
 import { labelOrganizer } from "./bit-systems/room-labels-system";
+import { presentationSystem } from "./bit-systems/presentation-system";
+import { translationSystem } from "./bit-systems/translation-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -76,16 +78,18 @@ export default class SceneEntryManager {
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
     // logger.RegisterUser();
-    translationSystem.Init(reset);
+    oldTranslationSystem.Init(reset);
+    translationSystem.Init();
     virtualAgent.Init(reset);
     floorMap.Init(reset);
     navSystem.Init(reset);
     tutorialManager.Init(reset);
     helpButton.Init(reset);
     labelOrganizer.Init();
+    presentationSystem.Init();
 
     if (!reset) {
-      // logger.AddAnnouncementInteraction("language", translationSystem.mylanguage);
+      // logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
       // logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
     }
   };

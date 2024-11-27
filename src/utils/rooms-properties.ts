@@ -55,7 +55,7 @@ interface MapProperties {
   room_size?: ArrayVec2;
 }
 
-interface TranslationProperties {
+export interface TranslationProperties {
   allow: Array<string>;
   conversation?: { type: "bubble" | "duo" | "presentation"; data?: Array<number> };
   spatiality?: {
@@ -64,7 +64,7 @@ interface TranslationProperties {
   };
   panel?: {
     type: "avatar" | "fixed";
-    data?: Array<number>;
+    data?: [number, number, number];
   };
 }
 

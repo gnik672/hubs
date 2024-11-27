@@ -17,13 +17,14 @@ import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { navSystem } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { languageCodes, translationSystem } from "./translation-system";
+import { oldTranslationSystem } from "./old-translation-system";
 import { UpdatePanelSize, GetTextSize, GetObjSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
 import { AxesHelper, Vector3 } from "three";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { logger } from "./logging-system";
+import { languageCodes } from "./localization-system";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -358,7 +359,7 @@ export default class VirtualAgent {
     try {
       const recordedQuestion = await RecordQuestion();
       this.isProccessing = true;
-      const sourceLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
+      const sourceLang = oldTranslationSystem.mylanguage ? languageCodes[oldTranslationSystem.mylanguage] : "en";
       const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
       const nmtResponse = await audioModules(
@@ -377,7 +378,7 @@ export default class VirtualAgent {
         navigation.knowledge
       );
 
-      const targetLang = languageCodes[translationSystem.mylanguage];
+      const targetLang = languageCodes[oldTranslationSystem.mylanguage];
       const nmtTextParams = { source_language: "en", target_language: targetLang };
       const outputArray = this.SegmentText(response.data.response);
 
@@ -435,7 +436,7 @@ export default class VirtualAgent {
 
   UpdateWithRandomPhrase(occasion) {
     const phrases = [];
-    const lang = translationSystem.mylanguage ? translationSystem.mylanguage : "english";
+    const lang = oldTranslationSystem.mylanguage ? oldTranslationSystem.mylanguage : "english";
 
     this.occasions[occasion].forEach(occasionKey => {
       const availablePhrases = agentDialogs[occasionKey][lang];

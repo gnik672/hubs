@@ -5,7 +5,8 @@
  */
 
 import { defineMessage, useIntl } from "react-intl";
-import { translationSystem } from "../bit-systems/translation-system";
+import { oldTranslationSystem } from "../bit-systems/old-translation-system";
+import { IconTranslationDict } from "../bit-systems/localization-system";
 
 AFRAME.registerComponent("icon-button", {
   schema: {
@@ -80,8 +81,8 @@ AFRAME.registerComponent("icon-button", {
 
     if (this.data.tooltip && hovering) {
       let tooltipText;
-      if (this.data.tooltipText && translationSystem.TextTranslationDict[this.data.tooltipText])
-        tooltipText = translationSystem.TextTranslationDict[this.data.tooltipText];
+      if (this.data.tooltipText && IconTranslationDict[this.data.tooltipText])
+        tooltipText = IconTranslationDict[this.data.tooltipText];
       else tooltipText = this.data.active ? this.data.activeTooltipText : this.data.tooltipText;
 
       tooltipText = disabled ? "" : tooltipText;

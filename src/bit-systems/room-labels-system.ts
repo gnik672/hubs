@@ -4,7 +4,8 @@ import { ArrayVec3, renderAsEntity } from "../utils/jsx-entity";
 import { SimpleImagePanel } from "../prefabs/tutorial-panels";
 import { removeEntity } from "bitecs";
 import { degToRad } from "three/src/math/MathUtils";
-import { languageCodes, translationSystem } from "./translation-system";
+import { oldTranslationSystem } from "./old-translation-system";
+import { languageCodes, voxLanugages } from "./localization-system";
 
 class SceneObject {
   ref: number;
@@ -31,7 +32,7 @@ class RoomLabelOrganizer {
     });
     this.labels = new Array<SceneObject>();
 
-    const language = translationSystem.mylanguage as "english" | "spanish" | "german" | "dutch" | "greek" | "italian";
+    const language = oldTranslationSystem.mylanguage as voxLanugages;
     const languageCode = languageCodes[language];
 
     roomPropertiesReader.labelProps.forEach(label => {

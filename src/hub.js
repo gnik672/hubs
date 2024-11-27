@@ -273,7 +273,9 @@ import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import { navSystem } from "./bit-systems/routing-system";
+import { oldTranslationSystem } from "./bit-systems/old-translation-system";
 import { translationSystem } from "./bit-systems/translation-system";
+import { UpdateLanguage } from "./bit-systems/localization-system";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -779,7 +781,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
-    translationSystem.updateMyLanguage("english");
+    UpdateLanguage("english");
   };
   if (scene.hasLoaded) {
     onSceneLoaded();

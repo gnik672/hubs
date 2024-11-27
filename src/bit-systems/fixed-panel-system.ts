@@ -4,9 +4,11 @@ import { Object3DTag, FixedTextPanel, Slice9 } from "../bit-components";
 import { HubsWorld } from "../app";
 import { Text } from "troika-three-text";
 import { GreetingPhrases } from "../components/translate-panel";
-import { translationSystem } from "./translation-system";
+
 import { GetTextSize } from "../utils/interactive-panels";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
+import { oldTranslationSystem } from "./old-translation-system";
+import { voxLanugages } from "./localization-system";
 
 interface TranslateEventParams {
   id: string;
@@ -26,25 +28,24 @@ let fixedPanelRef: number | null;
 let textObj: Text | null;
 let textRef: number | null;
 
-let myLanguage: "spanish" | "italian" | "greek" | "dutch" | "german" | "english";
+let myLanguage: voxLanugages;
 
 export function FixedPanelSystem(world: HubsWorld) {
   panelEnterQuery(world).forEach(fixedPanelEid => {
     if (fixedPanelRef !== fixedPanelEid) {
-      APP.scene!.addEventListener("translation_available", onTranslationAvailable);
+      // APP.scene!.addEventListener("translation_available", onTranslationAvailable);
       fixedPanelRef = fixedPanelEid;
       fixedPanelObj = world.eid2obj.get(fixedPanelEid)!;
       textRef = FixedTextPanel.textRef[fixedPanelEid];
       textObj = world.eid2obj.get(textRef)! as Text;
       // textObj.addEventListener("synccomplete", updateTextSize);
 
-      myLanguage = translationSystem.mylanguage;
+      // myLanguage = .mylanguage;
       textObj.text = GreetingPhrases[myLanguage];
-      console.log(textObj);
     }
   });
   panelExitQuery(world).forEach(() => {
-    APP.scene!.removeEventListener("translation_available", onTranslationAvailable);
+    // APP.scene!.removeEventListener("translation_available", onTranslationAvailable);
     // textObj!.removeEventListener("synccomplete", updateTextSize);
     fixedPanelRef = null;
     fixedPanelObj = null;
@@ -57,10 +58,10 @@ function onTranslationAvailable(event: any) {
   const details = event.detail as TranslateEventParams;
   console.log(details);
   if (!details.text) return;
-  UpdateText(details.text);
+  UpdateFixedPanelText(details.text);
 }
 
-function UpdateText(text: string) {
+export function UpdateFixedPanelText(text: string) {
   if (!text) return;
   textObj!.text = text;
 }

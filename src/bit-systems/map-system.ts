@@ -5,11 +5,12 @@ import { AxesHelper, Object3D, Vector2, Vector3 } from "three";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { AElement, AScene } from "aframe";
-import { languageCodes, translationSystem } from "./translation-system";
 import { HubsWorld } from "../app";
 import { radToDeg } from "three/src/math/MathUtils";
 import { logger } from "./logging-system";
 import { faSlash } from "@fortawesome/free-solid-svg-icons";
+import { oldTranslationSystem } from "./old-translation-system";
+import { languageCodes } from "./localization-system";
 
 const mapQuery = defineQuery([FloorMap]);
 const enterMapQuery = enterQuery(mapQuery);
@@ -76,7 +77,13 @@ class FloorMapClass {
   }
 
   Instantiate() {
-    const language = translationSystem.mylanguage as "english" | "spanish" | "german" | "dutch" | "greek" | "italian";
+    const language = oldTranslationSystem.mylanguage as
+      | "english"
+      | "spanish"
+      | "german"
+      | "dutch"
+      | "greek"
+      | "italian";
     const languageCode = languageCodes[language];
 
     const mapImage = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/${languageCode}_map.png`;

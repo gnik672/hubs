@@ -14,7 +14,7 @@ import { LanguageSetupModal } from "./LanguageSetupModal";
 import { useLanguage } from "./hooks/useLanugage";
 
 export function LanguageSetupModalContainer({ scene, ...rest }) {
-  const { languageChanged, languages } = useLanguage(scene);
+  const { languageChanged, languages } = useLanguage();
 
   return <LanguageSetupModal languageOptions={languages} onChangeLanguage={languageChanged} {...rest} />;
 }
