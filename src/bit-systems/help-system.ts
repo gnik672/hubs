@@ -2,13 +2,10 @@ import { AScene } from "aframe";
 import { Object3D } from "three";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { HelpImagePanel } from "../prefabs/help-panel";
-import { roomPropertiesReader } from "../utils/rooms-properties";
+import { HelpSlide, roomPropertiesReader } from "../utils/rooms-properties";
 import { FloatingTextPanel, Interacted } from "../bit-components";
 import { hasComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
-import { logger } from "./logging-system";
-import { oldTranslationSystem } from "./old-translation-system";
-import { languageCodes } from "./localization-system";
 
 class HelpButton {
   Ascene: AScene;
@@ -26,6 +23,7 @@ class HelpButton {
 
   slideLinks: Array<string>;
   slidesObjs: Array<Object3D>;
+  slides: HelpSlide[];
 
   constructor() {
     this.activeSlideIndex = 0;
@@ -66,58 +64,19 @@ class HelpButton {
       APP.scene!.removeEventListener("clear-scene", this.onClear);
     }
 
-    const helpProps = roomPropertiesReader.helpProps;
-    const language = oldTranslationSystem.mylanguage as
-      | "english"
-      | "spanish"
-      | "german"
-      | "dutch"
-      | "greek"
-      | "italian";
-    const languageCode = languageCodes[language];
+    const helpSlides = roomPropertiesReader.roomProps.help;
 
-    this.slidesCount = helpProps.slides!;
+    this.slidesCount = helpSlides.length;
     this.slideLinks = [];
     this.slidesObjs = [];
-
-    for (let i = 0; i < this.slidesCount; i++) {
-      let navOnly = false;
-      let noNavOnly = false;
-      for (let j = 0; j < helpProps.nav!.length; j++) {
-        if (helpProps.nav![j] === i) {
-          navOnly = true;
-          break;
-        }
-      }
-
-      if (!navOnly) {
-        for (let j = 0; j < helpProps.no_nav!.length; j++) {
-          if (helpProps.no_nav![j] === i) {
-            noNavOnly = true;
-            break;
-          }
-        }
-      }
-
-      const contrain =
-        roomPropertiesReader.Room === "lobby"
-          ? roomPropertiesReader.AllowsNav
-          : roomPropertiesReader.Room === "tradeshows"
-          ? roomPropertiesReader.AllowsAgent
-          : false;
-
-      let shouldpush = contrain ? navOnly : noNavOnly;
-      shouldpush = shouldpush || !(navOnly || noNavOnly);
-
-      if (shouldpush) this.slideLinks.push(`${roomPropertiesReader.serverURL}/help/${languageCode}_help_${i}.png`);
-    }
+    this.slides = helpSlides;
 
     APP.scene!.addEventListener("help-toggle", this.onToggle);
     APP.scene!.addEventListener("clear-scene", this.onClear);
   }
 
   RenderPanel() {
-    this.panelRef = renderAsEntity(APP.world, HelpImagePanel(this.slideLinks, roomPropertiesReader.helpProps.ratio!));
+    this.panelRef = renderAsEntity(APP.world, HelpImagePanel(this.slides));
     this.panelObj = APP.world.eid2obj.get(this.panelRef)!;
     APP.world.scene.add(this.panelObj);
 
@@ -127,13 +86,8 @@ class HelpButton {
 
     this.prevObj = APP.world.eid2obj.get(this.prevRef)!;
     this.nextObj = APP.world.eid2obj.get(this.nextRef)!;
-    // this.testObj = APP.world.eid2obj.get(this.clickRef)!;
 
-    // this.testObj.visible = false;
-
-    this.slideLinks.forEach((_, index) => {
-      this.slidesObjs.push(this.panelObj.getObjectByName(`slide_${index}`)!);
-    });
+    for (let i = 0; i < this.slides.length; i++) this.slidesObjs.push(this.panelObj.getObjectByName(`slide_${i}`)!);
 
     (APP.scene as AScene).addState("help");
 

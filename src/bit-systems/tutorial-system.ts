@@ -1,6 +1,6 @@
 import { Object3D, Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { roomPropertiesReader } from "../utils/rooms-properties";
+import { roomPropertiesReader, Tutorial, TutorialSlide } from "../utils/rooms-properties";
 import { AElement, AScene } from "aframe";
 import { ArrayVec3, renderAsEntity } from "../utils/jsx-entity";
 import { MovingTutorialImagePanel, StaticTutorialImagePanel } from "../prefabs/tutorial-panels";
@@ -18,6 +18,9 @@ import {
 import { oldTranslationSystem } from "./old-translation-system";
 import { changeHub } from "../change-hub";
 import { languageCodes } from "./localization-system";
+import { popToBeginningOfHubHistory } from "../utils/history";
+import { touchscreenUserBindings } from "../systems/userinput/bindings/touchscreen-user";
+import { avatarDirection, avatarPos } from "./agent-system";
 // import { logger } from "./logging-system";
 
 const CONGRATS_SLIDE_COUNT = 4;
@@ -26,20 +29,22 @@ const ANGLE_THRESH = 44;
 const changeTime = 10000;
 const floatingPanelQuery = defineQuery([FloatingTextPanel]);
 
-interface StepCategory {
+interface TutorialChapter {
   name: string;
-  type: "nav" | "noNav" | "both";
-  slides: Array<number>;
-  steps: Array<StepObject>;
+  agent?: boolean;
+  map?: boolean;
+  translation?: boolean;
+  steps: Array<Step>;
+  slides?: number[];
 }
-interface StepObject {
-  onceFunc?: Function;
+interface Step {
+  openingFunc?: Function;
   loopFunc?: Function;
-  cleanUpFunc?: Function;
+  exitFunc?: Function;
 }
 
 interface RoomTutorial {
-  steps: StepCategory[];
+  chapters: TutorialChapter[];
   resetFunc: Function;
   clickFunc: Function;
 }
@@ -53,14 +58,14 @@ class TutorialManager {
   initPosition: Vector3;
   initDir: Vector3;
 
-  activeCategory: StepCategory;
-  activeStep: StepObject;
+  chapters: Step[][];
+  activeChapter: Step[];
+  activeSlide: Step;
+  slideIndex: number;
+  chapterIndex: number;
 
-  activeStepIndex: number;
-  activeCategoryIndex: number;
-
-  categoriesArray: Array<StepCategory>;
-  roomTutorial: RoomTutorial;
+  roomSteps: RoomTutorial;
+  tutorial: Tutorial;
 
   panelRef: number;
   prevRef: number;
@@ -68,7 +73,8 @@ class TutorialManager {
   resetRef: number;
   clickRef: number;
 
-  slides: Array<Object3D>;
+  slideArray: Object3D[][];
+  congratsSlides: Object3D[];
   avatarHead: Object3D;
   panelObj: Object3D;
   prevObj: Object3D;
@@ -88,8 +94,8 @@ class TutorialManager {
 
   constructor() {
     this.allowed = false;
-    this.activeStepIndex = 0;
-    this.activeCategoryIndex = 0;
+    this.slideIndex = 0;
+    this.chapterIndex = 0;
     this.onTaskToggle = this.onTaskToggle.bind(this);
     this.onClearToggle = this.onClearToggle.bind(this);
   }
@@ -114,91 +120,73 @@ class TutorialManager {
       return;
     }
 
-    this.roomTutorial = RoomSteps[roomPropertiesReader.Room as "conference_room" | "lobby" | "tradeshows"];
-    const navString =
-      roomPropertiesReader.Room === "lobby"
-        ? roomPropertiesReader.AllowsNav
-          ? "nav"
-          : "noNav"
-        : roomPropertiesReader.AllowsAgent
-        ? "nav"
-        : "noNav";
-
-    this.categoriesArray = [];
-    console.log(navString);
-
-    this.roomTutorial.steps.forEach(stepCategory => {
-      if (stepCategory.type === "both" || stepCategory.type === navString) this.categoriesArray.push(stepCategory);
-    });
-
-    console.log(this.categoriesArray);
-
-    this.activeStepIndex = 0;
-    this.activeCategoryIndex = 0;
-
-    // this.activeTimeout = setTimeout(() => {
+    const tutorial = roomPropertiesReader.roomProps.tutorials[0];
+    tutorial.name = roomPropertiesReader.roomProps.name;
+    this.tutorial = tutorial;
+    // this.chapters = chaptersDict[tutorial.name].chapters.map(chapter => chapter.steps);
     this.allowed = true;
-    this.AddTutorialPanel(
-      roomPropertiesReader.roomProps.tutorial.slides!,
-      roomPropertiesReader.tutorialProps.position!,
-      roomPropertiesReader.tutorialProps.rotation!,
-      roomPropertiesReader.tutorialProps.ratio!
-    );
-    // }, 1000);
-
+    this.AddTutorialPanel(tutorial);
     this.onMicEvent = this.onMicEvent.bind(this);
   }
 
   Tick(world: HubsWorld) {
     if (!this.allowed) return;
 
+    console.log(avatarPos().toArray().toString(), avatarDirection().toArray().toString());
+
     floatingPanelQuery(world).forEach(_ => {
       if (hasComponent(world, Interacted, this.nextRef)) this.Next();
       if (hasComponent(world, Interacted, this.prevRef)) this.Prev();
-      if (hasComponent(world, Interacted, this.resetRef)) this.roomTutorial.resetFunc();
-      if (hasComponent(world, Interacted, this.clickRef)) this.roomTutorial.clickFunc();
+      if (hasComponent(world, Interacted, this.resetRef)) {
+        this.Next();
+      }
+      if (hasComponent(world, Interacted, this.clickRef)) {
+        this.Next(true);
+      }
 
-      if (this.activeStep["loopFunc"]) this.activeStep.loopFunc();
+      if (this.activeSlide["loopFunc"]) this.activeSlide.loopFunc();
     });
   }
 
-  async AddTutorialPanel(slidesCount: number, pos: ArrayVec3, rot: ArrayVec3, ratio: number) {
-    const language = oldTranslationSystem.mylanguage as
-      | "english"
-      | "spanish"
-      | "german"
-      | "dutch"
-      | "greek"
-      | "italian";
-    const languageCode = languageCodes[language];
+  async AddTutorialPanel(tutorial: Tutorial) {
+    const position = tutorial.position as ArrayVec3;
+    const rotation = tutorial.rotation as ArrayVec3;
+    const ratio = tutorial.ratio;
 
-    const slides: Array<string> = [];
-    const cSlides: Array<string> = [];
+    const chapters = chaptersDict[tutorial.name!].chapters;
+    this.chapters = [];
+    const slideUrls: string[][][] = [];
+    const congratsUrls: string[] = [];
 
-    for (let i = 0; i < slidesCount; i++) {
-      const url = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/${languageCode}_tutorial_${i}.png`;
-      slides.push(url);
-    }
+    chapters.forEach((chapter, _) => {
+      let newRow = true;
+      let includeChapter = false;
+      let chapterInd: number;
+      tutorial.tutorialSlides.forEach(tSlide => {
+        if (tSlide.name === "congrats") congratsUrls.push(`${roomPropertiesReader.serverURL}/file/${tSlide.filename}`);
+        else if (tSlide.name === chapter.name) {
+          if (newRow) {
+            chapterInd = slideUrls.push([]) - 1;
+            newRow = false;
+          }
+          const ind = slideUrls[chapterInd].push([`${roomPropertiesReader.serverURL}/file/${tSlide.filename}`]) - 1;
+          includeChapter = true;
+          tutorial.tutorialMaterials.forEach(material => {
+            if (material.name === tSlide.name && material.index === tSlide.index)
+              slideUrls[chapterInd][ind].push(`${roomPropertiesReader.serverURL}/file/${material.filename}`);
+          });
+        }
+      });
 
-    const gifSlides: Array<string> = new Array(slidesCount).fill("");
+      if (includeChapter) this.chapters.push(chapter.steps);
+    });
 
-    for (let i = 0; i < slidesCount; i++) {
-      const url = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/tutorial_${i}.gif`;
-      const response = await fetch(url);
-      if (response.ok) gifSlides[i] = url;
-    }
-
-    console.group(gifSlides);
-
-    for (let i = 0; i < CONGRATS_SLIDE_COUNT; i++) {
-      const url = `${roomPropertiesReader.serverURL}/congrats_slides/${languageCode}_tutorial_congrats_${i}.png`;
-      cSlides.push(url);
-    }
     let tutorialPanelEntity;
 
-    if (roomPropertiesReader.tutorialProps.type === "moving")
-      tutorialPanelEntity = await MovingTutorialImagePanel(slides, cSlides, gifSlides, pos, rot, ratio, 2);
-    else tutorialPanelEntity = await StaticTutorialImagePanel(slides, cSlides, gifSlides, pos, rot, ratio, 4);
+    if (tutorial.type === "moving")
+      tutorialPanelEntity = await MovingTutorialImagePanel(slideUrls, congratsUrls, position, rotation, ratio, 2);
+    else tutorialPanelEntity = await StaticTutorialImagePanel(slideUrls, congratsUrls, position, rotation, ratio, 4);
+
     this.panelRef = renderAsEntity(APP.world, tutorialPanelEntity);
     this.panelObj = APP.world.eid2obj.get(this.panelRef)!;
     APP.world.scene.add(this.panelObj);
@@ -212,24 +200,26 @@ class TutorialManager {
     this.nextObj = APP.world.eid2obj.get(this.nextRef) as Object3D;
     this.resetButtonObj = APP.world.eid2obj.get(this.resetRef) as Object3D;
     this.clickButtonObj = APP.world.eid2obj.get(this.clickRef) as Object3D;
+    this.slideArray = [];
 
-    this.slides = [];
-
-    slides.forEach((_, index) => {
-      this.slides.push(this.panelObj.getObjectByName(`slide_${index}`)!);
-    });
-    cSlides.forEach((_, index) => {
-      this.slides.push(this.panelObj.getObjectByName(`congrats_slide_${index}`)!);
+    this.chapters.forEach((chapter, chapterIndex) => {
+      const ind = this.slideArray.push([]) - 1;
+      for (let slideIndex = 0; slideIndex < chapter.length; slideIndex++)
+        this.slideArray[ind].push(this.panelObj.getObjectByName(`slide_${chapterIndex}_${slideIndex}`)!);
     });
 
-    this.activeCategory = this.categoriesArray[this.activeCategoryIndex];
-    this.activeStep = this.activeCategory.steps[this.activeStepIndex];
+    this.congratsSlides = [];
+    for (let i = 0; i < congratsUrls.length; i++)
+      this.congratsSlides.push(this.panelObj.getObjectByName(`congrats_slide_${i}`)!);
+
+    this.activeChapter = this.chapters[this.chapterIndex];
+    this.activeSlide = this.activeChapter[this.slideIndex];
     this.showArrows = true;
     this.Ascene.addState("task");
     APP.scene!.addEventListener("task-toggle", this.onTaskToggle);
     APP.scene!.addEventListener("clear-scene", this.onClearToggle);
     this.RenderSlide();
-    this.OnceFunc();
+    this.RunInitFunc();
   }
 
   onTaskToggle() {
@@ -246,7 +236,7 @@ class TutorialManager {
   }
 
   onClearToggle() {
-    if (roomPropertiesReader.Room === "lobby") return;
+    if (this.tutorial.name === "lobby") return;
     if (this.Ascene.is("task")) {
       this.panelObj.visible = false;
       this.Ascene.removeState("task");
@@ -260,21 +250,21 @@ class TutorialManager {
     });
   }
 
-  RenderSlide(slideNo = -1) {
-    this.slides.forEach(slide => {
-      slide.visible = false;
+  RenderSlide(slideno: number = -1) {
+    this.slideArray.forEach(chapter => {
+      chapter.forEach(slide => {
+        slide.visible = false;
+      });
+    });
+    this.congratsSlides.forEach(cSlide => {
+      cSlide.visible = false;
     });
 
-    if (slideNo !== -1) {
-      this.slides[slideNo].visible = true;
-      return;
-    }
-
     this.ToggleArrowVisibility(this.showArrows);
-
-    this.slides[this.activeCategory.slides[this.activeStepIndex]].visible = true;
     APP.scene!.emit("clear-scene");
     this.Ascene.addState("task");
+    if (slideno !== -1) this.congratsSlides[slideno].visible = true;
+    else this.slideArray[this.chapterIndex][this.slideIndex].visible = true;
     this.panelObj.visible = true;
   }
 
@@ -283,80 +273,75 @@ class TutorialManager {
     this.activeTimeout = null;
   }
 
-  Next(congratulate = false) {
-    if (this.activeStepIndex === this.activeCategory.steps.length - 1) {
-      this.NextCategory(congratulate);
-    } else {
-      this.AddStep(1);
-    }
-  }
-
-  Prev() {
-    if (this.activeStepIndex === 0) this.PrevCategory();
-    else {
-      this.AddStep(-1);
-    }
-  }
-
-  AddStep(offset: number) {
-    this.SetStep(this.activeStepIndex + offset);
-  }
-
-  SetStep(number: number) {
-    this.ClearTimeOut();
-    this.RunCleanupFunc();
-    this.activeStepIndex = number;
-    this.activeStep = this.activeCategory.steps[this.activeStepIndex];
-    this.RenderSlide();
-    this.OnceFunc();
-  }
-
-  ChangeCategory(category: StepCategory) {
-    const cleanupFunc = this.activeStep["cleanUpFunc"];
-    if (cleanupFunc) cleanupFunc();
-    this.activeCategory = category;
-    this.SetStep(0);
-  }
-
   RunCleanupFunc() {
-    if (this.activeStep) {
-      const cleanupFunc = this.activeStep["cleanUpFunc"];
+    if (this.activeSlide) {
+      const cleanupFunc = this.activeSlide.exitFunc;
       if (cleanupFunc) cleanupFunc();
     }
   }
 
-  ChangeCategoryByIndex(index: number) {
-    this.activeCategoryIndex = index;
-    if (this.activeCategoryIndex === this.categoriesArray.length) this.activeCategoryIndex = 0;
-    this.ChangeCategory(this.categoriesArray[this.activeCategoryIndex]);
+  Next(congratulate = false) {
+    this.ClearTimeOut();
+    this.RunCleanupFunc();
+
+    if (congratulate) this.NextChapter(congratulate);
+    else if (this.slideIndex === this.activeChapter.length - 1) this.NextChapter();
+    else this.AddStep(1);
   }
 
-  NextCategory(congratulate = false) {
-    const cleanupFunc = this.activeStep["cleanUpFunc"];
-    if (cleanupFunc) cleanupFunc();
-
-    if (congratulate) {
-      this.ChangeCategory(WellDoneCategoryNext());
-    } else {
-      this.ChangeCategoryByIndex(this.activeCategoryIndex + 1);
-    }
+  Prev() {
+    this.ClearTimeOut();
+    this.RunCleanupFunc();
+    if (this.slideIndex === 0) this.ChangeChapterByIndex(this.chapterIndex - 1);
+    else this.AddStep(-1);
   }
 
-  PrevCategory() {
-    const cleanupFunc = this.activeStep["cleanUpFunc"];
-    if (cleanupFunc) cleanupFunc();
-    this.activeCategoryIndex -= 1;
-    this.activeCategory = this.categoriesArray[this.activeCategoryIndex];
+  AddStep(offset: number) {
+    this.SetStep(this.slideIndex + offset);
+  }
+
+  SetStep(number: number) {
+    this.slideIndex = number;
+    this.activeSlide = this.activeChapter[this.slideIndex];
+    this.RunInitFunc();
+    this.RenderSlide();
+  }
+
+  ChangeChapter(chapter: Step[]) {
+    this.activeChapter = chapter;
     this.SetStep(0);
   }
 
-  OnceFunc() {
-    const startingFunc = this.activeStep["onceFunc"];
-    if (startingFunc) startingFunc();
+  ChangeChapterByIndex(index: number) {
+    if (index === this.chapters.length || index < 0) this.chapterIndex = 0;
+    else this.chapterIndex = index;
+    this.ChangeChapter(this.chapters[this.chapterIndex]);
+  }
+
+  NextChapter(congratulate = false) {
+    if (congratulate) this.Congratulate();
+    else this.ChangeChapterByIndex(this.chapterIndex + 1);
+  }
+
+  Congratulate() {
+    const randomCongrats = Math.floor(Math.random() * this.congratsSlides.length);
+
+    this.activeSlide = {};
+    this.RenderSlide(randomCongrats);
+    this.ToggleArrowVisibility(false);
+    this.activeTimeout = setTimeout(() => {
+      this.Next();
+      this.ToggleArrowVisibility(true);
+    }, 1500);
+  }
+
+  RunInitFunc() {
+    const initFunc = this.activeSlide["openingFunc"];
+    if (initFunc) initFunc();
   }
 
   onMicEvent() {
-    this.NextCategory();
+    this.NextChapter();
   }
 
   HidePanel() {
@@ -376,61 +361,35 @@ class TutorialManager {
 
 export const tutorialManager = new TutorialManager();
 
-const WellDoneCategoryNext = (): StepCategory => {
-  const slideNo = tutorialManager.slides.length - Math.floor(Math.random() * (CONGRATS_SLIDE_COUNT - 1) + 1);
-
-  return {
-    name: "welldone",
-    type: "both",
-    slides: [slideNo],
-    steps: [
-      {
-        onceFunc: () => {
-          tutorialManager.ToggleArrowVisibility(false);
-          tutorialManager.activeTimeout = setTimeout(() => {
-            tutorialManager.Next();
-            tutorialManager.ToggleArrowVisibility(true);
-          }, 1500);
-        }
+const CongratsChapter = (): Step[] => {
+  return [
+    {
+      openingFunc: () => {
+        tutorialManager.ToggleArrowVisibility(false);
+        tutorialManager.activeTimeout = setTimeout(() => {
+          tutorialManager.Next();
+          tutorialManager.ToggleArrowVisibility(true);
+        }, 1500);
       }
-    ]
-  };
+    }
+  ];
 };
-const WellDoneCategory = (): StepCategory => {
-  const slideNo = tutorialManager.slides.length - Math.floor(Math.random() * (CONGRATS_SLIDE_COUNT - 1) + 1);
 
-  return {
-    name: "welldone",
-    type: "both",
-    slides: [slideNo],
-    steps: [
-      {
-        onceFunc: () => {
-          tutorialManager.activeTimeout = setTimeout(() => {
-            tutorialManager.HidePanel();
-          }, 1500);
-        }
-      }
-    ]
-  };
-};
-const MicUnMutedCategory = (): StepCategory => {
+const MicUnMutedChapter = (): TutorialChapter => {
   const onMuting = () => tutorialManager.Next(true);
 
   return {
     name: "mic_unmuted",
-    type: "nav",
-    slides: [9],
     steps: [
       {
-        onceFunc: () => tutorialManager.Ascene.addEventListener("action_disable_mic", onMuting, { once: true }),
-        cleanUpFunc: () => tutorialManager.Ascene.removeEventListener("action_disable_mic", onMuting)
+        openingFunc: () => tutorialManager.Ascene.addEventListener("action_disable_mic", onMuting, { once: true }),
+        exitFunc: () => tutorialManager.Ascene.removeEventListener("action_disable_mic", onMuting)
       }
     ]
   };
 };
 
-const onUnmuting = () => tutorialManager.ChangeCategory(MicUnMutedCategory());
+const onUnmuting = () => tutorialManager.ChangeChapter(MicUnMutedChapter().steps);
 
 const OnMapToggle = () => {
   APP.scene!.addEventListener(
@@ -442,50 +401,46 @@ const OnMapToggle = () => {
   );
 };
 
-const timeOutCategory: StepCategory = {
+const timeOutChapter: TutorialChapter = {
   name: "timeout",
-  type: "both",
-  slides: [3],
   steps: [
     {
-      onceFunc: () => {
+      openingFunc: () => {
         // tutorialManager.HidePanel(); //this need to be changed
         setTimeout(() => {
           // logger.AddAnnouncementInteraction("room redirection", "to conference room");
 
-          changeHub(roomPropertiesReader.devMode ? "" : "AxFm4cE"); ///provide correct ID in prod
+          changeHub("AxFm4cE"); ///provide correct ID in prod
         }, changeTime);
       }
     }
   ]
 };
 
-const MapPanelSteps: Array<StepObject> = [
-  { onceFunc: () => {} },
+const MapPanelSteps: Array<Step> = [
+  { openingFunc: () => {} },
   {
-    onceFunc: () => {
+    openingFunc: () => {
       APP.scene!.addEventListener("map-toggle", OnMapToggle, { once: true });
     },
-    cleanUpFunc: () => {
+    exitFunc: () => {
       APP.scene!.removeEventListener("map-toggle", OnMapToggle);
     }
   }
 ];
 let targetPos: Vector3;
 
-const LobbySteps: Array<StepCategory> = [
+const lobbyChapters: Array<TutorialChapter> = [
   {
     name: "welcome_1",
-    type: "both",
-    slides: [0],
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.resetButtonObj.visible = false;
           tutorialManager.clickButtonObj.visible = false;
           tutorialManager.prevObj.visible = false;
         },
-        cleanUpFunc: () => {
+        exitFunc: () => {
           tutorialManager.prevObj.visible = true;
         }
       }
@@ -493,26 +448,22 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "welcome_2",
-    type: "both",
-    slides: [1],
     steps: [
       {
-        onceFunc: () => {}
+        openingFunc: () => {}
       }
     ]
   },
   {
     name: "click",
-    type: "both",
-    slides: [2],
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.clickButtonObj.visible = true;
           }, 1000);
         },
-        cleanUpFunc: () => {
+        exitFunc: () => {
           tutorialManager.clickButtonObj.visible = false;
         }
       }
@@ -520,14 +471,12 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "move",
-    type: "both",
-    slides: [3, 4],
     steps: [
       {
-        onceFunc: () => {}
+        openingFunc: () => {}
       },
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
         },
         loopFunc: () => {
@@ -540,11 +489,9 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "teleport",
-    type: "both",
-    slides: [5],
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
         },
         loopFunc: () => {
@@ -557,11 +504,9 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "turn",
-    type: "both",
-    slides: [6],
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.initDir = tutorialManager.avatarHead.getWorldDirection(new Vector3());
         },
         loopFunc: () => {
@@ -575,17 +520,16 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "speak",
-    type: "both",
-    slides: [7, 8],
+    agent: true,
     steps: [
       {
-        onceFunc: () => {}
+        openingFunc: () => {}
       },
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting, { once: true });
         },
-        cleanUpFunc: () => {
+        exitFunc: () => {
           tutorialManager.Ascene.removeEventListener("action_enable_mic", onUnmuting);
         }
       }
@@ -593,27 +537,20 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "panel",
-    type: "both",
-    slides: [10, 12],
+    agent: true,
     steps: MapPanelSteps
   },
-  // {
-  //   name: "panel",
-  //   type: "noNav",
-  //   slides: [11, 13],
-  //   steps: MapPanelSteps
-  // },
+
   {
     name: "finish",
-    type: "both",
-    slides: [14],
+
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.resetButtonObj.visible = true;
           tutorialManager.nextObj.visible = false;
         },
-        cleanUpFunc: () => {
+        exitFunc: () => {
           tutorialManager.resetButtonObj.visible = false;
           tutorialManager.nextObj.visible = true;
         }
@@ -622,14 +559,12 @@ const LobbySteps: Array<StepCategory> = [
   }
 ];
 
-const TradeshowSteps: Array<StepCategory> = [
+const tradeshowChapters: Array<TutorialChapter> = [
   {
     name: "welcome",
-    type: "nav",
-    slides: [0],
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.resetButtonObj.visible = true;
           tutorialManager.ToggleArrowVisibility(false);
           tutorialManager.activeTimeout = setTimeout(() => {
@@ -641,11 +576,9 @@ const TradeshowSteps: Array<StepCategory> = [
   },
   {
     name: "welcome",
-    type: "noNav",
-    slides: [1],
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.ToggleArrowVisibility(false);
           tutorialManager.resetButtonObj.visible = true;
           tutorialManager.activeTimeout = setTimeout(() => {
@@ -657,14 +590,12 @@ const TradeshowSteps: Array<StepCategory> = [
   }
 ];
 
-const ConferenceSteps: Array<StepCategory> = [
+const conferenceChapters: Array<TutorialChapter> = [
   {
     name: "welcome",
-    slides: [0],
-    type: "both",
     steps: [
       {
-        onceFunc: () => {
+        openingFunc: () => {
           tutorialManager.resetButtonObj.visible = true;
           tutorialManager.ToggleArrowVisibility(false);
           tutorialManager.activeTimeout = setTimeout(() => {
@@ -676,9 +607,9 @@ const ConferenceSteps: Array<StepCategory> = [
   }
 ];
 
-const RoomSteps: { conference_room: RoomTutorial; lobby: RoomTutorial; tradeshows: RoomTutorial } = {
+const chaptersDict: { conference_room: RoomTutorial; lobby: RoomTutorial; tradeshows: RoomTutorial } = {
   conference_room: {
-    steps: ConferenceSteps,
+    chapters: conferenceChapters,
     resetFunc: () => {
       tutorialManager.HidePanel();
       tutorialManager.resetButtonObj.visible = false;
@@ -686,7 +617,7 @@ const RoomSteps: { conference_room: RoomTutorial; lobby: RoomTutorial; tradeshow
     clickFunc: () => {}
   },
   lobby: {
-    steps: LobbySteps,
+    chapters: lobbyChapters,
     resetFunc: () => {
       tutorialManager.Next();
       tutorialManager.resetButtonObj.visible = false;
@@ -697,7 +628,7 @@ const RoomSteps: { conference_room: RoomTutorial; lobby: RoomTutorial; tradeshow
     }
   },
   tradeshows: {
-    steps: TradeshowSteps,
+    chapters: tradeshowChapters,
     resetFunc: () => {
       tutorialManager.HidePanel();
       tutorialManager.resetButtonObj.visible = false;

@@ -171,7 +171,7 @@ export class TranslationSystem {
   async Init(reset) {
     if (reset) {
       this.targets = {};
-      this.allowed = roomPropertiesReader.AllowTrans && false;
+      this.allowed = false;
 
       if (!this.allowed) {
         console.warn("Translation is not enabled in this room");
@@ -179,7 +179,7 @@ export class TranslationSystem {
       }
     }
 
-    this.allowed = roomPropertiesReader.AllowTrans;
+    this.allowed = false;
     this.transProperties = roomPropertiesReader.transProps;
     this.targets = {};
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;

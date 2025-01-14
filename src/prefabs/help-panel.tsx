@@ -2,18 +2,13 @@
 import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef, ArrayVec3 } from "../utils/jsx-entity";
 import spotSrc from "../assets/images/pointer.png";
 import { textureLoader } from "../utils/media-utils";
-import nametagSrc from "../assets/hud/nametag.9.png";
 import { BUTTON_TYPES, StaticButton3D, TextButton3D } from "./button3D";
 import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
-import { degToRad, radToDeg } from "three/src/math/MathUtils";
-import { FollowFov } from "../bit-components";
-import { roomPropertiesReader } from "../utils/rooms-properties";
+import { HelpSlide, roomPropertiesReader } from "../utils/rooms-properties";
 
-const tutorialSchema = "https://kontopoulosdm.github.io/tutorial_";
-
-export function HelpImagePanel(slides: Array<string>, ratio: number) {
+export function HelpImagePanel(slides: HelpSlide[]) {
   const textRef = createRef();
   const panelRef = createRef();
   const nextRef = createRef();
@@ -23,21 +18,20 @@ export function HelpImagePanel(slides: Array<string>, ratio: number) {
 
   const slideEntities = [] as Array<EntityDef>;
 
-  const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
-  const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
-  const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
-  const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
+  const prevIcon = `${roomPropertiesReader.serverURL}/file/prev_icon.png`;
+  const nextIcon = `${roomPropertiesReader.serverURL}/file/next_icon.png`;
 
   slides.forEach((slide, index) => {
+    const slideUrl = `${roomPropertiesReader.serverURL}/file/${slide.filename}`;
     slideEntities.push(
       <entity
         name={`slide_${index}`}
         image={{
-          texture: textureLoader.load(slide),
-          ratio: ratio,
+          texture: textureLoader.load(slideUrl),
+          ratio: slide.ratio,
           projection: ProjectionMode.FLAT,
           alphaMode: AlphaMode.Blend,
-          cacheKey: TextureCache.key(slide, 1)
+          cacheKey: TextureCache.key(slideUrl, 1)
         }}
         visible={false}
       ></entity>

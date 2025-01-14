@@ -38,7 +38,7 @@ export function FixedPanel({ pos }: FixedPanelParams) {
     </entity>
   );
 }
-export function FixedText({ pos }: FixedPanelParams) {
+export function FixedText(pos: [number, number, number]) {
   const textRef = createRef();
   return (
     <entity

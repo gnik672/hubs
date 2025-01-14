@@ -1,6 +1,6 @@
 import { Object3D } from "three";
 import { generateRandomSentence } from "./presentation-system";
-import { roomPropertiesReader, TranslationProperties } from "../utils/rooms-properties";
+import { roomPropertiesReader, Translation } from "../utils/rooms-properties";
 import { AElement } from "aframe";
 import { audioModules, stopRecording, textModule } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
@@ -37,7 +37,7 @@ class TranslationTarget {
 
 export class TranslationSystem {
   allowed: boolean;
-  properties: TranslationProperties;
+  properties: Translation;
   targets: Record<string, TranslationTarget>;
   consumers: string[];
   avatarObj: Object3D;
@@ -55,12 +55,13 @@ export class TranslationSystem {
   Init() {
     this.targets = {};
     this.consumers = [];
-    this.allowed =
-      roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.conversation?.type !== "presentation";
+    this.allowed = roomPropertiesReader.AllowTrans;
 
     if (!this.allowed) return;
 
-    this.properties = roomPropertiesReader.transProps;
+    const transProps = roomPropertiesReader.roomProps.translations[0];
+
+    this.properties = transProps;
     this.avatarObj = (document.querySelector("#avatar-pov-node") as AElement).object3D;
     this.peerId = APP.dialog._clientId;
     this.wsActive = false;

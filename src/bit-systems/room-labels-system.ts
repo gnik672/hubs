@@ -1,5 +1,5 @@
 import { Object3D } from "three";
-import { roomPropertiesReader } from "../utils/rooms-properties";
+import { Label, roomPropertiesReader } from "../utils/rooms-properties";
 import { ArrayVec3, renderAsEntity } from "../utils/jsx-entity";
 import { SimpleImagePanel } from "../prefabs/tutorial-panels";
 import { removeEntity } from "bitecs";
@@ -21,9 +21,11 @@ class SceneObject {
 
 class RoomLabelOrganizer {
   labels: Array<SceneObject>;
+  labelProps: Label[];
 
   constructor() {
     this.labels = new Array<SceneObject>();
+    this.labelProps = [];
   }
   Init() {
     this.labels.forEach(label => {
@@ -31,27 +33,14 @@ class RoomLabelOrganizer {
       removeEntity(APP.world, label.ref);
     });
     this.labels = new Array<SceneObject>();
+    this.labelProps = roomPropertiesReader.roomProps.labels;
 
     const language = oldTranslationSystem.mylanguage as voxLanugages;
     const languageCode = languageCodes[language];
 
-    roomPropertiesReader.labelProps.forEach(label => {
-      const image = roomPropertiesReader.serverURL.concat(
-        "/",
-        roomPropertiesReader.Room,
-        "/",
-        languageCode,
-        "_",
-        label.name,
-        ".png"
-      );
-      const radiansRotation = label.rotation.map(degrees => {
-        return degToRad(degrees);
-      }) as ArrayVec3;
-      const ref = renderAsEntity(
-        APP.world,
-        SimpleImagePanel(image, label.name, label.position, radiansRotation, label.scale, label.ratio)
-      );
+    this.labelProps.forEach(label => {
+      label.filename = `${roomPropertiesReader.serverURL}/file/${label.filename}`;
+      const ref = renderAsEntity(APP.world, SimpleImagePanel(label));
 
       const labelEntity = new SceneObject(ref);
       APP.world.scene.add(labelEntity.obj);

@@ -1,5 +1,5 @@
 import { Object3D, Vector3 } from "three";
-import { roomPropertiesReader, TranslationProperties } from "../utils/rooms-properties";
+import { roomPropertiesReader, Translation } from "../utils/rooms-properties";
 import { AElement } from "aframe";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { FixedText } from "../prefabs/fixed-panel";
@@ -21,7 +21,7 @@ export class PresentationSystem {
   panelRef: number | null;
   allowed: boolean;
   presenterBorders: number[];
-  properties: TranslationProperties;
+  properties: Translation;
   mylanguage: voxLanugages | null;
   active: boolean;
 
@@ -35,8 +35,7 @@ export class PresentationSystem {
   }
 
   Init() {
-    this.allowed =
-      roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.conversation!.type === "presentation";
+    this.allowed = roomPropertiesReader.AllowPresentation;
 
     if (!this.allowed) {
       console.warn("Room not in presentation mode");
@@ -45,8 +44,8 @@ export class PresentationSystem {
 
     APP.scene!.addEventListener("toggle_translation", this.ToggleSubtitles);
     this.peerId = APP.dialog._clientId;
-    this.properties = roomPropertiesReader.transProps;
-    this.presenterBorders = this.properties.conversation?.data!;
+    this.properties = roomPropertiesReader.roomProps.translations[0];
+    this.presenterBorders = this.properties.type_data;
     this.avatarObj = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
     this.mylanguage = "english";
 
@@ -101,8 +100,8 @@ export class PresentationSystem {
   }
 
   ShowPresenterPanel() {
-    const pos = this.properties.panel!.data!;
-    const eid = renderAsEntity(APP.world, FixedText({ pos }));
+    const pos = this.properties.panel_data;
+    const eid = renderAsEntity(APP.world, FixedText(pos));
     this.panelObj = APP.world.eid2obj.get(eid) as Object3D;
     this.panelObj.rotation.set(0, degToRad(180), 0);
     console.log("rendering panel");

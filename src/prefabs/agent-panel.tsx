@@ -5,7 +5,6 @@ import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { TextButton3D, BUTTON_TYPES, StaticButton3D } from "./button3D";
 import { IconButton } from "./icon-button";
-import { nextIcon, prevIcon, resetIcon } from "./tutorial-panels";
 
 const panelTexture = textureLoader.load(nametagSrc);
 
@@ -91,7 +90,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
         width={buttonHeight}
         height={buttonHeight}
         ratio={1}
-        image={nextIcon}
+        image={"nextIcon"}
       />
 
       {/* <IconButton
@@ -194,7 +193,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           width={buttonHeight}
           height={buttonHeight}
           ratio={1}
-          image={resetIcon}
+          image={"resetIcon"}
         />
         <StaticButton3D
           ref={nextRef}
@@ -205,7 +204,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           width={buttonHeight}
           height={buttonHeight}
           ratio={1}
-          image={nextIcon}
+          image={"nextIcon"}
         />
 
         <StaticButton3D
@@ -217,7 +216,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           width={buttonHeight}
           height={buttonHeight}
           ratio={1}
-          image={prevIcon}
+          image={"prevIcon"}
         />
 
         <entity

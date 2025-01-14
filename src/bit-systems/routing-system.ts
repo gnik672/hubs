@@ -1,6 +1,6 @@
 import { Color, DiscreteInterpolant, Material, Mesh, Object3D, Vector, Vector2, Vector3 } from "three";
 import VirtualAgent, { avatarDirection, avatarPos, virtualAgent } from "./agent-system";
-import { NavigationProperties, PropertyType, roomPropertiesReader } from "../utils/rooms-properties";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 import { element, node, number, object } from "prop-types";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { removeEntity } from "bitecs";
@@ -22,6 +22,14 @@ export interface Navigation {
   instructions: Array<Record<string, any>>;
   knowledge: string;
   valid: boolean;
+}
+
+export interface NavigationProperties {
+  targets: { name: string; position: number[] }[];
+  dimensions: [number, number, number, number];
+  polygon: number[][];
+  obstacles: number[][][];
+  objects: { name: string; position: number[] }[];
 }
 
 interface RoomObject {
@@ -356,7 +364,13 @@ export class NavigationSystem {
       return;
     }
 
-    this.navProps = roomPropertiesReader.navProps;
+    const filename = roomPropertiesReader.roomProps.navigations[0].filename;
+
+    const response = await fetch(`${roomPropertiesReader.serverURL}/file/${filename}`, { method: "GET" });
+    if (!response.ok) throw new Error("Response not OK");
+    const responseProperties = (await response.json()) as NavigationProperties;
+
+    this.navProps = responseProperties;
     this.nodes = [];
     this.targetName = {};
     this.obstacles = [];

@@ -1,4 +1,5 @@
 import { setLocale } from "../utils/i18n";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 import { presentationSystem } from "./presentation-system";
 import { translationSystem } from "./translation-system";
 
@@ -130,6 +131,7 @@ export function UpdateLanguage(newLanguage: voxLanugages) {
   selectedLanguage = newLanguage;
   translationSystem.mylanguage = selectedLanguage;
   presentationSystem.mylanguage = selectedLanguage;
+  roomPropertiesReader.language = selectedLanguage;
   // APP.scene!.emit("language_updated", { language: selectedLanguage });
 
   APP.store.update({ profile: { language: GetSelectedLanguage().value } });

@@ -90,7 +90,7 @@ AFRAME.registerComponent("text", {
     this.troikaTextMesh = new Text();
 
     this.troikaTextMesh.material.toneMapped = false;
-    this.troikaTextMesh.font = "https://kontopoulosdm.github.io/manrope.ttf";
+    this.troikaTextMesh.font = "https://repo.vox.lab.synelixis.com/file/manrope.ttf";
     this.el.setObject3D("text", this.troikaTextMesh);
   },
 
@@ -114,7 +114,7 @@ AFRAME.registerComponent("text", {
     mesh.depthOffset = data.depthOffset || 0;
     mesh.direction = data.direction;
     mesh.fillOpacity = data.fillOpacity;
-    mesh.font = "https://kontopoulosdm.github.io/manrope.ttf";
+    mesh.font = "https://repo.vox.lab.synelixis.com/file/manrope.ttf";
     mesh.fontSize = data.fontSize;
     mesh.letterSpacing = data.letterSpacing || 0;
     mesh.clipRect = data.clipRect;

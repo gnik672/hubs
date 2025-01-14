@@ -1,122 +1,101 @@
-import { string } from "prop-types";
-import { EventEmitter } from "eventemitter3";
-import { ArrayVec2, ArrayVec3 } from "./jsx-entity";
-import { keyboardDebuggingBindings } from "../systems/userinput/bindings/keyboard-debugging";
+import { languageCodes, voxLanugages } from "../bit-systems/localization-system";
 
-interface RoomDescription {
-  room: string;
-  id: Array<string>;
+interface Properties {
+  name: "lobby" | "conference_room" | "tradeshows";
+  id?: string;
+  labels: Label[];
+  maps: Map[];
+  navigations: { filename: string }[];
+  translations: Translation[];
+  tutorials: Tutorial[];
+  congrats: TutorialMaterials[];
+  agent: boolean;
+  help: HelpSlide[];
 }
 
-interface RoomProperties {
-  room: string;
-  id: Array<string>;
-  agent: Array<string>;
-  translation: TranslationProperties;
-  navigation: NavigationProperties;
-  map: MapProperties;
-  tutorial: TutorialProperties;
-  help: HelpProperties;
-  labels: Array<LabelProperties>;
-  HubID?: string;
-}
-
-interface TutorialProperties {
-  allow: Array<string>;
-  slides?: number;
-  congrats_slides?: Array<string>;
-  position?: ArrayVec3;
-  rotation?: ArrayVec3;
-  ratio?: number;
-  type?: "fixed" | "moving";
-}
-
-interface HelpProperties {
-  allow: Array<string>;
-  slides?: number;
-  nav?: Array<number>;
-  no_nav?: Array<number>;
-  ratio?: number;
-}
-
-export interface NavigationProperties {
-  allow: Array<string>;
-  targets?: Array<{ name: string; position: [number, number] }>;
-  dimensions?: [number, number, number, number];
-  polygon?: Array<[number, number]>;
-  obstacles?: Array<Array<[number, number]>>;
-  objects?: Array<{ name: string; position: [number, number] }>;
-}
-
-interface MapProperties {
-  allow: Array<string>;
-  image_ratio?: number;
-  scale?: number;
-  room_size?: ArrayVec2;
-}
-
-export interface TranslationProperties {
-  allow: Array<string>;
-  conversation?: { type: "bubble" | "duo" | "presentation"; data?: Array<number> };
-  spatiality?: {
-    type: "borders" | "room";
-    data?: Array<Array<number>>;
-  };
-  panel?: {
-    type: "avatar" | "fixed";
-    data?: [number, number, number];
-  };
-}
-
-interface LabelProperties {
+export interface Label {
   name: string;
-  position: ArrayVec3;
-  rotation: ArrayVec3;
   scale: number;
   ratio: number;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  filename: string;
 }
 
-export enum PropertyType {
-  ROOM = "https://kontopoulosdm.github.io/room_properties.json",
-  MAP = "https://kontopoulosdm.github.io/maps.json"
+export interface Tutorial {
+  name?: "lobby" | "conference_room" | "tradeshows";
+  position: number[];
+  rotation: number[];
+  type: "moving" | "fixed";
+  scale: number;
+  ratio: number;
+  tutorialSlides: TutorialSlide[];
+  tutorialMaterials: TutorialSlide[];
 }
+
+export interface TutorialMaterials {
+  index: number;
+  filename: string;
+}
+
+export interface TutorialSlide {
+  index: number;
+  name: string;
+  filename: string;
+}
+
+export interface HelpSlide {
+  index: number;
+  ratio: number;
+  filename: string;
+}
+
+export interface Translation {
+  type: "bubble" | "presentation";
+  spatiality: "room";
+  panel: "avatar" | "fixed";
+  type_data: number[];
+  panel_data: [number, number, number];
+}
+
+interface Map {
+  size: number[];
+  scale: number;
+  ratio: number;
+  filename: string;
+}
+
+const invalidProps: Properties = {
+  name: "conference_room",
+  maps: [],
+  tutorials: [],
+  navigations: [],
+  help: [],
+  labels: [],
+  translations: [],
+  congrats: [],
+  agent: false
+};
 
 class RoomPropertiesReader {
-  roomProps: RoomProperties;
-  uknownRoom: RoomProperties;
-  navProps: NavigationProperties;
-  transProps: TranslationProperties;
-  mapProps: MapProperties;
-  tutorialProps: TutorialProperties;
-  helpProps: HelpProperties;
-  labelProps: LabelProperties[];
-  read: boolean;
-  url: string;
+  roomProps: Properties;
   serverURL: string;
+  propertiesURL: string;
   hubId: string;
-  redirectionHubId: string;
-  devMode: boolean;
+  read: boolean;
+  language: voxLanugages;
+  map: Map;
+  translation: Translation;
+  help: HelpSlide[];
+  tutorial: Tutorial;
+  labels: Label[];
 
   constructor() {
     this.read = false;
-
-    this.serverURL = "https://kontopoulosdm.github.io";
-    this.url = this.serverURL + "/properties.json";
-
-    this.uknownRoom = {
-      room: "unknown",
-      id: ["uknown"],
-      agent: [],
-      translation: { allow: [] },
-      navigation: { allow: [] },
-      map: { allow: [] },
-      tutorial: { allow: [] },
-      help: { allow: [] },
-      labels: []
-    };
+    this.serverURL = "https://repo.vox.lab.synelixis.com";
   }
 
-  async Read(HubID: string, reset: boolean): Promise<RoomProperties> {
+  async Read(HubID: string, reset: boolean): Promise<Properties> {
     if (reset) {
       this.read = false;
       APP.scene!.emit("room_properties_updated");
@@ -126,89 +105,24 @@ class RoomPropertiesReader {
     else {
       try {
         this.hubId = HubID;
-        console.log(`hubid: ${this.hubId}`);
-
-        const response = await fetch(this.url, { method: "GET" });
+        const response = await fetch(
+          `${this.serverURL}/properties/room/${this.hubId}?language=${languageCodes[this.language]}&user=user-c`,
+          { method: "GET" }
+        );
         if (!response.ok) throw new Error("Response not OK");
-        const roomArray = (await response.json()) as RoomProperties[];
-        console.log("room array", roomArray);
+        const responseProperties = ((await response.json()) as { message: Properties }).message;
+        this.roomProps = responseProperties;
 
-        for (let i = 0; i < roomArray.length; i++) {
-          for (let j = 0; j < roomArray[i].id.length; j++) {
-            if (roomArray[i].id[j] === HubID) {
-              this.setProps(roomArray[i], HubID);
-              this.read = true;
-              this.redirectionHubId = await this.GetRedirectionHubId();
-              break;
-            }
-          }
-        }
-
-        if (!this.read) {
-          this.setProps(this.uknownRoom, HubID);
-          this.read = true;
-        }
         APP.scene!.emit("properties_loaded");
-        return this.roomProps;
+
+        console.log(this.roomProps);
       } catch (error) {
-        this.setProps(this.uknownRoom, HubID);
-        APP.scene!.emit("properties_loaded");
+        this.roomProps = invalidProps;
+      } finally {
         this.read = true;
         return this.roomProps;
       }
     }
-  }
-
-  async GetRedirectionHubId(): Promise<string> {
-    const response = await fetch(this.serverURL.concat("/rooms.json"), { method: "GET" });
-    if (!response.ok) throw new Error("Response not OK");
-
-    const roomArrays = (await response.json()) as RoomDescription[];
-
-    let myHubIndex: number = -1;
-
-    console.log(this.AllowsNav);
-
-    for (let i = 0; i < roomArrays.length; i++) {
-      const room = roomArrays[i];
-      if (room.room === this.Room) {
-        console.log(`room is `, room.room, this.Room);
-        const hubIds = room["id"];
-        for (let j = 0; j < hubIds.length; j++) {
-          if (hubIds[j] === this.hubId) {
-            myHubIndex = j;
-            if (j === 0) this.devMode = true;
-            else this.devMode = false;
-            console.log(`myhubindex is `, myHubIndex);
-            break;
-          }
-        }
-        break;
-      }
-    }
-    let result: string[] = [];
-    if (myHubIndex >= 0)
-      roomArrays.forEach(room => {
-        const hubIds = room["id"];
-        if (room.room !== this.Room) result.push(hubIds[myHubIndex]);
-      });
-    else {
-      this.redirectionHubId = "";
-      this.devMode = false;
-    }
-
-    console.log(`results`, result);
-    return result[0];
-  }
-
-  setProps(roomProps: RoomProperties, HubID: string) {
-    this.roomProps = { ...roomProps, HubID: HubID };
-    this.navProps = roomProps.navigation;
-    this.transProps = roomProps.translation;
-    this.mapProps = roomProps.map;
-    this.tutorialProps = roomProps.tutorial;
-    this.helpProps = roomProps.help;
-    this.labelProps = roomProps.labels;
   }
 
   waitForProperties(): Promise<any> {
@@ -223,37 +137,26 @@ class RoomPropertiesReader {
     return this.read;
   }
 
-  AllowsProperty(propertyArray: Array<string>): boolean {
-    if (this.read) {
-      for (let i = 0; i < propertyArray.length; i++) {
-        if (this.roomProps.HubID! === propertyArray[i] || propertyArray[i] === "all") return true;
-      }
-      return false;
-    }
-    return false;
-  }
-
   get AllowsNav() {
-    return this.AllowsProperty(this.navProps.allow);
+    return this.roomProps.navigations.length !== 0;
   }
   get AllowsMap() {
-    return this.AllowsProperty(this.mapProps.allow);
+    return this.roomProps.maps.length !== 0;
   }
   get AllowTrans() {
-    return this.AllowsProperty(this.transProps.allow);
+    return this.roomProps.translations.length !== 0 && this.roomProps.translations[0].type !== "presentation";
+  }
+  get AllowPresentation() {
+    return this.roomProps.translations.length !== 0 && this.roomProps.translations[0].type === "presentation";
   }
   get AllowsAgent() {
-    return this.AllowsProperty(this.roomProps.agent);
+    return this.roomProps.agent;
   }
   get AllowsTutorial() {
-    return this.AllowsProperty(this.tutorialProps.allow);
+    return this.roomProps.tutorials.length !== 0;
   }
   get AllowsHelp() {
-    return this.AllowsProperty(this.helpProps.allow);
-  }
-
-  get Room() {
-    return this.roomProps.room.replace(" ", "_").toLowerCase();
+    return this.roomProps.help.length !== 0;
   }
 }
 
