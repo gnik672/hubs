@@ -2,6 +2,7 @@ import { EventEmitter } from "eventemitter3";
 import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID } from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 import { isIOS as detectIOS } from "./is-mobile";
+import { presentationSystem } from "../bit-systems/presentation-system";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isIOS = detectIOS();

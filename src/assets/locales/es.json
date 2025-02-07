@@ -97,11 +97,12 @@
   "more-menu.whats-new": "Novedades",
   "more-menu.you-signed-in-as": "Registrado como: {email}",
   "hud-panel.translate": "Traducir",
+  "hud-panel.ask": "Pregunta",
   "hud-panel.agent": "Traducir",
   "hud-panel.map": "Mapa",
   "hud-panel.lanugage": "Idioma",
   "hud-panel.mic": "Silenciar Micrófono",
-  "hud-panel.mic.muted ": "Activar Micrófono  ",
+  "hud-panel.mic.muted ": "Activar Micrófono",
   "change-hub.message": "Visitar Sala",
 
   "audio-debug-panel.audio-debug-avatar-title": "Avatar",

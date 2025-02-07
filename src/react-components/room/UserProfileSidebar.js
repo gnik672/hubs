@@ -40,6 +40,9 @@ export function UserProfileSidebar({
   showBackButton,
   onBack,
   onClose,
+  onProccess,
+  isPresenter,
+  hasRaisedHand,
   ...rest
 }) {
   const intl = useIntl();
@@ -124,6 +127,16 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.demote-button" defaultMessage="Demote" />
           </Button>
         )}
+        {isPresenter && hasRaisedHand && (
+          <Button
+            preset="accept"
+            onClick={() => {
+              onProccess(true);
+            }}
+          >
+            <FormattedMessage id="user-profile-sidebar.accept-button" defaultMessage="Accept Question" />
+          </Button>
+        )}
         <Button onClick={onToggleHidden}>
           {isHidden ? (
             <FormattedMessage id="user-profile-sidebar.unhide-button" defaultMessage="Unhide" />
@@ -168,5 +181,8 @@ UserProfileSidebar.propTypes = {
   onKick: PropTypes.func,
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  isPresenter: PropTypes.bool,
+  hasRaisedHand: PropTypes.bool,
+  onProccess: PropTypes.func
 };

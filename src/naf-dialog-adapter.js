@@ -342,6 +342,7 @@ export class DialogAdapter extends EventEmitter {
 
       switch (notification.method) {
         case "newPeer": {
+          if (presentationSystem.presenterState) APP.dialog.sendPresenterInfo(true);
           break;
         }
 
@@ -422,9 +423,36 @@ export class DialogAdapter extends EventEmitter {
           this._consumerStats[consumerId]["score"] = score;
         }
 
+        case "questionRequest": {
+          const { raiseHand, from } = notification.data;
+          console.log(`received question request from: ${from} with raise_hand: ${raiseHand}`);
+          if (!presentationSystem.allowed || !presentationSystem.presenterState) break;
+
+          presentationSystem.ProccessRaisedHandRequest(from, raiseHand);
+          break;
+        }
+
+        case "questionRequestReply": {
+          const { from, accept } = notification.data;
+          console.log(
+            `received question reply to request from: ${from} and the presenter is ${presentationSystem.presenter}. Accept: ${accept}`,
+            presentationSystem.allowed,
+            presentationSystem.raisedHand
+          );
+
+          if (!presentationSystem.allowed || !presentationSystem.raisedHand) break;
+          if (presentationSystem.presenter === from) {
+            presentationSystem.canUnmute = true;
+
+            console.log("Able to unmute now");
+          }
+          break;
+        }
+
         case "presenterInfo": {
-          const { presenterId } = notification.data;
-          presentationSystem.UpdatePresenterInfo(presenterId);
+          const { presenter } = notification.data;
+          console.log(presenter);
+          presentationSystem.UpdatePresenterInfo(presenter);
           break;
         }
 
@@ -935,6 +963,17 @@ export class DialogAdapter extends EventEmitter {
       return;
     }
 
+    const isAudience = presentationSystem.allowed && !presentationSystem.presenterState;
+
+    if (isAudience && enabled && !presentationSystem.canUnmute) {
+      console.log(`returning without enabling microphone cause in presenter mode and not the presenter`);
+      return;
+    }
+
+    if (isAudience && presentationSystem.canUnmute && !enabled) {
+      presentationSystem.CountMuteSec();
+    }
+
     if (enabled && !this.isMicEnabled) {
       this._micProducer.resume();
       this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
@@ -942,6 +981,7 @@ export class DialogAdapter extends EventEmitter {
       this._micProducer.pause();
       this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
     }
+    console.log(`enableMicrophone call with isMicEnabled: ${this.isMicEnabled} and enabled: ${enabled}`);
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
   }
@@ -1018,6 +1058,25 @@ export class DialogAdapter extends EventEmitter {
       console.error("sending presenter info failed");
     }
   }
+
+  async sendHandRequest(ask) {
+    try {
+      console.log(`sending raised hand request. Is raised: ${ask}`);
+      await this._protoo.request("sendQuestionRequest", { raiseHand: ask });
+    } catch (error) {
+      console.error("sending raised hand request failed", error);
+    }
+  }
+
+  async RespondToHandRequest(reply, to) {
+    try {
+      console.log(`replying to raised hand request. Accepted: ${reply}`);
+      await this._protoo.request("sendQuestionRequestReply", { accept: reply, to: to });
+    } catch (error) {
+      console.error("replying to raised hand request failed", error);
+    }
+  }
+
   async subscribeToPeer(clientId) {
     try {
       await this._protoo.request("transcriptionRequest", { to: clientId });

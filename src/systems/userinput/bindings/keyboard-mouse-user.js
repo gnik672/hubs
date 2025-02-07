@@ -978,5 +978,21 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising,
       priority: 10
     }
+  ],
+  [sets.rightCursorHoveringOnAgent]: [
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.cursor.right.scrollPanel },
+      xform: xforms.scale(0.12),
+      priority: 1
+    }
+  ],
+  [sets.leftCursorHoveringOnAgent]: [
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.cursor.left.scrollPanel },
+      xform: xforms.scale(0.03),
+      priority: 1
+    }
   ]
 });

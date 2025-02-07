@@ -41,3 +41,8 @@ sets.leftHandHoldingInteractable = "leftHandHoldingInteractable";
 sets.leftHandHoveringOnNothing = "leftHandHoveringOnNothing";
 sets.debugUserInput = "debugUserInput";
 sets.inspecting = "inspecting";
+
+sets.rightHandHoveringOnAgent = "rightHandHoveringOnAgent";
+sets.leftHandHoveringOnAgent = "leftHandHoveringOnAgent";
+sets.rightCursorHoveringOnAgent = "rightCursorHoveringOnAgent";
+sets.leftCursorHoveringOnAgent = "leftCursorHoveringOnAgent";

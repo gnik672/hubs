@@ -40,6 +40,7 @@ import { logger } from "./bit-systems/logging-system";
 import { labelOrganizer } from "./bit-systems/room-labels-system";
 import { presentationSystem } from "./bit-systems/presentation-system";
 import { translationSystem } from "./bit-systems/translation-system";
+import { VisitRoom } from "./bit-systems/progress-tracker";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -87,6 +88,7 @@ export default class SceneEntryManager {
     helpButton.Init(reset);
     labelOrganizer.Init();
     presentationSystem.Init();
+    VisitRoom();
 
     if (!reset) {
       // logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
@@ -167,9 +169,8 @@ export default class SceneEntryManager {
     setTimeout(() => this.store.bumpEntryCount(), 30000);
 
     this.scene.addState("entered");
-    await this.setupVRConferece(false);
-
     APP.mediaDevicesManager.micEnabled = !muteOnEntry;
+    await this.setupVRConferece(false);
   };
 
   whenSceneLoaded = callback => {

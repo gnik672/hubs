@@ -1,3 +1,4 @@
+import { presentationSystem } from "../bit-systems/presentation-system";
 import { SOUND_TOGGLE_MIC } from "../systems/sound-effects-system";
 
 const bindAllEvents = function (elements, events, f) {
@@ -52,6 +53,10 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onToggle: function () {
+    if (presentationSystem.allowed && !presentationSystem.canUnmute && !APP.dialog.isMicEnabled) {
+      console.log(`Ignore toggle mic event cause you are audience in conference`);
+      return;
+    }
     APP.mediaDevicesManager.toggleMic();
     if (!this.el.sceneEl.is("entered")) return;
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
@@ -62,6 +67,10 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onUnmute: function () {
+    if (presentationSystem.allowed && !presentationSystem.canUnmute) {
+      console.log(`Ignore toggle mic event cause you are audience in conference`);
+      return;
+    }
     APP.mediaDevicesManager.micEnabled = true;
   }
 });

@@ -48,7 +48,7 @@ export function FixedText(pos: [number, number, number]) {
       ref={textRef}
       text={{
         value: "",
-        color: "#ffffff",
+        color: "ffffff",
         textAlign: "center",
         anchorX: "center",
         anchorY: "middle",

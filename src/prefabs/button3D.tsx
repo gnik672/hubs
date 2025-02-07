@@ -30,6 +30,8 @@ export interface Button3DParams extends Attrs {
   labelRef?: Ref;
   holdable?: true;
   holdableButton?: true;
+  maxWidth?: number;
+  textSize?: number;
 }
 
 export interface ImageButton3DParams extends Attrs {
@@ -52,6 +54,8 @@ export function TextButton3D({
   texture = buttonTexture,
   name = "Button",
   type,
+  maxWidth = 10000,
+  textSize = 0.05,
   ...props
 }: Button3DParams) {
   const labelRef = createRef();
@@ -71,7 +75,15 @@ export function TextButton3D({
       <entity
         ref={labelRef}
         layers={1 << Layers.CAMERA_LAYER_UI}
-        text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
+        text={{
+          value: text,
+          color: "#000000",
+          textAlign: "center",
+          anchorX: "center",
+          anchorY: "middle",
+          maxWidth: maxWidth,
+          fontSize: textSize
+        }}
         position={[0, 0, 0.01]}
         name={`${name} Label`}
         lookatuser

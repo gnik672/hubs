@@ -94,6 +94,7 @@ import { helpButton } from "../bit-systems/help-system";
 import { logger } from "../bit-systems/logging-system";
 import { presentationSystem } from "../bit-systems/presentation-system";
 import { translationSystem } from "../bit-systems/translation-system";
+import { ProgressSystem } from "../bit-systems/progress-tracker";
 
 declare global {
   interface Window {
@@ -284,7 +285,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   //VOXSystem
   lookAtUserSystem(world);
-  AgentSystem(t);
+  AgentSystem(t, aframeSystems.userinput);
   FloorMapSystem(world);
   followFovSystem(dt);
   FlagPanelSystem(world);
@@ -301,6 +302,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   translationSystem.Tick();
   presentationSystem.Tick();
   logger.Tick();
+  ProgressSystem();
   textSystem(world);
 
   videoTextureSystem(world);

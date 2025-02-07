@@ -107,6 +107,8 @@ import { LanguagePopoverContainer } from "./room/LanguagePopoverContainer";
 import { TranslateButton } from "./room/TranslateButton";
 import { LanguageSetupModalContainer } from "./room/LanguageSetupModalContainer";
 import { HelpSpawnButton } from "./room/HelpSpawnButton";
+import { presentationSystem } from "../bit-systems/presentation-system";
+import { HandButton } from "./room/HandButton";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1648,6 +1650,7 @@ class UIRoot extends Component {
                               showNonHistoriedDialog={this.showNonHistoriedDialog}
                             />
                             <AgenSpawnButton scene={this.props.scene} />
+                            <HandButton />
                             <TranslateButton scene={this.props.scene} />
                             {/* <LanguagePopoverContainer scene={this.props.scene} /> */}
                             <MapSpawnButton scene={this.props.scene} />

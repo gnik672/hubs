@@ -1,5 +1,5 @@
 import { defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
-import { Object3D, Quaternion, Vector3 } from "three";
+import { Color, Object3D, Quaternion, Vector3 } from "three";
 import { Object3DTag, FixedTextPanel, Slice9 } from "../bit-components";
 import { HubsWorld } from "../app";
 import { Text } from "troika-three-text";
@@ -9,6 +9,7 @@ import { GetTextSize } from "../utils/interactive-panels";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
 import { oldTranslationSystem } from "./old-translation-system";
 import { voxLanugages } from "./localization-system";
+import { presentationSystem } from "./presentation-system";
 
 interface TranslateEventParams {
   id: string;
@@ -28,8 +29,6 @@ let fixedPanelRef: number | null;
 let textObj: Text | null;
 let textRef: number | null;
 
-let myLanguage: voxLanugages;
-
 export function FixedPanelSystem(world: HubsWorld) {
   panelEnterQuery(world).forEach(fixedPanelEid => {
     if (fixedPanelRef !== fixedPanelEid) {
@@ -39,9 +38,7 @@ export function FixedPanelSystem(world: HubsWorld) {
       textRef = FixedTextPanel.textRef[fixedPanelEid];
       textObj = world.eid2obj.get(textRef)! as Text;
       // textObj.addEventListener("synccomplete", updateTextSize);
-
-      // myLanguage = .mylanguage;
-      textObj.text = GreetingPhrases[myLanguage];
+      // textObj.text = GreetingPhrases[presentationSystem.mylanguage!];
     }
   });
   panelExitQuery(world).forEach(() => {
@@ -64,6 +61,10 @@ function onTranslationAvailable(event: any) {
 export function UpdateFixedPanelText(text: string) {
   if (!text) return;
   textObj!.text = text;
+}
+
+export function UpdatePanelColor(color: Color) {
+  if (color !== textObj!.color) textObj!.color = color;
 }
 
 function updateTextSize() {

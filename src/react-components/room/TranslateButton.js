@@ -12,10 +12,7 @@ const TranslateTooltipDescription = defineMessage({
 });
 
 export function TranslateButton({ scene }) {
-  const shouldExist =
-    roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.conversation.type === "presentation";
-
-  if (shouldExist) {
+  if (roomPropertiesReader.AllowPresentation) {
     const [active, setActive] = useState(presentationSystem.active);
     const intl = useIntl();
     const description = intl.formatMessage(TranslateTooltipDescription);
