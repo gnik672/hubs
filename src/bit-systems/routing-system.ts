@@ -960,6 +960,34 @@ export class NavigationSystem {
     avatarRig.updateMatrix();
   }
 
+  async SnapFromPoint(i: number, j: number) {
+    APP.scene!.emit("clear-scene");
+
+    const avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
+    const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
+    const avatarHeight = avatarRig.position.y;
+
+    avatarRig.rotation.set(0, degToRad(j), 0);
+    const nodeVec = this.nodes[i].vector;
+    avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+    avatarRig.updateMatrix();
+    await this.waitForSeconds(0.1);
+
+    // this.SnapPOV(i, j);
+  }
+
+  MoveToPoint(i: number, j: number) {
+    APP.scene!.emit("clear-scene");
+
+    const avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
+    const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
+    const avatarHeight = avatarRig.position.y;
+    avatarRig.rotation.set(0, degToRad(j), 0);
+    const nodeVec = this.nodes[i].vector;
+    avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+    avatarRig.updateMatrix();
+  }
+
   async CreateVLDataset() {
     const targets = ["conference room", "business room", "social area", "booth 1", "booth 2", "booth 3", "booth 4"];
 
@@ -976,12 +1004,14 @@ export class NavigationSystem {
       return degToRad(Math.round(Math.random() * (max - min) + min));
     };
 
-    for (let j = 6; j < headRotationSteps; j++) {
+    for (let j = 11; j < headRotationSteps; j++) {
+      if (j !== 11 && j !== 17) continue;
       const headRotation = j * headRotationInterval;
       avatarRig.rotation.set(0, degToRad(headRotation), 0);
       counter = -1;
 
       for (let i = 0; i < this.nodes.length; i++) {
+        if (j === 11 && i < 1353) continue;
         const node = this.nodes[i];
         const nodeVec = node.vector;
         avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
@@ -1006,7 +1036,7 @@ export class NavigationSystem {
         if ((i + 1) % 100 === 0) console.log(`Processed ${i + 1}/${this.nodes.length} nodes`);
       }
 
-      await this.waitForSeconds(60);
+      await this.waitForSeconds(10);
 
       // console.log(`exporting json file for angle: ${headRotation}`);
       // const serializedJSONData = JSON.stringify(instructions);

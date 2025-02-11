@@ -452,9 +452,11 @@ export default class VirtualAgent {
     if (changedMicStatus) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
       if (this.micStatus && !this.waitingForResponse) {
-        this.AskAgent();
+        navSystem.SnapPOV();
       } else {
-        stopRecording();
+        // stopRecording();
+        // navSystem.CreateVLDataset();
+        navSystem.SnapFromPoint(50, 0);
       }
     }
   }
