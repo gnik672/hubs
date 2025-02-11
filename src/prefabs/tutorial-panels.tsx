@@ -12,19 +12,18 @@ import { FollowFov } from "../bit-components";
 import { createTexture, loadTexture, loadTextureFromCache } from "../utils/load-texture";
 import { createKTX2Texture } from "../utils/create-basis-texture";
 import { preload } from "../utils/preload";
-import { roomPropertiesReader } from "../utils/rooms-properties";
+import { Label, roomPropertiesReader } from "../utils/rooms-properties";
 
-const tutorialSchema = "https://kontopoulosdm.github.io/tutorial_";
-export const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
-export const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
-export const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
-export const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
-export const closeIcon = `${roomPropertiesReader.serverURL}/assets/close_icon.png`;
+const url = "https://repo.vox.lab.synelixis.com";
+const prevIcon = `${url}/file/prev_icon.png`;
+const nextIcon = `${url}/file/next_icon.png`;
+const closeIcon = `${url}/file/close_icon.png`;
+const clickIcon = `${url}/file/click_icon.png`;
+const resetIcon = `${url}/file/reset_icon.png`;
 
 export async function MovingTutorialImagePanel(
-  slides: Array<string>,
+  slides: string[][][],
   cSlides: Array<string>,
-  gifSlides: Array<string>,
   pos: ArrayVec3,
   rot: ArrayVec3,
   ratio: number,
@@ -37,7 +36,9 @@ export async function MovingTutorialImagePanel(
   const resetRef = createRef();
   const clickRef = createRef();
 
-  const [slideEntities, cSlideEntities] = await TutorialPanelInit(slides, cSlides, gifSlides, ratio, scale);
+  const rads = rot.map(deg => degToRad(deg)) as ArrayVec3;
+
+  const [slideEntities, cSlideEntities] = await TutorialPanelInit(slides, cSlides, ratio, scale);
   return (
     <entity
       name="tutorialPanel"
@@ -50,7 +51,7 @@ export async function MovingTutorialImagePanel(
       }}
       ref={panelRef}
       position={pos}
-      rotation={rot}
+      rotation={rads}
       followFov={{ offset: [0, 0, -2] }}
     >
       {slideEntities}
@@ -105,9 +106,8 @@ export async function MovingTutorialImagePanel(
 }
 
 export async function StaticTutorialImagePanel(
-  slides: Array<string>,
+  slides: string[][][],
   cSlides: Array<string>,
-  gifSlides: Array<string>,
   pos: ArrayVec3,
   rot: ArrayVec3,
   ratio: number,
@@ -120,7 +120,9 @@ export async function StaticTutorialImagePanel(
   const resetRef = createRef();
   const clickRef = createRef();
 
-  const [slideEntities, cSlideEntities] = await TutorialPanelInit(slides, cSlides, gifSlides, ratio, scale);
+  const rads = rot.map(deg => degToRad(deg)) as ArrayVec3;
+
+  const [slideEntities, cSlideEntities] = await TutorialPanelInit(slides, cSlides, ratio, scale);
 
   return (
     <entity
@@ -134,7 +136,7 @@ export async function StaticTutorialImagePanel(
       }}
       ref={panelRef}
       position={pos}
-      rotation={rot}
+      rotation={rads}
     >
       {slideEntities}
       {cSlideEntities}
@@ -197,66 +199,60 @@ export async function StaticTutorialImagePanel(
   );
 }
 
-async function TutorialPanelInit(
-  slides: Array<string>,
-  congratsSlides: Array<string>,
-  gifSlides: Array<string>,
-  ratio: number,
-  scale: number
-) {
+async function TutorialPanelInit(chapters: string[][][], congratsSlides: Array<string>, ratio: number, scale: number) {
   const slideEntities = [] as Array<EntityDef>;
   const cSlideEntities = [] as Array<EntityDef>;
 
-  for (let index = 0; index < slides.length; index++) {
-    const slide = slides[index];
-    const gifSlide = gifSlides[index];
+  console.log(chapters);
 
-    const contentType = slide.includes(".gif") ? "image/gif" : "image/png";
-    const texture = await createTexture(contentType, slide);
+  for (let chapterIndex = 0; chapterIndex < chapters.length; chapterIndex++) {
+    const chapter = chapters[chapterIndex];
+    for (let slideIndex = 0; slideIndex < chapter.length; slideIndex++) {
+      const slide = chapter[slideIndex][0];
+      const texture = await createTexture("image/png", slide);
 
-    const slideEntity: EntityDef = (
-      <entity
-        name={`slide_${index}`}
-        image={{
-          texture: texture,
-          ratio: ratio,
-          projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
-          cacheKey: slide
-        }}
-        visible={false}
-        scale={[scale, scale, scale]}
-      ></entity>
-    );
+      console.log(`slide_${chapterIndex}_${slideIndex}`);
 
-    if (gifSlide.length > 0) {
-      const gifContentType = gifSlide.includes(".gif") ? "image/gif" : "image/png";
-      const gifTexture = await createTexture(gifContentType, gifSlide);
-
-      slideEntity.children.push(
+      const slideEntity: EntityDef = (
         <entity
-          name={`gif_slide_slide_${index}`}
+          name={`slide_${chapterIndex}_${slideIndex}`}
           image={{
-            texture: gifTexture,
+            texture: texture,
             ratio: ratio,
             projection: ProjectionMode.FLAT,
             alphaMode: AlphaMode.Blend,
             cacheKey: slide
           }}
-          visible={true}
-          position={[0, 0, 0.001]}
+          visible={false}
+          scale={[scale, scale, scale]}
         ></entity>
       );
-    }
 
-    slideEntities.push(slideEntity);
+      if (chapter[slideIndex].length > 1) {
+        const gifSlide = chapter[slideIndex][1];
+        const gifTexture = await createTexture("image/gif", gifSlide);
+        slideEntity.children.push(
+          <entity
+            name={`gif_slide_${chapterIndex}_${slideIndex}`}
+            image={{
+              texture: gifTexture,
+              ratio: ratio,
+              projection: ProjectionMode.FLAT,
+              alphaMode: AlphaMode.Blend,
+              cacheKey: slide
+            }}
+            visible={true}
+            position={[0, 0, 0.001]}
+          ></entity>
+        );
+      }
+
+      slideEntities.push(slideEntity);
+    }
   }
 
   for (let index = 0; index < congratsSlides.length; index++) {
     const cSlide = congratsSlides[index];
-    // const texture = textureLoader.load(cSlide, null, null, () => {
-    //   console.log(`error`);
-    // });
 
     const contentType = cSlide.includes(".gif") ? "image/gif" : "image/png";
     const texture = await createTexture(contentType, cSlide);
@@ -280,27 +276,21 @@ async function TutorialPanelInit(
   return [slideEntities, cSlideEntities];
 }
 
-export function SimpleImagePanel(
-  textureUrl: string,
-  name: string,
-  position: ArrayVec3,
-  rotation: ArrayVec3,
-  scale: number,
-  ratio: number
-) {
+export function SimpleImagePanel(item: Label) {
+  const radRot = item.rotation.map(deg => degToRad(deg)) as ArrayVec3;
   return (
     <entity
       name={`name`}
       image={{
-        texture: textureLoader.load(textureUrl),
-        ratio: ratio,
+        texture: textureLoader.load(item.filename),
+        ratio: item.ratio,
         projection: ProjectionMode.FLAT,
         alphaMode: AlphaMode.Blend,
-        cacheKey: TextureCache.key(textureUrl, 1)
+        cacheKey: TextureCache.key(item.filename, 1)
       }}
-      position={position}
-      scale={[scale, scale, 1]}
-      rotation={rotation}
+      position={item.position}
+      scale={[item.scale, item.scale, 1]}
+      rotation={radRot}
     ></entity>
   );
 }

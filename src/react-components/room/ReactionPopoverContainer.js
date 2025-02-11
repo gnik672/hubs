@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ReactionPopoverButton } from "./ReactionPopover";
 import { spawnEmojiInFrontOfUser, emojis } from "../../components/emoji";
 import { defineMessages, useIntl } from "react-intl";
+import { presentationSystem } from "../../bit-systems/presentation-system";
 
 const emojiLabels = defineMessages({
   smile: { id: "reaction-popover.emoji-label.smile", defaultMessage: "Smile" },
@@ -41,11 +42,7 @@ export function ReactionPopoverContainer({ scene, initialPresence }) {
   }));
 
   const onToggleHandRaised = useCallback(() => {
-    if (presence.hand_raised) {
-      window.APP.hubChannel.lowerHand();
-    } else {
-      window.APP.hubChannel.raiseHand();
-    }
+    presentationSystem.ToggleHand();
   }, [presence]);
 
   return <ReactionPopoverButton items={items} presence={presence} onToggleHandRaised={onToggleHandRaised} />;

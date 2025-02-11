@@ -21,12 +21,14 @@ export function AgentEntity() {
   const prevRef = createRef();
   const textRef = createRef();
   const navRef = createRef();
+  const suggestionRRef = createRef();
+  const suggestionLRef = createRef();
 
   return (
     <entity followFov={{ offset: [0, 0, -2] }}>
       <entity
         name="Agent"
-        agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef, navRef }}
+        agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef, navRef, suggestionRRef, suggestionLRef }}
         ref={agentRef}
         model={{ model: cloneModelFromCache(agentModelSrc).scene }}
         position={[0, 0, 0]}
@@ -58,6 +60,8 @@ export function AgentEntity() {
           clearRef={navRef}
           nextRef={nextRef}
           prevRef={prevRef}
+          suggestionL={suggestionLRef}
+          suggestionR={suggestionRRef}
         />
       </entity>
     </entity>

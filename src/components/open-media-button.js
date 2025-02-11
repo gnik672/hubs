@@ -2,10 +2,11 @@ import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUr
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
-import { translationSystem } from "../bit-systems/translation-system";
+import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { tutorialManager } from "../bit-systems/tutorial-system";
 import { logger } from "../bit-systems/logging-system";
 import { roomPropertiesReader } from "../utils/rooms-properties";
+import { IconTranslationDict } from "../bit-systems/localization-system";
 
 AFRAME.registerComponent("open-media-button", {
   schema: {
@@ -36,7 +37,7 @@ AFRAME.registerComponent("open-media-button", {
             if (url.hash && window.APP.hub.hub_id === hubId) {
               label = "go to";
             } else {
-              label = translationSystem.VisitButtonText;
+              label = IconTranslationDict["change-hub.message"];
               tutorialManager.changeRoomID = hubId;
             }
           }
@@ -46,7 +47,7 @@ AFRAME.registerComponent("open-media-button", {
     };
 
     this.onClick = async () => {
-      // if (this.label.getAttribute("text") === translationSystem.VisitButtonText)
+      // if (this.label.getAttribute("text") === oldTranslationSystem.VisitButtonText)
       //   logger.AddUiInteraction("visit_room", tutorialManager.changeRoomID);
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 

@@ -193,7 +193,7 @@ export class App {
     // These get overridden by environment-system but setting to the highly expected defaults to avoid any extra work
     renderer.physicallyCorrectLights = true;
     renderer.outputEncoding = sRGBEncoding;
-
+    renderer.localClippingEnabled = true;
     sceneEl.appendChild(renderer.domElement);
 
     const camera = new PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.05, 10000);

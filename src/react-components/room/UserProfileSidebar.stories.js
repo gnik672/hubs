@@ -21,6 +21,8 @@ export const AllPermissions = () => (
         canKick
         canMute
         canPromote
+        isPresenter
+        hasRaisedHand
       />
     }
   />

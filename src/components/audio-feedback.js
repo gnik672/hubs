@@ -3,7 +3,8 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
-import { translationSystem } from "../bit-systems/translation-system";
+import { oldTranslationSystem } from "../bit-systems/old-translation-system";
+import { IconTranslationDict } from "../bit-systems/localization-system";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -327,7 +328,7 @@ AFRAME.registerComponent("mic-button", {
       this.textEl.setAttribute(
         "text",
         "value",
-        active ? translationSystem.MicButtonText : translationSystem.UnmuteMicButtonText
+        active ? IconTranslationDict["hud-panel.mic"] : IconTranslationDict["hud-panel.mic.muted"]
       );
     }
   }

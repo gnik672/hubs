@@ -7,6 +7,7 @@ import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 import { useCan } from "./hooks/useCan";
 import { useRoomPermissions } from "./hooks/useRoomPermissions";
 import { useRole } from "./hooks/useRole";
+import { presentationSystem } from "../../bit-systems/presentation-system";
 
 export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
   const meta = presence.metas[presence.metas.length - 1];
@@ -14,7 +15,12 @@ export function userFromPresence(sessionId, presence, micPresences, mySessionId,
   if (micPresence && !voiceEnabled && !meta.permissions.voice_chat) {
     micPresence.muted = true;
   }
-  return { id: sessionId, isMe: mySessionId === sessionId, micPresence, ...meta };
+  return {
+    id: sessionId,
+    isMe: mySessionId === sessionId,
+    micPresence,
+    ...meta
+  };
 }
 
 function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
@@ -92,6 +98,7 @@ export function PeopleSidebarContainer({
   onClose
 }) {
   const people = usePeopleList(presences, mySessionId);
+
   const [selectedPersonId, setSelectedPersonId] = useState(null);
   const selectedPerson = people.find(person => person.id === selectedPersonId);
   const setSelectedPerson = useCallback(
@@ -129,6 +136,8 @@ export function PeopleSidebarContainer({
       );
     }
   }
+
+  console.log(people);
 
   return (
     <PeopleListContainer onSelectPerson={setSelectedPerson} onClose={onClose} hubChannel={hubChannel} people={people} />

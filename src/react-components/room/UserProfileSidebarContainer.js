@@ -4,6 +4,7 @@ import { PromoteClientModal } from "./PromoteClientModal";
 import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
+import { presentationSystem } from "../../bit-systems/presentation-system";
 
 export function UserProfileSidebarContainer({
   user,
@@ -99,6 +100,24 @@ export function UserProfileSidebarContainer({
     }
   }, [performConditionalSignIn, hubChannel, userId, onClose, onBack]);
 
+  const [presenter, setPresenter] = useState(false);
+  const [raisedHand, setRaisedHand] = useState(false);
+
+  useEffect(() => {
+    setPresenter(presentationSystem.allowed && presentationSystem.presenterState);
+  }, [user, presenter, hubChannel]);
+
+  useEffect(() => {
+    setRaisedHand(presentationSystem.questionQueue.includes(user.id));
+  }, [raisedHand, presenter, user, hubChannel]);
+
+  const proccessHand = useCallback(
+    result => {
+      presentationSystem.RespondToHandRequest(result, userId);
+    },
+    [userId, setRaisedHand, setPresenter]
+  );
+
   return (
     <UserProfileSidebar
       userId={user.id}
@@ -122,6 +141,9 @@ export function UserProfileSidebarContainer({
       onClose={onClose}
       onBack={onBack}
       hasMicPresence={hasMicPresence}
+      onProccess={proccessHand}
+      isPresenter={presenter}
+      hasRaisedHand={raisedHand}
     />
   );
 }

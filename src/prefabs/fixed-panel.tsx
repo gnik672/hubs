@@ -38,7 +38,7 @@ export function FixedPanel({ pos }: FixedPanelParams) {
     </entity>
   );
 }
-export function FixedText({ pos }: FixedPanelParams) {
+export function FixedText(pos: [number, number, number]) {
   const textRef = createRef();
   return (
     <entity
@@ -48,7 +48,7 @@ export function FixedText({ pos }: FixedPanelParams) {
       ref={textRef}
       text={{
         value: "",
-        color: "#ffffff",
+        color: "ffffff",
         textAlign: "center",
         anchorX: "center",
         anchorY: "middle",

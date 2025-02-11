@@ -3,6 +3,8 @@ import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
 import { MediaDevices } from "./utils/media-devices-utils";
+import { presentationSystem } from "./bit-systems/presentation-system";
+import { translationSystem } from "./bit-systems/translation-system";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -340,12 +342,14 @@ export class DialogAdapter extends EventEmitter {
 
       switch (notification.method) {
         case "newPeer": {
+          if (presentationSystem.presenterState) APP.dialog.sendPresenterInfo(true);
           break;
         }
 
         case "peerClosed": {
           const { peerId } = notification.data;
           this.closePeer(peerId);
+          translationSystem.ClosePeer(peerId);
 
           break;
         }
@@ -417,6 +421,57 @@ export class DialogAdapter extends EventEmitter {
 
           this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
           this._consumerStats[consumerId]["score"] = score;
+        }
+
+        case "questionRequest": {
+          const { raiseHand, from } = notification.data;
+          console.log(`received question request from: ${from} with raise_hand: ${raiseHand}`);
+          if (!presentationSystem.allowed || !presentationSystem.presenterState) break;
+
+          presentationSystem.ProccessRaisedHandRequest(from, raiseHand);
+          break;
+        }
+
+        case "questionRequestReply": {
+          const { from, accept } = notification.data;
+          console.log(
+            `received question reply to request from: ${from} and the presenter is ${presentationSystem.presenter}. Accept: ${accept}`,
+            presentationSystem.allowed,
+            presentationSystem.raisedHand
+          );
+
+          if (!presentationSystem.allowed || !presentationSystem.raisedHand) break;
+          if (presentationSystem.presenter === from) {
+            presentationSystem.canUnmute = true;
+
+            console.log("Able to unmute now");
+          }
+          break;
+        }
+
+        case "presenterInfo": {
+          const { presenter } = notification.data;
+          console.log(presenter);
+          presentationSystem.UpdatePresenterInfo(presenter);
+          break;
+        }
+
+        case "transcAvailable": {
+          const { message, language, from } = notification.data;
+          presentationSystem.ProccessAvailableTranscription(message, language, from);
+          translationSystem.ProccessIncomingTranscription(message, language, from);
+          break;
+        }
+
+        case "newTranscSub": {
+          const { from } = notification.data;
+          translationSystem.AddSubscriber(from);
+          break;
+        }
+        case "removeTranscSub": {
+          const { from } = notification.data;
+          translationSystem.RemoveSubscriber(from);
+          break;
         }
       }
     });
@@ -908,6 +963,17 @@ export class DialogAdapter extends EventEmitter {
       return;
     }
 
+    const isAudience = presentationSystem.allowed && !presentationSystem.presenterState;
+
+    if (isAudience && enabled && !presentationSystem.canUnmute) {
+      console.log(`returning without enabling microphone cause in presenter mode and not the presenter`);
+      return;
+    }
+
+    if (isAudience && presentationSystem.canUnmute && !enabled) {
+      presentationSystem.CountMuteSec();
+    }
+
     if (enabled && !this.isMicEnabled) {
       this._micProducer.resume();
       this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
@@ -915,6 +981,7 @@ export class DialogAdapter extends EventEmitter {
       this._micProducer.pause();
       this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
     }
+    console.log(`enableMicrophone call with isMicEnabled: ${this.isMicEnabled} and enabled: ${enabled}`);
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
   }
@@ -980,5 +1047,59 @@ export class DialogAdapter extends EventEmitter {
       second: "numeric"
     });
     this.scene.emit("rtc_event", { level, tag, time, msg: msgFunc() });
+  }
+
+  async sendPresenterInfo(isPresenter) {
+    const newPresenter = isPresenter ? this._clientId : "";
+    try {
+      await this._protoo.request("sendPresenterInfo", { presenterId: newPresenter });
+      console.log(`sending presenter info to sever ${newPresenter}`);
+    } catch (error) {
+      console.error("sending presenter info failed");
+    }
+  }
+
+  async sendHandRequest(ask) {
+    try {
+      console.log(`sending raised hand request. Is raised: ${ask}`);
+      await this._protoo.request("sendQuestionRequest", { raiseHand: ask });
+    } catch (error) {
+      console.error("sending raised hand request failed", error);
+    }
+  }
+
+  async RespondToHandRequest(reply, to) {
+    try {
+      console.log(`replying to raised hand request. Accepted: ${reply}`);
+      await this._protoo.request("sendQuestionRequestReply", { accept: reply, to: to });
+    } catch (error) {
+      console.error("replying to raised hand request failed", error);
+    }
+  }
+
+  async subscribeToPeer(clientId) {
+    try {
+      await this._protoo.request("transcriptionRequest", { to: clientId });
+      console.log("requesting transcription successfull");
+    } catch (error) {
+      console.error("requesting transcription failed");
+    }
+  }
+  async unsubscribeFromPeer(clientId) {
+    try {
+      await this._protoo.request("stopTranscriptionRequest", { to: clientId });
+      console.log("end transcription successfull");
+    } catch (error) {
+      console.error("end transcription failed");
+    }
+  }
+
+  async SendTranscription(message, language) {
+    try {
+      await this._protoo.request("sendTranscription", { message: message, language: language });
+      console.log("transcription sent");
+    } catch (error) {
+      console.error("transcription sending failed");
+    }
   }
 }

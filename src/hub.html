@@ -773,6 +773,7 @@
         <!-- Avatar Rig -->
         <a-entity id="avatar-rig" ik-root player-info set-yxz-order periodic-full-syncs visible="false"
             tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot">
+
             <a-entity id="avatar-pov-node" class="camera" personal-space-bubble="radius: 0.4;" rotation
                 pitch-yaw-rotator set-yxz-order position="0 1.6 0">
                 <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
@@ -783,6 +784,7 @@
 
             <a-entity id="player-hud" hud-controller="head: #viewing-camera;" vr-mode-toggle-class="class: ui"
                 layers="mask: 768; recursive: true;" vr-mode-toggle-visibility vr-mode-toggle-playing__hud-controller>
+
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;" rotation="30 0 0">
                     <a-entity class="leave-btn" position="0 0 0" scale="0.7 0.7 0.7" leave-room-button
                         is-remote-hover-target tags="singleActionButton: true;">
@@ -792,12 +794,16 @@
                         </a-entity>
                     </a-entity>
                 </a-entity>
+
                 <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;"
                     rotation="30 0 0">
+
                     <a-entity sprite="name: Background.png" scale="0.2 0.08 1" position="-0.34 -0.005 0" class="hud bg"
                         visible="false"></a-entity>
+
                     <a-entity id="hud-presence-count" text="value: ; textAlign:center;" position="-0.30 -0.005 0.001"
                         visible="false"></a-entity>
+
                     <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target
                         tags="singleActionButton: true;" visible="false">
                         <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
@@ -805,6 +811,7 @@
                                 position="0 0 0.001"></a-entity>
                         </a-entity>
                     </a-entity>
+
                     <a-entity visible="false" vr-mode-toggle-visibility id="hud-tooltip" position="-0.2 -0.2 0"
                         rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                         <a-entity text="value: ; textAlign:center; fontSize: 0.06; outlineWidth: 2%;"
@@ -818,7 +825,8 @@
                     image: spawn.png;
                     hoverImage: spawn-hover.png;
                     disabledImage: spawn-disabled.png;" scale="0.2 0.2 0.2" position="0 0 0.005" class="hud spawn"
-                        visible="false"></a-entity>
+                        visible="false">
+                    </a-entity>
 
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
@@ -829,7 +837,8 @@
                         activeImage: pen_on.png;
                         activeHoverImage: pen_on-hover.png;
                         disabledImage: pen_off-disabled.png;" scale="0.1 0.1 0.1" position="0.17 0 0.001"
-                        class="hud penhud" visible="false"></a-entity>
+                        class="hud penhud" visible="false">
+                    </a-entity>
 
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                             tooltip: #hud-tooltip;
@@ -840,7 +849,8 @@
                             activeImage: camera_on.png;
                             activeHoverImage: camera_on-hover.png;
                             disabledImage: camera_off-disabled.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
-                        class="hud camera-btn" visible="false"></a-entity>
+                        class="hud camera-btn" visible="false">
+                    </a-entity>
 
                     <!-- <a-entity is-remote-hover-target tags="singleActionButton: true" sprite flag-button="
                                 tooltip: #hud-tooltip;
@@ -859,12 +869,13 @@
                         hoverImage: agent_off-hover.png;
                         activeImage: agent_on.png;
                         activeHoverImage: agent_on-hover.png;
-                        disabledImage: _.png;" scale="0.1 0.1 0.1" position="-0.17 0 0.001"
-                        class="hud agent-btn"></a-entity>
+                        disabledImage: _.png;" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="hud agent-btn">
+                    </a-entity>
 
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite
                         mic-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic;"
-                        scale="0.1 0.1 0.1" position="-0.05 0 0.001" class="hud mic"></a-entity>
+                        scale="0.1 0.1 0.1" position="-0.05 0 0.001" class="hud mic">
+                    </a-entity>
 
 
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
@@ -875,8 +886,8 @@
                         hoverImage: map_off-hover.png;
                         activeImage: map_on.png;
                         activeHoverImage: map_on-hover.png;
-                        disabledImage: _.png;" scale="0.1 0.1 0.1" position="0.06 0 0.001"
-                        class="hud map-btn"></a-entity>
+                        disabledImage: _.png;" scale="0.1 0.1 0.1" position="0.06 0 0.001" class="hud map-btn">
+                    </a-entity>
 
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                                 tooltip: #hud-tooltip;
@@ -887,7 +898,9 @@
                                 activeImage: help_on.png;
                                 activeHoverImage: help_on-hover.png;
                                 disabledImage: _.png;" scale="0.1 0.1 0.1" position="0.17 0 0.001"
-                        class="hud help-btn"></a-entity>
+                        class="hud help-btn">
+                    </a-entity>
+
                     <!-- <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                                 tooltip: #hud-tooltip;
                                 tooltipText: hud-panel.task;
@@ -897,7 +910,9 @@
                                 activeImage: task_on.png;
                                 activeHoverImage: task_on-hover.png;
                                 disabledImage: _.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
-                        class="hud task-btn"></a-entity> -->
+                        class="hud task-btn">
+                    </a-entity> -->
+
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.translate;
@@ -906,8 +921,19 @@
                         hoverImage: translate_off-hover.png;
                         activeImage: translate_on.png;
                         activeHoverImage: translate_on-hover.png;
-                        disabledImage: none.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
-                        class="hud trans-btn"></a-entity>
+                        disabledImage: none.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="hud trans-btn">
+                    </a-entity>
+
+                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
+                        tooltip: #hud-tooltip;
+                        tooltipText: hud-panel.ask;
+                        activeTooltipText: Ask;
+                        image: ask_off.png;
+                        hoverImage: ask_off-hover.png;
+                        activeImage: ask_on.png;
+                        activeHoverImage: ask_on-hover.png;
+                        disabledImage: none.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="hud ask-btn">
+                    </a-entity>
 
                 </a-entity>
             </a-entity>

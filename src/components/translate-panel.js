@@ -5,8 +5,9 @@
  */
 
 import { Vector3 } from "three";
-import { translationSystem } from "../bit-systems/translation-system";
+import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { roomPropertiesReader } from "../utils/rooms-properties";
+import { selectedLanguage } from "../bit-systems/localization-system";
 
 const PANEL_PADDING = 0.05;
 
@@ -15,9 +16,12 @@ AFRAME.registerComponent("translate-panel", {
     this.translateText = this.el.querySelector(".translate-text").object3D;
     this.translateBackground = this.el.querySelector(".translate-background").object3D;
 
+    this.onShowPanel = this.onShowPanel.bind(this);
+    this.onHidePanel = this.onHidePanel.bind(this);
+    this.onUpdatePanel = this.onUpdatePanel.bind(this);
+
     this.updateTextSize = this.updateTextSize.bind(this);
     this.fortmatLines = this.fortmatLines.bind(this);
-    this.onTargetUpdate = this.onTargetUpdate.bind(this);
 
     NAF.utils
       .getNetworkedEntity(this.el)
@@ -30,27 +34,41 @@ AFRAME.registerComponent("translate-panel", {
     this.size = new Vector3();
     this.preformatText;
     this.formattedText;
+
     this.targetLanguage = false;
-
-    NAF.utils
-      .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        this.owner = networkedEl.components.networked.data.owner;
-      })
-      .catch(error => {
-        console.error(error);
-      });
-
-    this.onAvailableTranslation = ({ detail: response }) => {
-      if (response.id === this.owner) this.UpdateText(response.text);
-    };
-
     this.el.object3D.visible = false;
     await roomPropertiesReader.waitForProperties();
-    this.panelAllowed = roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.panel.type === "avatar";
-    if (this.panelAllowed) {
-      this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
-    }
+
+    this.allowed = roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.panel.type === "avatar";
+  },
+
+  play() {
+    this.el.sceneEl.addEventListener("show_avatar_panel", this.onShowPanel);
+    this.el.sceneEl.addEventListener("hide_avatar_panel", this.onHidePanel);
+    this.el.sceneEl.addEventListener("update_avatar_panel", this.onUpdatePanel);
+  },
+  pause() {
+    this.el.sceneEl.removeEventListener("show_avatar_panel", this.onShowPanel);
+    this.el.sceneEl.removeEventListener("hide_avatar_panel", this.onHidePanel);
+    this.el.sceneEl.removeEventListener("update_avatar_panel", this.onUpdatePanel);
+  },
+
+  onShowPanel({ detail: peerId }) {
+    if (peerId !== this.owner || this.el.object3D.visible) return;
+
+    this.el.sceneEl.addEventListener("translation_available", this.onAvailableTranslation);
+    this.UpdateText(GreetingPhrases[selectedLanguage]);
+    this.el.object3D.visible = true;
+  },
+
+  onHidePanel({ detail: peerId }) {
+    if (peerId !== this.owner || !this.el.object3D.visible) return;
+
+    this.el.sceneEl.removeEventListener("translation_available", this.onAvailableTranslation);
+    this.el.object3D.visible = false;
+  },
+  onUpdatePanel({ detail: { id: peerId, message: message } }) {
+    if (peerId === this.owner) this.UpdateText(message);
   },
 
   UpdateText(text) {
@@ -77,18 +95,6 @@ AFRAME.registerComponent("translate-panel", {
     const maxStep = 7;
     const step = line_size / 2 > maxStep ? maxStep : line_size > 3 ? Math.ceil(line_size / 2) : line_size;
     this.formattedText = lines.map((word, index) => (index % step === step - 1 ? word + "\n" : word)).join(" ");
-  },
-
-  onTargetUpdate({ detail: updates }) {
-    if (updates.id !== this.owner) return;
-
-    const show = updates.type === "add";
-    if (show && !this.el.object3D.visible) {
-      this.el.sceneEl.addEventListener("translation_available", this.onAvailableTranslation);
-      this.UpdateText(GreetingPhrases[translationSystem.mylanguage]);
-    } else if (!show) this.el.sceneEl.removeEventListener("translation_available", this.onAvailableTranslation);
-
-    this.el.object3D.visible = show;
   }
 });
 

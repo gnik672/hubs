@@ -5,11 +5,12 @@ import { AxesHelper, Object3D, Vector2, Vector3 } from "three";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { AElement, AScene } from "aframe";
-import { languageCodes, translationSystem } from "./translation-system";
 import { HubsWorld } from "../app";
 import { radToDeg } from "three/src/math/MathUtils";
 import { logger } from "./logging-system";
 import { faSlash } from "@fortawesome/free-solid-svg-icons";
+import { oldTranslationSystem } from "./old-translation-system";
+import { languageCodes } from "./localization-system";
 
 const mapQuery = defineQuery([FloorMap]);
 const enterMapQuery = enterQuery(mapQuery);
@@ -66,20 +67,26 @@ class FloorMapClass {
     this.userPov = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
     this.userObj = (document.querySelector("#avatar-rig")! as AElement).object3D;
     this.roomSize = new Vector2(
-      roomPropertiesReader.mapProps.room_size![0],
-      roomPropertiesReader.mapProps.room_size![1]
+      roomPropertiesReader.roomProps.maps[0].size![0],
+      roomPropertiesReader.roomProps.maps[0].size![1]
     );
-    this.imageRatio = roomPropertiesReader.mapProps.image_ratio!;
-    this.scale = roomPropertiesReader.mapProps.scale!;
+    this.imageRatio = roomPropertiesReader.roomProps.maps[0].ratio!;
+    this.scale = roomPropertiesReader.roomProps.maps[0].scale!;
 
     this.Instantiate();
   }
 
   Instantiate() {
-    const language = translationSystem.mylanguage as "english" | "spanish" | "german" | "dutch" | "greek" | "italian";
+    const language = oldTranslationSystem.mylanguage as
+      | "english"
+      | "spanish"
+      | "german"
+      | "dutch"
+      | "greek"
+      | "italian";
     const languageCode = languageCodes[language];
 
-    const mapImage = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/${languageCode}_map.png`;
+    const mapImage = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.roomProps.maps[0].filename}`;
     this.entityRef = renderAsEntity(APP.world, FloorMapPanel(this.imageRatio, mapImage, this.scale));
     this.entityObj = APP.world.eid2obj.get(this.entityRef)!;
     this.imageSize = this.GetObjSize(this.entityObj);

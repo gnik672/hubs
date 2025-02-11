@@ -5,7 +5,6 @@ import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { TextButton3D, BUTTON_TYPES, StaticButton3D } from "./button3D";
 import { IconButton } from "./icon-button";
-import { nextIcon, prevIcon, resetIcon } from "./tutorial-panels";
 
 const panelTexture = textureLoader.load(nametagSrc);
 
@@ -34,6 +33,8 @@ interface InteractivePanelParams {
   clearRef: Ref;
   nextRef: Ref;
   prevRef: Ref;
+  suggestionR: Ref;
+  suggestionL: Ref;
 }
 
 export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, maxSlideCount }: PanelParams) {
@@ -91,7 +92,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
         width={buttonHeight}
         height={buttonHeight}
         ratio={1}
-        image={nextIcon}
+        image={"nextIcon"}
       />
 
       {/* <IconButton
@@ -139,7 +140,7 @@ export function SimplePanel({ panelRef, textRef, listenRef, navRef }: SimplePane
           position={[0, 0, 0.01]}
           ref={textRef}
           text={{
-            value: "This is aaa test",
+            value: "Simple panel: This should never be visible",
             color: "#000000",
             textAlign: "center",
             anchorX: "center",
@@ -173,7 +174,16 @@ export function SimplePanel({ panelRef, textRef, listenRef, navRef }: SimplePane
   );
 }
 
-export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef, textRef }: InteractivePanelParams) {
+export function InteractivePanel({
+  panelRef,
+  clearRef,
+  dotsRef,
+  nextRef,
+  prevRef,
+  textRef,
+  suggestionR,
+  suggestionL
+}: InteractivePanelParams) {
   const buttonScale = [0.4, 0.4, 0.4];
   const buttonHeight = 0.2;
 
@@ -194,7 +204,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           width={buttonHeight}
           height={buttonHeight}
           ratio={1}
-          image={resetIcon}
+          image={"resetIcon"}
         />
         <StaticButton3D
           ref={nextRef}
@@ -205,7 +215,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           width={buttonHeight}
           height={buttonHeight}
           ratio={1}
-          image={nextIcon}
+          image={"nextIcon"}
         />
 
         <StaticButton3D
@@ -217,7 +227,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           width={buttonHeight}
           height={buttonHeight}
           ratio={1}
-          image={prevIcon}
+          image={"prevIcon"}
         />
 
         <entity
@@ -225,7 +235,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           position={[0, 0, 0.01]}
           ref={textRef}
           text={{
-            value: "This is aaaaaaaa test",
+            value: "Interactive panel: This should never be visible",
             color: "#000000",
             textAlign: "center",
             anchorX: "center",
@@ -234,6 +244,44 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
             maxWidth: 1
           }}
         />
+
+        <TextButton3D
+          name="suggestion_l"
+          text="Suggestion Left: This should never be visible"
+          ref={suggestionL}
+          position={[-0.4, 0.4, 0.01]}
+          width={1}
+          height={1}
+          maxWidth={0.4}
+          textSize={0.04}
+          type={BUTTON_TYPES.ACTION}
+        />
+        <TextButton3D
+          name="suggestion_r"
+          text="Suggestion Right: This should never be visible"
+          ref={suggestionR}
+          position={[0.4, 0.4, 0.01]}
+          width={1}
+          height={1}
+          maxWidth={0.4}
+          textSize={0.04}
+          type={BUTTON_TYPES.ACTION}
+        />
+
+        {/* <entity
+          name={`text`}
+          position={[0.3, -1, 0.01]}
+          ref={suggestionR}
+          text={{
+            value: "Suggestion Right: This should never be visible",
+            color: "#000000",
+            textAlign: "center",
+            anchorX: "center",
+            anchorY: "middle",
+            fontSize: 0.05,
+            maxWidth: 0.4
+          }}
+        /> */}
       </entity>
 
       <TextButton3D

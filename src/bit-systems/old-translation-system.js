@@ -6,15 +6,7 @@ import { FixedPanel, FixedText } from "../prefabs/fixed-panel";
 import { setLocale } from "../utils/i18n";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { degToRad } from "three/src/math/MathUtils";
-
-export const languageCodes = {
-  greek: "el",
-  english: "en",
-  spanish: "es",
-  italian: "it",
-  dutch: "nl",
-  german: "de"
-};
+import { languageCodes } from "./localization-system";
 
 const translationIds = [
   "hud-panel.translate",
@@ -179,7 +171,7 @@ export class TranslationSystem {
   async Init(reset) {
     if (reset) {
       this.targets = {};
-      this.allowed = roomPropertiesReader.AllowTrans;
+      this.allowed = false;
 
       if (!this.allowed) {
         console.warn("Translation is not enabled in this room");
@@ -187,7 +179,7 @@ export class TranslationSystem {
       }
     }
 
-    this.allowed = roomPropertiesReader.AllowTrans;
+    this.allowed = false;
     this.transProperties = roomPropertiesReader.transProps;
     this.targets = {};
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
@@ -516,4 +508,4 @@ export class TranslationSystem {
   }
 }
 
-export const translationSystem = new TranslationSystem();
+export const oldTranslationSystem = new TranslationSystem();

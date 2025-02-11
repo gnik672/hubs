@@ -377,6 +377,8 @@ export interface JSXComponentData extends ComponentData {
     nextRef: Ref;
     prevRef: Ref;
     navRef: Ref;
+    suggestionLRef: Ref;
+    suggestionRRef: Ref;
   };
   agentTextPanel?: any;
   floorMap?: {

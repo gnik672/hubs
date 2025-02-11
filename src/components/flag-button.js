@@ -1,4 +1,5 @@
-import { translationSystem } from "../bit-systems/translation-system";
+import { IconTranslationDict } from "../bit-systems/localization-system";
+import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 
 /**
  * A button with an image, tooltip, hover states.
@@ -91,7 +92,7 @@ AFRAME.registerComponent("flag-button", {
 
     if (this.data.tooltip && hovering) {
       let tooltipText;
-      if (this.data.tooltipText) tooltipText = translationSystem.LanguageButtonText;
+      if (this.data.tooltipText) tooltipText = IconTranslationDict["hud-panel.language"];
       else tooltipText = this.data.active ? this.data.activeTooltipText : this.data.tooltipText;
 
       tooltipText = disabled ? "" : tooltipText;

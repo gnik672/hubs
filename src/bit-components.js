@@ -29,7 +29,9 @@ export const Agent = defineComponent({
   snapRef: Types.eid,
   nextRef: Types.eid,
   prevRef: Types.eid,
-  navRef: Types.eid
+  navRef: Types.eid,
+  suggestionLRef: Types.eid,
+  suggestionRRef: Types.eid
 });
 
 export const FollowFov = defineComponent({ offset: [Types.f32, 3] });

@@ -19,6 +19,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.helpBtn = this.el.querySelector(".help-btn");
     // this.langBtn = this.el.querySelector(".lang-btn");
     this.transBtn = this.el.querySelector(".trans-btn");
+    this.askBtn = this.el.querySelector(".ask-btn");
     // this.taskBtn = this.el.querySelector(".task-btn");
     // this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
@@ -45,6 +46,7 @@ AFRAME.registerComponent("in-world-hud", {
         this.mapBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsMap);
         this.helpBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsHelp);
         this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowTrans);
+        this.askBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowPresentation);
 
         // this.taskBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("task"));
 
@@ -54,14 +56,10 @@ AFRAME.registerComponent("in-world-hud", {
           this.mapBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("map"));
         if (roomPropertiesReader.AllowsHelp)
           this.helpBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("help"));
-        if (roomPropertiesReader.AllowTrans)
-          this.transBtn.setAttribute(
-            "icon-button",
-            "active",
-            this.el.sceneEl.is("translation") &&
-              roomPropertiesReader.read &&
-              roomPropertiesReader.transProps.conversation === "presentation"
-          );
+        if (roomPropertiesReader.AllowPresentation) {
+          this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("presentation"));
+          this.askBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("presentation"));
+        }
       });
     };
 
@@ -114,8 +112,14 @@ AFRAME.registerComponent("in-world-hud", {
       if (!roomPropertiesReader.AllowTrans) return;
       this.el.emit("toggle_translation");
     };
+
     this.onTaskClick = () => {
       this.el.emit("task-toggle");
+    };
+
+    this.onAskClick = () => {
+      if (!roomPropertiesReader.AllowPresentation) return;
+      this.el.emit("toggle_question");
     };
 
     this.onPenClick = e => {
@@ -155,6 +159,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.helpBtn.object3D.addEventListener("interact", this.onHelpClick);
     // this.langBtn.object3D.addEventListener("interact", this.onLangClick);
     this.transBtn.object3D.addEventListener("interact", this.onTransClick);
+    this.askBtn.object3D.addEventListener("interact", this.onAskClick);
     // this.taskBtn.object3D.addEventListener("interact", this.onTaskClick);
     // this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
@@ -174,6 +179,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.helpBtn.object3D.removeEventListener("interact", this.onHelpClick);
     // this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
     this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
+    this.askBtn.object3D.removeEventListener("interact", this.onAskClick);
     // this.taskBtn.object3D.removeEventListener("interact", this.onTaskClick);
     // this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }

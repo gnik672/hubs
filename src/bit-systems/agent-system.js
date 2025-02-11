@@ -1,5 +1,15 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { Agent, CursorRaycastable, Hidden, Interacted, LookAtUser } from "../bit-components";
+import {
+  Agent,
+  CursorRaycastable,
+  HeldHandLeft,
+  HeldHandRight,
+  HeldRemoteLeft,
+  HeldRemoteRight,
+  Hidden,
+  Interacted,
+  LookAtUser
+} from "../bit-components";
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
@@ -17,17 +27,33 @@ import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { navSystem } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { languageCodes, translationSystem } from "./translation-system";
+import { oldTranslationSystem } from "./old-translation-system";
 import { UpdatePanelSize, GetTextSize, GetObjSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
-import { AxesHelper, Vector3 } from "three";
+import { AxesHelper, BoxHelper, Mesh, Plane, Quaternion, Vector3 } from "three";
 import { roomPropertiesReader } from "../utils/rooms-properties";
-import { logger } from "./logging-system";
+import { GetObjectives, GetResolved, GetValids, MakeObjectiveResolved, RoomObjectives } from "./progress-tracker";
+import { off } from "process";
+import { paths } from "../systems/userinput/paths";
+import { labelOrganizer } from "./room-labels-system";
+import { languageCodes, selectedLanguage } from "./localization-system";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
 const PANEL_PADDING = 0.05;
+let trargetCounter = 0;
+const MAX_PANEL_LENGTH = 0.5;
+
+// const suggestions = [
+//   { type: "navigation", value: "How can I go to the conference room?", done: false },
+//   { type: "navigation", value: "How can I go to the business room?", done: false },
+//   { type: "navigation", value: "How can I go to the booth 1?", done: false },
+//   { type: "navigation", value: "How can I go to the social area?", done: false },
+//   { type: "summarization", value: "Summarize the content of the main presentation", done: false },
+//   { type: "tradeshows", value: "΅Who will I find in the tradeshows?", done: false },
+//   { type: "schedule", value: "Who is presenting in the morning?", done: false }
+// ];
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -37,7 +63,7 @@ export function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-export function AgentSystem(t) {
+export function AgentSystem(t, userinput) {
   enterAgentQuery(APP.world).forEach(eid => {
     virtualAgent.Setup(eid);
   });
@@ -45,6 +71,7 @@ export function AgentSystem(t) {
     virtualAgent.ButtonInteractions();
     virtualAgent.Animations(t);
     virtualAgent.agent.obj.updateMatrix();
+    virtualAgent.UpdatePanel(userinput);
   });
 }
 
@@ -66,6 +93,18 @@ class textElement extends objElement {
     super();
     this.value = null;
   }
+
+  set text(message) {
+    this.value = message;
+    this.obj.text = message;
+  }
+}
+class SuggestionElement extends textElement {
+  constructor() {
+    super();
+    this.intention = null;
+    this.index = -1;
+  }
 }
 
 export default class VirtualAgent {
@@ -77,14 +116,20 @@ export default class VirtualAgent {
     this.prevArrow = new objElement();
     this.infoPanel = new objElement();
     this.snapButton = new objElement();
+    this.suggestionL = new objElement();
+    this.suggestionR = new objElement();
     this.clearButton = new objElement();
     this.agentParent = new objElement();
 
     this.panel = new objElement();
     this.displayedText = new textElement();
+    this.suggLText = new SuggestionElement();
+    this.suggRText = new SuggestionElement();
 
     this.textArray = [];
     this.diplayedSenteceIndex = null;
+    this.clippingPlaneUp = null;
+    this.clippingPlaneDown = null;
 
     this.currentOccasion = null;
     this.waitingForResponse = null;
@@ -94,11 +139,12 @@ export default class VirtualAgent {
     this.isProccessing = false;
     this.isListening = false;
     this.successResult = false;
-
+    this.listeners = new Map();
     this.onClear = this.onClear.bind(this);
+    this.UpdatePlanes = this.UpdatePanel.bind(this);
     this.onToggle = this.onToggle.bind(this);
     this.setMicStatus = this.setMicStatus.bind(this);
-    this.OntextUpdate = this.OntextUpdate.bind(this);
+    this.OnDisplaytextUpdate = this.OnDisplaytextUpdate.bind(this);
 
     this.occasions = {
       greetings: ["greetings"],
@@ -122,6 +168,7 @@ export default class VirtualAgent {
     }
 
     this.allowed = true;
+
     APP.scene.addEventListener("agent-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
     this.navProperties = roomPropertiesReader.navProps;
@@ -130,17 +177,55 @@ export default class VirtualAgent {
   }
 
   Enable() {
-    this.displayedText.obj.addEventListener("synccomplete", this.OntextUpdate);
+    this.displayedText.obj.addEventListener("synccomplete", this.OnDisplaytextUpdate);
+    this.suggLText.obj.addEventListener("synccomplete", this.listeners.get(this.suggLText));
+    this.suggRText.obj.addEventListener("synccomplete", this.listeners.get(this.suggRText));
+
     this.UpdateWithRandomPhrase("greetings");
     APP.dialog.on("mic-state-changed", this.setMicStatus);
     APP.scene.addState("agent");
+
+    this.FetchSuggestions();
     this.ToggleRays(true);
     this.agent.obj.position.copy(this.AgentInitialPosition);
     this.agent.obj.rotation.set(0, 0, 0);
   }
 
+  FetchSuggestions() {
+    const types = [];
+    const texts = [this.suggLText, this.suggRText];
+    const objs = [this.suggestionL.obj, this.suggestionR.obj];
+
+    objs.forEach(obj => {
+      obj.visible = true;
+    });
+
+    GetObjectives().forEach((objective, index) => {
+      const valids = GetValids();
+      const resolved = GetResolved();
+      console.log(valids, resolved, index);
+      if (valids[index] && !resolved[index]) {
+        if (types.length === 2 || (types.length === 1 && types[0] === objective.type)) return;
+
+        types.push(objective.type);
+
+        texts[types.length - 1].text = objective.value;
+        texts[types.length - 1].intention = objective.type;
+        texts[types.length - 1].index = index;
+      }
+    });
+
+    objs.forEach((obj, index) => {
+      if (index >= types.length) {
+        obj.visible = false;
+      }
+    });
+  }
+
   Disable() {
-    this.displayedText.obj.removeEventListener("synccomplete", this.OntextUpdate);
+    this.displayedText.obj.removeEventListener("synccomplete", this.OnDisplaytextUpdate);
+    this.suggLText.obj.removeEventListener("synccomplete", this.listeners.get(this.suggLText));
+    this.suggRText.obj.removeEventListener("synccomplete", this.listeners.get(this.suggRText));
     APP.dialog.off("mic-state-changed", this.setMicStatus);
     APP.scene.removeState("agent");
     this.agentParent.obj.visible = false;
@@ -184,6 +269,12 @@ export default class VirtualAgent {
     this.panel.update(Agent.panelRef[agentEid]);
     this.displayedText.update(Agent.textRef[agentEid]);
     this.snapButton.update(Agent.snapRef[agentEid]);
+    this.suggestionL.update(Agent.suggestionLRef[agentEid]);
+    this.suggestionR.update(Agent.suggestionRRef[agentEid]);
+    this.suggLText.obj = this.suggestionL.obj.getObjectByName(`${this.suggestionL.obj.name} Label`);
+    this.suggRText.obj = this.suggestionR.obj.getObjectByName(`${this.suggestionR.obj.name} Label`);
+
+    console.log(this.suggestionL, this.suggestionR, this.suggLText, this.suggRText); //done working
 
     this.isProccessing = false;
     this.isListening = false;
@@ -197,8 +288,76 @@ export default class VirtualAgent {
 
     this.AgentInitialPosition = this.agent.obj.position.clone();
 
+    const suggestionTextSyncHandler = (textObj, panelElem) => {
+      return () => {
+        console.log(`sugg button update`);
+        const size = GetTextSize(textObj);
+        size[0] += 2 * PANEL_PADDING;
+        size[1] += 2 * PANEL_PADDING;
+        UpdatePanelSize(panelElem.eid, size);
+        panelElem.size = size;
+      };
+    };
+
+    this.listeners.set(this.suggLText, suggestionTextSyncHandler(this.suggLText.obj, this.suggestionL));
+    this.listeners.set(this.suggRText, suggestionTextSyncHandler(this.suggRText.obj, this.suggestionR));
+
     this.AddAnimationDots();
     this.ToggleRays(false);
+
+    this.clippingPlaneUp = new THREE.Plane(new Vector3(0, -1, 0), 0);
+    this.clippingPlaneDown = new THREE.Plane(new Vector3(0, 1, 0), 0);
+    this.displayedText.obj.material.clippingPlanes = [this.clippingPlaneUp, this.clippingPlaneDown];
+  }
+
+  UpdatePanel(userinput) {
+    if (!this.clippingPlaneUp || !this.clippingPlaneDown || !this.panel.obj) return;
+
+    const panelSize = this.panel.size || GetObjSize(this.panel.obj);
+    const textSize = GetTextSize(this.displayedText.obj);
+
+    const worldQuaternion = this.panel.obj.getWorldQuaternion(new Quaternion());
+
+    // const xGlobal = new Vector3(1, 0, 0).applyQuaternion(worldQuaternion).normalize();
+    const yGlobal = new Vector3(0, 1, 0).applyQuaternion(worldQuaternion).normalize();
+    // const zGlobal = new Vector3(0, 0, 1).applyQuaternion(worldQuaternion).normalize();
+    const worldPosition = this.panel.obj.getWorldPosition(new Vector3());
+
+    const umidPoint = new Vector3().addVectors(
+      worldPosition,
+      yGlobal.clone().multiplyScalar(MAX_PANEL_LENGTH / 2 - PANEL_PADDING)
+    );
+    const dmidPoint = new Vector3().addVectors(
+      worldPosition,
+      yGlobal.clone().multiplyScalar(-MAX_PANEL_LENGTH / 2 + PANEL_PADDING)
+    );
+
+    // const ulPoint = new Vector3().addVectors(umidPoint, xGlobal.clone().multiplyScalar(-MAX_PANEL_LENGTH / 2));
+    // const urPoint = new Vector3().addVectors(umidPoint, xGlobal.clone().multiplyScalar(MAX_PANEL_LENGTH / 2));
+    // const dlPoint = new Vector3().addVectors(dmidPoint, xGlobal.clone().multiplyScalar(-MAX_PANEL_LENGTH / 2));
+    // const drPoint = new Vector3().addVectors(dmidPoint, xGlobal.clone().multiplyScalar(MAX_PANEL_LENGTH / 2));
+
+    // const upThirdPoint = new Vector3().addVectors(umidPoint, zGlobal.clone());
+    // const downThirdPoint = new Vector3().addVectors(dmidPoint, zGlobal.clone());
+
+    // this.clippingPlaneUp.setFromCoplanarPoints(ulPoint, urPoint, upThirdPoint);
+    // this.clippingPlaneDown.setFromCoplanarPoints(drPoint, dlPoint, downThirdPoint);
+
+    this.clippingPlaneUp.constant = umidPoint.y;
+    this.clippingPlaneDown.constant = -dmidPoint.y;
+
+    const movement = userinput.get(paths.actions.cursor.right.scrollPanel)
+      ? userinput.get(paths.actions.cursor.right.scrollPanel)
+      : 0;
+
+    const initPos = this.displayedText.obj.position;
+    const downBarrier = panelSize[1] / 2 - textSize[1] / 2 - PANEL_PADDING;
+    const upBarrier = textSize[1] / 2 - panelSize[1] / 2 + PANEL_PADDING;
+
+    if ((initPos.y <= upBarrier && movement > 0) || (initPos.y >= -upBarrier && movement < 0)) {
+      this.displayedText.obj.position.setY(initPos.y + movement);
+      this.displayedText.obj.updateMatrix();
+    }
   }
 
   onClear() {
@@ -211,32 +370,42 @@ export default class VirtualAgent {
     if (!APP.scene.is("agent")) {
       APP.scene.emit("clear-scene");
       this.Enable();
+      // logger.AddUiInteraction("agent_toggle", "activate_agent");
     } else {
       this.Disable();
+      // logger.AddUiInteraction("agent_toggle", "deactivate_agent");
     }
   }
 
-  OntextUpdate() {
+  OnDisplaytextUpdate() {
     const size = GetTextSize(this.displayedText.obj);
     const arrowSize = GetObjSize(this.nextArrow.obj);
     const clearSize = GetObjSize(this.clearButton.obj);
-    size[0] += 2 * PANEL_PADDING;
-    size[1] += 2 * PANEL_PADDING;
-    UpdatePanelSize(this.panel.eid, size);
-    this.panel.size = size;
+
+    const panelSize = size.map(sizeElem => sizeElem + 2 * PANEL_PADDING);
+    if (panelSize[1] > MAX_PANEL_LENGTH) {
+      panelSize[1] = MAX_PANEL_LENGTH;
+      console.log(`resizing panel to max allowed width`);
+    }
+
+    UpdatePanelSize(this.panel.eid, panelSize);
+    this.panel.size = panelSize;
 
     if (this.successResult) {
-      this.clearButton.obj.position.copy(new Vector3(0, -((size[1] + clearSize[1]) / 2 + PANEL_PADDING), 0));
-
+      this.clearButton.obj.position.copy(new Vector3(0, -((panelSize[1] + clearSize[1]) / 2 + PANEL_PADDING), 0));
       this.clearButton.obj.updateMatrix();
-
       this.clearButton.obj.visible = true;
     } else {
       this.clearButton.obj.visible = false;
     }
 
-    this.nextArrow.obj.position.copy(new Vector3((size[0] + arrowSize[0]) / 2 + PANEL_PADDING, 0, 0));
-    this.prevArrow.obj.position.copy(new Vector3(-((size[0] + arrowSize[0]) / 2 + PANEL_PADDING), 0, 0));
+    const offset = size[1] / 2 - panelSize[1] / 2 + PANEL_PADDING;
+    const initPos = this.displayedText.obj.position.clone();
+
+    this.nextArrow.obj.position.copy(new Vector3((panelSize[0] + arrowSize[0]) / 2 + PANEL_PADDING, 0, 0));
+    this.prevArrow.obj.position.copy(new Vector3(-((panelSize[0] + arrowSize[0]) / 2 + PANEL_PADDING), 0, 0));
+    this.displayedText.obj.position.copy(new Vector3(initPos.x, -offset, initPos.z));
+    this.displayedText.obj.updateMatrix();
     this.nextArrow.obj.updateMatrix();
     this.prevArrow.obj.updateMatrix();
 
@@ -278,12 +447,16 @@ export default class VirtualAgent {
   setMicStatus() {
     const permissionsGranted = APP.mediaDevicesManager.getPermissionsStatus("microphone") === PermissionStatus.GRANTED;
     const changedMicStatus = this.micStatus !== (permissionsGranted && APP.mediaDevicesManager.isMicEnabled);
+
+    trargetCounter++;
     if (changedMicStatus) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
       if (this.micStatus && !this.waitingForResponse) {
-        this.AskAgent();
+        navSystem.SnapPOV();
       } else {
-        stopRecording();
+        // stopRecording();
+        // navSystem.CreateVLDataset();
+        navSystem.SnapFromPoint(50, 0);
       }
     }
   }
@@ -300,6 +473,24 @@ export default class VirtualAgent {
     }
     if (clicked(this.prevArrow.eid)) {
       this.PrevSentence();
+    }
+    if (clicked(this.suggestionL.eid)) {
+      this.AskAgent({
+        query: this.suggLText.value,
+        intention: this.suggLText.intention,
+        index: this.suggRText.index
+      }).then(() => {
+        this.FetchSuggestions();
+      });
+    }
+    if (clicked(this.suggestionR.eid)) {
+      this.AskAgent({
+        query: this.suggRText.value,
+        intention: this.suggRText.intention,
+        index: this.suggRText.index
+      }).then(() => {
+        this.FetchSuggestions();
+      });
     }
   }
 
@@ -347,75 +538,79 @@ export default class VirtualAgent {
     });
   }
 
-  async AskAgent() {
+  async AskAgent({ query, intention, index } = { query: "", intention: "", index: -1 }) {
     this.panel.obj.visible = false;
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
-    this.setMicStatus();
+    // this.setMicStatus();
 
-    const agentDataObj = [];
-
+    // const agentDataObj = [];
     try {
-      const recordedQuestion = await RecordQuestion();
+      const langCode = languageCodes[selectedLanguage] || "en";
       this.isProccessing = true;
-      const sourceLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
-      const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
+      let nmtResponse;
+      if (!query) {
+        const recordedQuestion = await RecordQuestion(); // question recording
+        const nmtAudioParams = { source_language: langCode, target_language: "en", return_transcription: "true" };
+        nmtResponse = (
+          await audioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordedQuestion.data.file, nmtAudioParams)
+        ).data.translations[0]; // sending to ASR/NMT
+      } else nmtResponse = query;
 
-      const nmtResponse = await audioModules(
-        COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
-        recordedQuestion.data.file,
-        nmtAudioParams
-      );
+      const intentResponse = !!intention ? intention : (await intentionModule(nmtResponse)).data.intent; // retrieving intention
+      const dsResponse = (await dsResponseModule(nmtResponse, intentResponse, "")).data.response; // retrieving ds response (in case of nav: send also instructions)
 
-      const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
-
-      const navigation = navSystem.GetInstructions(intentResponse.data.destination);
-
-      const response = await dsResponseModule(
-        nmtResponse.data.translations[0],
-        intentResponse.data.intent,
-        navigation.knowledge
-      );
-
-      const targetLang = languageCodes[translationSystem.mylanguage];
-      const nmtTextParams = { source_language: "en", target_language: targetLang };
-      const outputArray = this.SegmentText(response.data.response);
-
-      if (nmtTextParams.source_language === nmtTextParams.target_language) this.UpdateTextArray(outputArray);
-      else {
-        const translatePromises = [];
-        outputArray.forEach(sentence =>
-          translatePromises.push(textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams))
-        );
-
-        const translatedResponses = await Promise.all(translatePromises);
-        const TranslatedOutputArray = translatedResponses.map(element => {
-          return element.data.translations[0];
-        });
-
-        this.UpdateTextArray(TranslatedOutputArray);
+      if (langCode === "en") {
+        this.UpdateTextArray([dsResponse]); //print result if language is english
+      } else {
+        const nmtTextParams = { source_language: "en", target_language: langCode };
+        const translatedResponse = (await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams)).data
+          .translations[0]; // translate if language is not english
+        this.UpdateTextArray([translatedResponse]); // print the translated response
       }
 
-      if (intentResponse.data.intent.includes("navigation") && navigation.valid) {
+      if (intentResponse.includes("navigation") && navigation.valid) {
         this.successResult = true;
-        navSystem.RenderCues(navigation);
-      } else if (
-        intentResponse.data.intent.includes("program_info") ||
-        intentResponse.data.intent.includes("trade_show")
-      ) {
+        navSystem.RenderCues(navigation); // if intent=nav with a valid destination render ques
+      } else if (intentResponse.includes("program_info") || intentResponse.includes("trade_show")) {
         this.successResult = true;
       } else {
         this.successResult = false;
       }
+
+      console.log(`results: ${this.successResult} for index: ${index}`);
+      if (this.successResult && index >= 0) {
+        MakeObjectiveResolved(index, true);
+      }
     } catch (error) {
       console.log("error", error);
       this.UpdateWithRandomPhrase("error");
+      this.UpdateTextArray([
+        `1914 translation by H. Rackham
+
+"But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?"
+Section 1.10.33 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
+
+"At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat."
+1914 translation by H. Rackham
+
+"On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains."`
+      ]); // display error message on error
     } finally {
       this.isProccessing = false;
       this.infoPanel.obj.visible = false;
-      this.setMicStatus();
+      this.panel.obj.visible = true;
       this.waitingForResponse = false;
     }
+  }
+
+  DatasetCreate() {
+    const destNames = ["conference room", "business room", "social area", "booth 1", "booth 2", "booth 3", "booth 4"];
+    const randomInt = Math.floor(Math.random() * destNames.length);
+    const navigation = navSystem.GetInstructions("business room");
+    navigation.destination = destNames[randomInt];
+    navSystem.RenderCues(navigation);
+    return navigation;
   }
 
   async SnapActions() {
@@ -435,10 +630,9 @@ export default class VirtualAgent {
 
   UpdateWithRandomPhrase(occasion) {
     const phrases = [];
-    const lang = translationSystem.mylanguage ? translationSystem.mylanguage : "english";
 
     this.occasions[occasion].forEach(occasionKey => {
-      const availablePhrases = agentDialogs[occasionKey][lang];
+      const availablePhrases = agentDialogs[occasionKey][selectedLanguage];
 
       const randomIndex = Math.floor(Math.random() * availablePhrases.length);
 
@@ -447,6 +641,14 @@ export default class VirtualAgent {
 
     this.UpdateTextArray(phrases.length === 1 ? [phrases[0]] : [phrases.join(" ")]);
     this.currentOccasion = occasion;
+  }
+
+  GetTypingObj() {
+    return typingObj;
+  }
+
+  get exists() {
+    return !!this.agent.eid;
   }
 }
 
@@ -462,7 +664,17 @@ export function avatarPos() {
 
 export function avatarDirection() {
   const avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+  // const avatarPovObj = document.querySelector("#avatar-rig").object3D;
   const playerForward = new THREE.Vector3();
   avatarPovObj.getWorldDirection(playerForward);
+  return playerForward.multiplyScalar(-1);
+}
+export function avatarIgnoreYDirection() {
+  const avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+  // const avatarPovObj = document.querySelector("#avatar-rig").object3D;
+  const playerForward = new THREE.Vector3();
+  avatarPovObj.getWorldDirection(playerForward);
+
+  playerForward.setY(0);
   return playerForward.multiplyScalar(-1);
 }

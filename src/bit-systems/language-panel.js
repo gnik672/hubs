@@ -1,4 +1,4 @@
-import { translationSystem } from "./translation-system";
+import { oldTranslationSystem } from "./old-translation-system";
 import { FlagPanelManager, Interacted } from "../bit-components";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
@@ -75,7 +75,7 @@ export class LanguagePanel {
       this.flagButtons[key].update(refs[key]);
     });
 
-    this.Update(translationSystem.mylanguage);
+    this.Update(oldTranslationSystem.mylanguage);
     APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
   }
 
@@ -105,7 +105,7 @@ export class LanguagePanel {
     Object.keys(this.flagButtons).forEach(key => {
       if (hasComponent(world, Interacted, this.flagButtons[key].eid)) {
         closePanel = true;
-        if (translationSystem.mylanguage !== key) translationSystem.updateMyLanguage(key);
+        if (oldTranslationSystem.mylanguage !== key) oldTranslationSystem.updateMyLanguage(key);
       }
     });
 

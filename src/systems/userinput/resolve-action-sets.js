@@ -19,7 +19,9 @@ import {
   CameraTool,
   OffersHandConstraint,
   AEntity,
-  MediaVideo
+  MediaVideo,
+  Agent,
+  AgentTextPanel
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
 const debugUserInput = qsTruthy("dui");
@@ -76,6 +78,23 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.rightHandHoveringOnCamera, hc(world, CameraTool, rightHandHovering));
   userinput.toggleSet(sets.leftCursorHoveringOnCamera, hc(world, CameraTool, leftRemoteHovering));
   userinput.toggleSet(sets.rightCursorHoveringOnCamera, hc(world, CameraTool, rightRemoteHovering));
+
+  userinput.toggleSet(
+    sets.leftHandHoveringOnAgent,
+    hc(world, Agent, leftHandHovering) || hc(world, AgentTextPanel, leftHandHovering)
+  );
+  userinput.toggleSet(
+    sets.rightHandHoveringOnAgent,
+    hc(world, Agent, rightHandHovering) || hc(world, AgentTextPanel, rightHandHovering)
+  );
+  userinput.toggleSet(
+    sets.leftCursorHoveringOnAgent,
+    hc(world, Agent, leftRemoteHovering) || hc(world, AgentTextPanel, leftRemoteHovering)
+  );
+  userinput.toggleSet(
+    sets.rightCursorHoveringOnAgent,
+    hc(world, Agent, rightRemoteHovering) || hc(world, AgentTextPanel, rightRemoteHovering)
+  );
 
   userinput.toggleSet(
     sets.leftHandHoveringOnInteractable,
