@@ -440,7 +440,7 @@ class ConfigurationEditor extends Component {
           hub&#39;s rooms (More &gt; Preferences &gt; Misc &gt; Theme).More information about customizing your hubs&#39;
           themes can be found in our{" "}
           <a
-            href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-themes.html"
+            href="https://docs.hubsfoundation.org/hubs-cloud-customizing-themes.html"
             target="_blank"
             rel="noopener noreferrer"
             className="link"
@@ -459,6 +459,7 @@ class ConfigurationEditor extends Component {
               className={this.props.classes.button}
               variant="contained"
               color="primary"
+              disabled={this.state.warningMessage}
             >
               Save
             </Button>

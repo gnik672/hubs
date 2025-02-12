@@ -116,11 +116,11 @@
                             <a-entity class="nametag-status-border" visible="false"
                                 slice9="width: 0.45; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; transparent: false; alphaTest: 0.1; src: nametag-border;"></a-entity>
                             <a-entity class="nametag-text"
-                                text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack
-                                position="0 0.025 0.001"></a-entity>
+                                text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; anchorY: center"
+                                text-raycast-hack position="0 0.125 0.001"></a-entity>
                             <a-entity class="pronouns-text"
-                                text="side: double; textAlign: center; color: #ddd; fontSize: 0.06;" text-raycast-hack
-                                position="0 -0.06 0.001"></a-entity>
+                                text="side: double; textAlign: center; color: #ddd; fontSize: 0.06; anchorY: center"
+                                text-raycast-hack position="0 0 0.001"></a-entity>
                             <a-entity class="language-text" visible="false"></a-entity>
 
                         </a-entity>
@@ -775,7 +775,7 @@
             tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot">
 
             <a-entity id="avatar-pov-node" class="camera" personal-space-bubble="radius: 0.4;" rotation
-                pitch-yaw-rotator set-yxz-order position="0 1.6 0">
+                pitch-yaw-rotator set-yxz-order position="0 1.6 0" avatar-pov-node>
                 <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                 <a-entity id="gaze-teleport" position="0.15 0 0"
                     teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport;"></a-entity>

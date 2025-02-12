@@ -2,9 +2,9 @@ import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
-import qsTruthy from "./utils/qs_truthy";
 import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
 import { storedUpdates } from "./bit-systems/network-receive-system";
+import { shouldUseNewLoader } from "./utils/bit-utils";
 import { tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
 
@@ -31,7 +31,7 @@ function loadRoomObjects(hubId) {
   objectsScene.appendChild(objectsEl);
 }
 
-export async function changeHub(hubId, addToHistory = true, waypoint = null) {
+export async function changeHub(hubId, addToHistory = true, waypoint = "") {
   if (tutorialManager.allowed) {
     tutorialManager.RunCleanupFunc();
   }
@@ -93,8 +93,8 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 
   NAF.entities.removeRemoteEntities();
   await NAF.connection.adapter.disconnect();
-  await APP.dialog.disconnect();
-  if (!qsTruthy("newLoader")) {
+  APP.dialog.disconnect();
+  if (!shouldUseNewLoader()) {
     unloadRoomObjects();
   }
   NAF.connection.connectedClients = {};
@@ -113,7 +113,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     // TODO: With newLoader (and new net code), we need to clear any network state
     // that we applied to scene-owned entities before transitioning to the new room.
     // For now, just unload scene even if the room we're going to has the same scene.
-    qsTruthy("newLoader") ||
+    shouldUseNewLoader() ||
     document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
       (await getSceneUrlForHub(hub))
   ) {
@@ -141,7 +141,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     NAF.connection.adapter.connect()
   ]);
 
-  if (qsTruthy("newLoader")) {
+  if (shouldUseNewLoader()) {
     loadSavedEntityStates(APP.hubChannel);
     loadLegacyRoomObjects(hubId);
   } else {
