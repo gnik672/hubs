@@ -350,6 +350,7 @@ export class NavigationSystem {
   }
 
   SnapPOV(nodeNo: number, angleNo: number) {
+    console.log(window.innerWidth);
     const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
     APP.scene?.renderer.setRenderTarget(renderTarget);
     APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
@@ -963,14 +964,14 @@ export class NavigationSystem {
   async SnapFromPoint(i: number, j: number) {
     APP.scene!.emit("clear-scene");
 
-    const avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
-    const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
-    const avatarHeight = avatarRig.position.y;
+    // const avatarRig = (document.querySelector("#avatar-rig")! as AElement).object3D;
+    // const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
+    // const avatarHeight = avatarRig.position.y;
 
-    avatarRig.rotation.set(0, degToRad(j), 0);
-    const nodeVec = this.nodes[i].vector;
-    avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
-    avatarRig.updateMatrix();
+    // avatarRig.rotation.set(0, degToRad(j), 0);
+    // const nodeVec = this.nodes[i].vector;
+    // avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+    // avatarRig.updateMatrix();
     await this.waitForSeconds(0.1);
 
     // this.SnapPOV(i, j);
@@ -1004,67 +1005,70 @@ export class NavigationSystem {
       return degToRad(Math.round(Math.random() * (max - min) + min));
     };
 
-    for (let j = 11; j < headRotationSteps; j++) {
-      if (j !== 11 && j !== 17) continue;
+    for (let j = 0; j < headRotationSteps; j++) {
       const headRotation = j * headRotationInterval;
+      if (headRotation !== 200 && headRotation !== 80) continue;
+
       avatarRig.rotation.set(0, degToRad(headRotation), 0);
       counter = -1;
 
       for (let i = 0; i < this.nodes.length; i++) {
-        if (j === 11 && i < 1353) continue;
-        const node = this.nodes[i];
-        const nodeVec = node.vector;
-        avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
-        avatarRig.updateMatrix();
-        avatarHead.rotation.set(getRandomNumber(-15, 15), 0, getRandomNumber(-10, 10));
-        avatarHead.updateMatrix();
+        if ((i === 2326 && headRotation === 200) || (i === 3111 && headRotation === 80)) {
+          const node = this.nodes[i];
+          const nodeVec = node.vector;
+          // if (Object.keys(node.neighboors).length === 0) continue;
+          avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+          avatarRig.updateMatrix();
+          avatarHead.rotation.set(getRandomNumber(-15, 15), 0, getRandomNumber(-10, 10));
+          avatarHead.updateMatrix();
 
-        // try {
-        //   for (const targetName of targets) {
-        //     counter++;
-        //     const instObj = this.GetOnlyInstructionsKnowledege(i, headRotation, targetName);
-        //     instructions[counter] = instObj;
+          try {
+            for (const targetName of targets) {
+              counter++;
+              const instObj = this.GetOnlyInstructionsKnowledege(i, headRotation, targetName);
+              instructions[counter] = instObj;
+            }
+          } catch (e) {
+            console.log(`Error at node ${i}, angle ${j}`);
+            console.error(e instanceof Error ? e.message : e);
+            continue;
+          }
+          await this.waitForSeconds(0.5);
+          this.SnapPOV(i, j);
+          // if (j === 0) photoNames.push(i);
+          // if ((i + 1) % 100 === 0) console.log(`Processed ${i + 1}/${this.nodes.length} nodes`);}
+        }
+
+        // await this.waitForSeconds(10);
+
+        // console.log(`exporting json file for angle: ${headRotation}`);
+        // const serializedJSONData = JSON.stringify(instructions);
+        // const filename = `instructions_${headRotation}.json`;
+        // await this.waitForSeconds(5);
+        // await this.downloadFile(filename, serializedJSONData);
+        // instructions.length = 0;
+
+        // console.log(`waiting for a bit`);
+        // await this.waitForSeconds(10);
+        //console.log(`continuing`);
+
+        // for (let j = 270; j < 360; j += 45) {
+        //   avatarRig.rotation.set(0, degToRad(j), 0);
+        //   avatarRig.updateMatrix();
+        //   for (let i = 0; i < photoNames.length; i++) {
+        //     const nodeIndex = photoNames[i];
+        //     const node = this.nodes[nodeIndex];
+
+        //     var avatarHeight = avatarRig.position.y;
+        //     var nodeVec = node.vector.clone();
+        //     avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
+        //     avatarRig.updateMatrix();
+        //     await this.waitForSeconds(0.005);
+        //     this.SnapPOV(nodeIndex, j);
         //   }
-        // } catch (e) {
-        //   console.log(`Error at node ${i}, angle ${j}`);
-        //   console.error(e instanceof Error ? e.message : e);
-        //   continue;
         // }
-        await this.waitForSeconds(0.1);
-        this.SnapPOV(i, j);
-        // if (j === 0) photoNames.push(i);
-        if ((i + 1) % 100 === 0) console.log(`Processed ${i + 1}/${this.nodes.length} nodes`);
       }
-
-      await this.waitForSeconds(10);
-
-      // console.log(`exporting json file for angle: ${headRotation}`);
-      // const serializedJSONData = JSON.stringify(instructions);
-      // const filename = `instructions_${headRotation}.json`;
-      // await this.waitForSeconds(5);
-      // await this.downloadFile(filename, serializedJSONData);
-      // instructions.length = 0;
     }
-
-    // console.log(`waiting for a bit`);
-    // await this.waitForSeconds(10);
-    //console.log(`continuing`);
-
-    // for (let j = 270; j < 360; j += 45) {
-    //   avatarRig.rotation.set(0, degToRad(j), 0);
-    //   avatarRig.updateMatrix();
-    //   for (let i = 0; i < photoNames.length; i++) {
-    //     const nodeIndex = photoNames[i];
-    //     const node = this.nodes[nodeIndex];
-
-    //     var avatarHeight = avatarRig.position.y;
-    //     var nodeVec = node.vector.clone();
-    //     avatarRig.position.set(nodeVec.x, avatarHeight, nodeVec.z);
-    //     avatarRig.updateMatrix();
-    //     await this.waitForSeconds(0.005);
-    //     this.SnapPOV(nodeIndex, j);
-    //   }
-    // }
   }
 
   downloadFile(filename: string, data: string) {
