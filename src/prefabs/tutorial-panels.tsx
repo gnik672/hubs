@@ -5,7 +5,6 @@ import { resolveMediaInfo, textureLoader } from "../utils/media-utils";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { BUTTON_TYPES, TextButton3D, StaticButton3D } from "./button3D";
 import { ProjectionMode } from "../utils/projection-mode";
-import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
 import { degToRad, radToDeg } from "three/src/math/MathUtils";
 import { FollowFov } from "../bit-components";
@@ -13,6 +12,7 @@ import { createTexture, loadTexture, loadTextureFromCache } from "../utils/load-
 import { createKTX2Texture } from "../utils/create-basis-texture";
 import { preload } from "../utils/preload";
 import { Label, roomPropertiesReader } from "../utils/rooms-properties";
+import { AlphaMode } from "../utils/create-image-mesh";
 
 const url = "https://repo.vox.lab.synelixis.com";
 const prevIcon = `${url}/file/prev_icon.png`;
@@ -220,7 +220,7 @@ async function TutorialPanelInit(chapters: string[][][], congratsSlides: Array<s
             texture: texture,
             ratio: ratio,
             projection: ProjectionMode.FLAT,
-            alphaMode: AlphaMode.Blend,
+            alphaMode: AlphaMode.BLEND,
             cacheKey: slide
           }}
           visible={false}
@@ -238,7 +238,7 @@ async function TutorialPanelInit(chapters: string[][][], congratsSlides: Array<s
               texture: gifTexture,
               ratio: ratio,
               projection: ProjectionMode.FLAT,
-              alphaMode: AlphaMode.Blend,
+              alphaMode: AlphaMode.BLEND,
               cacheKey: slide
             }}
             visible={true}
@@ -264,7 +264,7 @@ async function TutorialPanelInit(chapters: string[][][], congratsSlides: Array<s
           texture: texture,
           ratio: ratio,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
+          alphaMode: AlphaMode.BLEND,
           cacheKey: cSlide
         }}
         visible={false}
@@ -285,7 +285,7 @@ export function SimpleImagePanel(item: Label) {
         texture: textureLoader.load(item.filename),
         ratio: item.ratio,
         projection: ProjectionMode.FLAT,
-        alphaMode: AlphaMode.Blend,
+        alphaMode: AlphaMode.BLEND,
         cacheKey: TextureCache.key(item.filename, 1)
       }}
       position={item.position}

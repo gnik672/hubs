@@ -1,7 +1,7 @@
 /** @jsx createElementEntity */
 import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
 import { loadTexture, loadTextureFromCache } from "../utils/load-texture";
-import { Button3D, BUTTON_TYPES } from "./button3D";
+import { BUTTON_TYPES, StaticImageButton3D } from "./button3D";
 import closeIconSrc from "../assets/close-action.png";
 
 export async function loadMirrorMenuButtonIcons() {
@@ -14,7 +14,7 @@ const buttonScale: ArrayVec3 = [0.65, 0.65, 0.65];
 function CloseButton(props: Attrs) {
   const { texture, cacheKey } = loadTextureFromCache(closeIconSrc, 1);
   return (
-    <Button3D
+    <StaticImageButton3D
       name="Close Button"
       scale={buttonScale}
       width={buttonHeight}

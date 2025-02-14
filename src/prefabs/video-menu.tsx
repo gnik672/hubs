@@ -4,7 +4,7 @@ import { Label } from "../prefabs/camera-tool";
 import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
 import playImageUrl from "../assets/images/sprites/notice/play.png";
 import pauseImageUrl from "../assets/images/sprites/notice/pause.png";
-import { BUTTON_TYPES, Button3D } from "./button3D";
+import { BUTTON_TYPES, StaticImageButton3D } from "./button3D";
 import { loadTexture, loadTextureFromCache } from "../utils/load-texture";
 import snapIconSrc from "../assets/spawn_message.png";
 
@@ -77,7 +77,7 @@ interface VolumeButtonProps extends Attrs {
 
 function VolumeButton(props: VolumeButtonProps) {
   return (
-    <Button3D
+    <StaticImageButton3D
       name={props.name}
       scale={SMALL_BUTTON_SCALE}
       width={BUTTON_WIDTH}
@@ -105,7 +105,7 @@ interface VideoButtonProps extends Attrs {
 function VideoActionButton({ buttonIcon, ...props }: VideoButtonProps) {
   const { texture, cacheKey } = loadTextureFromCache(buttonIcon, 1);
   return (
-    <Button3D
+    <StaticImageButton3D
       position={[0, 0, uiZ]}
       scale={BIG_BUTTON_SCALE}
       width={BUTTON_HEIGHT}
@@ -120,7 +120,7 @@ function VideoActionButton({ buttonIcon, ...props }: VideoButtonProps) {
 function SnapButton(props: Attrs) {
   const { texture, cacheKey } = loadTextureFromCache(snapIconSrc, 1);
   return (
-    <Button3D
+    <StaticImageButton3D
       name="Remove Button"
       scale={BUTTON_SCALE}
       width={BUTTON_HEIGHT}

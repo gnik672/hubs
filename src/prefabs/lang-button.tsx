@@ -76,7 +76,7 @@ export function FlagButton({ width, name = "FlagButton", type, flag, ...props }:
         texture: backTexture,
         ratio: 1,
         projection: ProjectionMode.FLAT,
-        alphaMode: AlphaMode.Mask,
+        alphaMode: AlphaMode.MASK,
         cacheKey: ""
       }}
       scale={[width, width, width]}
@@ -92,7 +92,7 @@ export function FlagButton({ width, name = "FlagButton", type, flag, ...props }:
           texture: flags[flag],
           ratio: 0.74,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Mask,
+          alphaMode: AlphaMode.MASK,
           cacheKey: ""
         }}
         scale={[0.5, 0.5, 0.5]}

@@ -6,12 +6,11 @@ import normalTextureSrc from "../assets/images/flags/flag_background.png";
 import backgroundTextureSrc from "../assets/images/flags/language_panel_2.png";
 
 import { ProjectionMode } from "../utils/projection-mode";
-import { AlphaMode } from "../utils/create-image-mesh";
 import { FLAGS, FlagButton } from "./lang-button";
 import { BUTTON_TYPES } from "./button3D";
-import { virtualAgent } from "../bit-systems/agent-system";
 import { Color, Vector3 } from "three";
 import { COLLISION_LAYERS } from "../constants";
+import { AlphaMode } from "../utils/create-image-mesh";
 
 const selectedTexture = textureLoader.load(selectedTextureSrc);
 const normalTexture = textureLoader.load(normalTextureSrc);
@@ -51,7 +50,7 @@ export function HUDLangPanel() {
           texture: backgroundTexture,
           ratio: 0.6,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
+          alphaMode: AlphaMode.BLEND,
           cacheKey: ""
         }}
         flagPanelManager={{ deRef: deRef, duRef: duRef, itRef: itRef, elRef: elRef, esRef: esRef, enRef: enRef }}

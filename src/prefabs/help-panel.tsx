@@ -4,9 +4,9 @@ import spotSrc from "../assets/images/pointer.png";
 import { textureLoader } from "../utils/media-utils";
 import { BUTTON_TYPES, StaticButton3D, TextButton3D } from "./button3D";
 import { ProjectionMode } from "../utils/projection-mode";
-import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
 import { HelpSlide, roomPropertiesReader } from "../utils/rooms-properties";
+import { AlphaMode } from "../utils/create-image-mesh";
 
 export function HelpImagePanel(slides: HelpSlide[]) {
   const textRef = createRef();
@@ -30,7 +30,7 @@ export function HelpImagePanel(slides: HelpSlide[]) {
           texture: textureLoader.load(slideUrl),
           ratio: slide.ratio,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
+          alphaMode: AlphaMode.MASK,
           cacheKey: TextureCache.key(slideUrl, 1)
         }}
         visible={false}

@@ -8,8 +8,8 @@ import { textureLoader } from "../utils/media-utils";
 import { HubsWorld } from "../app";
 import { Object3D, Vector3 } from "three";
 import { ProjectionMode } from "../utils/projection-mode";
-import { AlphaMode } from "../utils/create-image-mesh";
 import { degToRad } from "three/src/math/MathUtils";
+import { AlphaMode } from "../utils/create-image-mesh";
 
 const spotTexture = textureLoader.load(spotSrc);
 const lobbydemoText = textureLoader.load(lobbySrc);
@@ -25,7 +25,7 @@ export function FloorMapPanel(imageRatio: number, mapImage: string, scale: numbe
           texture: textureLoader.load(mapImage),
           ratio: imageRatio,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
+          alphaMode: AlphaMode.BLEND,
           cacheKey: ""
         }}
         floorMap={{ planeRef: panelRef, pointRef: pointRef }}
@@ -48,7 +48,7 @@ export function FloorMapPanel(imageRatio: number, mapImage: string, scale: numbe
             texture: spotTexture,
             ratio: 1,
             projection: ProjectionMode.FLAT,
-            alphaMode: AlphaMode.Mask,
+            alphaMode: AlphaMode.MASK,
             cacheKey: ""
           }}
           position={[0, 0, 0.1]}

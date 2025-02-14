@@ -1,7 +1,7 @@
 /** @jsx createElementEntity */
 import { Color } from "three";
 import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
-import { TextButton3D, BUTTON_TYPES } from "./button3D";
+import { TextButton3D, BUTTON_TYPES, StaticButton3D, StaticImageButton3D } from "./button3D";
 import { Label } from "./camera-tool";
 import { loadTexture, loadTextureFromCache } from "../utils/load-texture";
 import snapIconSrc from "../assets/spawn_message.png";
@@ -35,7 +35,7 @@ function PDFPageButton(props: PDFPageButtonProps) {
 function SnapButton(props: Attrs) {
   const { texture, cacheKey } = loadTextureFromCache(snapIconSrc, 1);
   return (
-    <Button3D
+    <StaticImageButton3D
       name="Remove Button"
       scale={BUTTON_SCALE}
       width={BUTTON_HEIGHT}
