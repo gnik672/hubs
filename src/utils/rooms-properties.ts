@@ -1,7 +1,9 @@
 import { languageCodes, voxLanugages } from "../bit-systems/localization-system";
 
+export type Room = "lobby" | "conference room" | "main area" | "social area" | "business room" | "unknown";
+
 interface Properties {
-  name: "lobby" | "conference_room" | "tradeshows";
+  name: Room;
   id?: string;
   labels: Label[];
   maps: Map[];
@@ -66,7 +68,7 @@ interface Map {
 }
 
 const invalidProps: Properties = {
-  name: "conference_room",
+  name: "unknown",
   maps: [],
   tutorials: [],
   navigations: [],
