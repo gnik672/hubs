@@ -1,7 +1,5 @@
-import { func, object } from "prop-types";
-import { roomPropertiesReader } from "../utils/rooms-properties";
+import { Room, roomPropertiesReader } from "../utils/rooms-properties";
 
-type Room = "lobby" | "conference room" | "social area" | "main-area" | "business room";
 type Category = "navigation" | "tutorial" | "trade_show" | "program_info" | "summarization" | "translation" | "general";
 
 type objectiveFunction = (index: number) => void;
@@ -50,43 +48,46 @@ let currentRoom: Room;
 
 export const RoomObjectives = {
   lobby: [CreateObjective({})],
-  "main-area": [
-    CreateObjective({ type: "navigation", room: "main-area", value: "How can I go to the business room?" }),
+  "main area": [
+    CreateObjective({ type: "navigation", room: "main area", value: "How can I go to the business room?" }),
     CreateObjective({
       type: "navigation",
-      room: "main-area",
+      room: "main area",
       value: "How can I go to the booth 1?",
       validator: index => {
-        validIndices["main-area"][index] = false;
+        validIndices["main area"][index] = false;
         return;
       }
     }),
-    CreateObjective({ type: "navigation", room: "main-area", value: "How can I go to the social area?" }),
-    CreateObjective({ type: "trade_show", room: "main-area", value: "Who will I find in the tradeshows?" }),
-    CreateObjective({ type: "program_info", room: "main-area", value: "Who is presenting in the morning?" }),
+    CreateObjective({ type: "navigation", room: "main area", value: "How can I go to the social area?" }),
+    CreateObjective({ type: "trade_show", room: "main area", value: "Who will I find in the tradeshows?" }),
+    CreateObjective({ type: "program_info", room: "main area", value: "Who is presenting in the morning?" }),
     CreateObjective({
       type: "summarization",
-      room: "main-area",
+      room: "main area",
       value: "Summarize the content of the main presentation"
     })
   ],
   "conference room": [CreateObjective({})],
   "social area": [CreateObjective({})],
-  "business room": [CreateObjective({})]
+  "business room": [CreateObjective({})],
+  unknown: [CreateObjective({})]
 };
 const resolvedIndices: Record<Room, boolean[]> = {
   lobby: new Array<boolean>(RoomObjectives["lobby"].length).fill(false),
-  "main-area": new Array<boolean>(RoomObjectives["main-area"].length).fill(false),
+  "main area": new Array<boolean>(RoomObjectives["main area"].length).fill(false),
   "conference room": new Array<boolean>(RoomObjectives["conference room"].length).fill(false),
   "social area": new Array<boolean>(RoomObjectives["social area"].length).fill(false),
-  "business room": new Array<boolean>(RoomObjectives["business room"].length).fill(false)
+  "business room": new Array<boolean>(RoomObjectives["business room"].length).fill(false),
+  unknown: new Array<boolean>(RoomObjectives["unknown"].length).fill(false)
 };
 const validIndices: Record<Room, boolean[]> = {
   lobby: new Array<boolean>(RoomObjectives["lobby"].length).fill(false),
-  "main-area": new Array<boolean>(RoomObjectives["main-area"].length).fill(true),
+  "main area": new Array<boolean>(RoomObjectives["main area"].length).fill(true),
   "conference room": new Array<boolean>(RoomObjectives["conference room"].length).fill(false),
   "social area": new Array<boolean>(RoomObjectives["social area"].length).fill(false),
-  "business room": new Array<boolean>(RoomObjectives["business room"].length).fill(false)
+  "business room": new Array<boolean>(RoomObjectives["business room"].length).fill(false),
+  unknown: new Array<boolean>(RoomObjectives["unknown"].length).fill(false)
 };
 const visitedRooms: Room[] = [];
 
