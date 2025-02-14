@@ -39,7 +39,7 @@ AFRAME.registerComponent("translate-panel", {
     this.el.object3D.visible = false;
     await roomPropertiesReader.waitForProperties();
 
-    this.allowed = roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.panel.type === "avatar";
+    this.allowed = roomPropertiesReader.AllowTrans;
   },
 
   play() {
