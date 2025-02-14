@@ -25,7 +25,7 @@ export interface Label {
 }
 
 export interface Tutorial {
-  name?: "lobby" | "conference_room" | "tradeshows";
+  name?: Room;
   position: number[];
   rotation: number[];
   type: "moving" | "fixed";

@@ -1,6 +1,6 @@
 import { Object3D, Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { roomPropertiesReader, Tutorial, TutorialSlide } from "../utils/rooms-properties";
+import { Room, roomPropertiesReader, Tutorial, TutorialSlide } from "../utils/rooms-properties";
 import { AElement, AScene } from "aframe";
 import { ArrayVec3, renderAsEntity } from "../utils/jsx-entity";
 import { MovingTutorialImagePanel, StaticTutorialImagePanel } from "../prefabs/tutorial-panels";
@@ -28,6 +28,15 @@ const DISTANCE_THRESH = 1.5;
 const ANGLE_THRESH = 44;
 const changeTime = 10000;
 const floatingPanelQuery = defineQuery([FloatingTextPanel]);
+
+interface TutorialDict {
+  lobby: RoomTutorial;
+  "conference room"?: RoomTutorial;
+  "main area"?: RoomTutorial;
+  unknown?: RoomTutorial;
+  "business room"?: RoomTutorial;
+  "social area"?: RoomTutorial;
+}
 
 interface TutorialChapter {
   name: string;
@@ -153,7 +162,8 @@ class TutorialManager {
     const rotation = tutorial.rotation as ArrayVec3;
     const ratio = tutorial.ratio;
 
-    const chapters = chaptersDict[tutorial.name!].chapters;
+    if (!Object.keys(chaptersDict).includes(tutorial.name!)) return;
+    const chapters = chaptersDict[tutorial.name!]!.chapters;
     this.chapters = [];
     const slideUrls: string[][][] = [];
     const congratsUrls: string[] = [];
@@ -607,8 +617,8 @@ const conferenceChapters: Array<TutorialChapter> = [
   }
 ];
 
-const chaptersDict: { conference_room: RoomTutorial; lobby: RoomTutorial; tradeshows: RoomTutorial } = {
-  conference_room: {
+const chaptersDict: TutorialDict = {
+  "conference room": {
     chapters: conferenceChapters,
     resetFunc: () => {
       tutorialManager.HidePanel();
@@ -627,7 +637,7 @@ const chaptersDict: { conference_room: RoomTutorial; lobby: RoomTutorial; trades
       tutorialManager.clickButtonObj.visible = false;
     }
   },
-  tradeshows: {
+  "main area": {
     chapters: tradeshowChapters,
     resetFunc: () => {
       tutorialManager.HidePanel();
