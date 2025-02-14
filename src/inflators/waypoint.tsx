@@ -4,11 +4,11 @@ import { HubsWorld } from "../app";
 import spawnPointSrc from "../assets/images/sprites/notice/spawn-point.png";
 import { Networked, NetworkedWaypoint, Waypoint } from "../bit-components";
 import { WaypointFlags } from "../bit-systems/waypoint";
-import { AlphaMode } from "../utils/create-image-mesh";
 import { createElementEntity, createRef, renderAsEntity } from "../utils/jsx-entity";
 import { loadTexture, loadTextureFromCache } from "../utils/load-texture";
 import { preload } from "../utils/preload";
 import { ProjectionMode } from "../utils/projection-mode";
+import { AlphaMode } from "../utils/create-image-mesh";
 
 preload(loadTexture(spawnPointSrc, 1, "image/png"));
 
