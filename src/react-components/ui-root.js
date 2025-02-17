@@ -577,23 +577,8 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
-    this.setState({ enterInVR, waitingOnAudio: true });
-
-    // const hasGrantedMic = (await grantedMicLabels()).length > 0;
-
+    this.setState({ enterInVR });
     this.pushHistoryState("entry_step", "language");
-
-    // if (hasGrantedMic) {
-    //   if (!this.mediaDevicesManager.isMicShared) {
-    //     await this.mediaDevicesManager.startMicShare({});
-    //   }
-    //   this.beginOrSkipAudioSetup();
-    // } else {
-    //   this.onRequestMicPermission();
-    //   this.pushHistoryState("entry_step", "audio");
-    // }
-
-    // this.setState({ waitingOnAudio: false });
   };
 
   enter2D = async () => {
@@ -833,6 +818,8 @@ class UIRoot extends Component {
     const isLockedDownDemo = isLockedDownDemoRoom();
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedNameOrPronouns;
 
+    console.log(this.state.waitingOnAudio, this.props.entryDisallowed);
+
     // TODO: What does onEnteringCanceled do?
     return (
       <>
@@ -851,7 +838,7 @@ class UIRoot extends Component {
             if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
-              this.pushHistoryState("entry_step", "language");
+              this.pushHistoryState("entry_step", "profile");
             } else {
               this.handleForceEntry();
             }
@@ -886,11 +873,13 @@ class UIRoot extends Component {
     const isLockedDownDemo = isLockedDownDemoRoom();
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedNameOrPronouns;
 
+    console.log("language panel");
+
     return (
       <LanguageSetupModalContainer
         scene={this.props.scene}
         onEnterRoom={() => {
-          if (promptForNameAndAvatarBeforeEntry) {
+          if (!hasAcceptedProfile) {
             this.pushHistoryState("entry_step", "profile");
           } else {
             this.onRequestMicPermission();
