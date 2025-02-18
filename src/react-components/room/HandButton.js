@@ -32,9 +32,13 @@ export function HandButton() {
     const intl = useIntl();
     const description = intl.formatMessage(HandTooltipDescription);
 
-    const clickCallback = () => {
+    // const clickCallback = () => {
+    //   presentationSystem.ToggleHand();
+    // };
+
+    const clickCallback = useCallback(() => {
       presentationSystem.ToggleHand();
-    };
+    }, presentationSystem);
 
     return (
       <ToolTip description={description}>

@@ -1,4 +1,4 @@
-import { Color, Object3D, Vector3 } from "three";
+import { AxesHelper, Color, Object3D, Vector3 } from "three";
 import { roomPropertiesReader, Translation } from "../utils/rooms-properties";
 import { AElement } from "aframe";
 import { renderAsEntity } from "../utils/jsx-entity";
@@ -45,12 +45,18 @@ export class PresentationSystem {
     this.canUnmute = false;
     this.questionQueue = [];
 
-    this.ToggleSubtitles = this.ToggleSubtitles.bind(this);
     this.ToggleHand = this.ToggleHand.bind(this);
+    this.ToggleSubtitles = this.ToggleSubtitles.bind(this);
+    this.OnToggleHand = this.OnToggleHand.bind(this);
   }
 
-  Init() {
+  Init(reset: boolean) {
     this.allowed = roomPropertiesReader.AllowPresentation;
+
+    if (reset) {
+      APP.scene!.removeEventListener("toggle_translation", this.ToggleSubtitles);
+      APP.scene!.removeEventListener("ask-toggle", this.OnToggleHand);
+    }
 
     if (!this.allowed) {
       console.warn("Room not in presentation mode");
@@ -58,6 +64,7 @@ export class PresentationSystem {
     }
 
     APP.scene!.addEventListener("toggle_translation", this.ToggleSubtitles);
+    APP.scene!.addEventListener("ask-toggle", this.OnToggleHand);
     this.peerId = APP.dialog._clientId;
     this.properties = roomPropertiesReader.roomProps.translations[0];
     this.presenterBorders = this.properties.type_data;
@@ -77,8 +84,7 @@ export class PresentationSystem {
     if (!this.allowed || !APP.scene!.is("entered")) return;
 
     this.CheckPresenterState();
-    if (this.presenterState) this.PresenterActions();
-    else this.AudienceActions();
+    if (this.presenterState) this.PresenterActions(); // TODO: remove this after integrating trans model
   }
 
   ToggleSubtitles() {
@@ -116,6 +122,10 @@ export class PresentationSystem {
     // }
   }
 
+  OnToggleHand() {
+    this.ToggleHand();
+  }
+
   CountMuteSec() {
     if (this.handTimeout !== null) {
       clearTimeout(this.handTimeout);
@@ -140,6 +150,7 @@ export class PresentationSystem {
   RaiseHand() {
     APP.hubChannel!.raiseHand();
     this.raisedHand = true;
+    if (!APP.scene!.is("handraise")) APP.scene!.addState("handraise");
     APP.dialog.sendHandRequest(this.raisedHand);
   }
 
@@ -147,6 +158,7 @@ export class PresentationSystem {
     APP.hubChannel!.lowerHand();
     if (this.canUnmute) this.canUnmute = false;
     this.raisedHand = false;
+    if (APP.scene!.is("handraise")) APP.scene!.removeState("handraise");
     APP.dialog.sendHandRequest(this.raisedHand);
   }
 
@@ -234,7 +246,6 @@ export class PresentationSystem {
   }
 
   PresenterActions() {
-    return;
     const currentTime = Date.now();
     console.log(this.devCounter, lastLoggedTime);
 

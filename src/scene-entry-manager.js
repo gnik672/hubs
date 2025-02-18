@@ -41,6 +41,7 @@ import { labelOrganizer } from "./bit-systems/room-labels-system";
 import { presentationSystem } from "./bit-systems/presentation-system";
 import { translationSystem } from "./bit-systems/translation-system";
 import { VisitRoom } from "./bit-systems/progress-tracker";
+import { ResizeHudPanel } from "./bit-systems/hub-panel-manager";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -82,12 +83,13 @@ export default class SceneEntryManager {
     oldTranslationSystem.Init(reset);
     translationSystem.Init();
     virtualAgent.Init(reset);
+    ResizeHudPanel();
     floorMap.Init(reset);
     navSystem.Init(reset);
     tutorialManager.Init(reset);
     helpButton.Init(reset);
     labelOrganizer.Init();
-    presentationSystem.Init();
+    presentationSystem.Init(reset);
     VisitRoom();
 
     if (!reset) {

@@ -1,5 +1,3 @@
-import { agentLogger } from "../bit-systems/agent-system";
-import { logger } from "../bit-systems/logging-system";
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 /**
@@ -10,18 +8,11 @@ import { roomPropertiesReader } from "../utils/rooms-properties";
 AFRAME.registerComponent("in-world-hud", {
   init() {
     this.mic = this.el.querySelector(".mic");
-    // this.spawn = this.el.querySelector(".spawn");
-    // this.pen = this.el.querySelector(".penhud");
-    // this.cameraBtn = this.el.querySelector(".camera-btn");
-
     this.agentBtn = this.el.querySelector(".agent-btn");
     this.mapBtn = this.el.querySelector(".map-btn");
     this.helpBtn = this.el.querySelector(".help-btn");
-    // this.langBtn = this.el.querySelector(".lang-btn");
     this.transBtn = this.el.querySelector(".trans-btn");
     this.askBtn = this.el.querySelector(".ask-btn");
-    // this.taskBtn = this.el.querySelector(".task-btn");
-    // this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
     this.onMicStateChanged = () => {
@@ -31,21 +22,12 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.updateButtonStates = () => {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
-      // this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
-      // this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
-      // this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("panel"));
-
-      if (window.APP.hubChannel) {
-        // this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
-        // this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
-        // this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
-      }
 
       roomPropertiesReader.waitForProperties().then(() => {
         this.agentBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsAgent);
         this.mapBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsMap);
         this.helpBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsHelp);
-        this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowTrans);
+        this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowPresentation);
         this.askBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowPresentation);
 
         // this.taskBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("task"));
@@ -57,13 +39,14 @@ AFRAME.registerComponent("in-world-hud", {
         if (roomPropertiesReader.AllowsHelp)
           this.helpBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("help"));
         if (roomPropertiesReader.AllowPresentation) {
-          this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("presentation"));
-          this.askBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("presentation"));
+          this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("translation"));
+          this.askBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("handraise"));
         }
       });
     };
 
     this.onStateChange = evt => {
+      console.log(evt.detail);
       if (
         !(
           evt.detail === "frozen" ||
@@ -73,6 +56,7 @@ AFRAME.registerComponent("in-world-hud", {
           evt.detail === "map" ||
           evt.detail === "panel" ||
           evt.detail === "translation" ||
+          evt.detail === "handraise" ||
           evt.detail === "help" ||
           evt.detail === "task"
         )
@@ -105,11 +89,8 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("help-toggle");
     };
 
-    // this.onLangClick = () => {
-    //   this.el.emit("lang-toggle");
-    // };
     this.onTransClick = () => {
-      if (!roomPropertiesReader.AllowTrans) return;
+      if (!roomPropertiesReader.AllowPresentation) return;
       this.el.emit("toggle_translation");
     };
 
@@ -119,7 +100,7 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onAskClick = () => {
       if (!roomPropertiesReader.AllowPresentation) return;
-      this.el.emit("toggle_question");
+      this.el.emit("ask-toggle");
     };
 
     this.onPenClick = e => {
@@ -136,10 +117,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.onInviteClick = () => {
       this.el.emit("action_invite");
     };
-
-    this.onHubUpdated = e => {
-      // this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
-    };
   },
 
   play() {
@@ -147,21 +124,13 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
     this.el.sceneEl.addEventListener("room_properties_updated", this.updateButtonStates);
     this.el.sceneEl.systems.permissions.onPermissionsUpdated(this.updateButtonStates);
-    this.el.sceneEl.addEventListener("hub_updated", this.onHubUpdated);
     this.updateButtonStates();
-
     this.mic.object3D.addEventListener("interact", this.onMicClick);
-    // this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
-    // this.pen.object3D.addEventListener("interact", this.onPenClick);
-    // this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.addEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.addEventListener("interact", this.onMapClick);
     this.helpBtn.object3D.addEventListener("interact", this.onHelpClick);
-    // this.langBtn.object3D.addEventListener("interact", this.onLangClick);
     this.transBtn.object3D.addEventListener("interact", this.onTransClick);
     this.askBtn.object3D.addEventListener("interact", this.onAskClick);
-    // this.taskBtn.object3D.addEventListener("interact", this.onTaskClick);
-    // this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
   pause() {
@@ -171,16 +140,10 @@ AFRAME.registerComponent("in-world-hud", {
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
     this.el.sceneEl.removeEventListener("hub_updated", this.onHubUpdated);
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
-    // this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
-    // this.pen.object3D.removeEventListener("interact", this.onPenClick);
-    // this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.removeEventListener("interact", this.onMapClick);
     this.helpBtn.object3D.removeEventListener("interact", this.onHelpClick);
-    // this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
     this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
     this.askBtn.object3D.removeEventListener("interact", this.onAskClick);
-    // this.taskBtn.object3D.removeEventListener("interact", this.onTaskClick);
-    // this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });
