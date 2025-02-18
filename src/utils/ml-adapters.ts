@@ -95,6 +95,11 @@ export async function audioModules(
 
     const data = await response.json();
 
+    if (response.status >= 300) {
+      console.error(`throwing audio trans error`);
+      throw new Error("something went wrong");
+    }
+
     return {
       status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
       data: data
@@ -125,6 +130,11 @@ export async function textModule(
       body: JSON.stringify(requestBody)
     });
 
+    if (response.status >= 300) {
+      console.error(`throwing text trans error`);
+      throw new Error("something went wrong");
+    }
+
     const responseBody = await response.json();
 
     return {
@@ -148,6 +158,11 @@ export async function intentionModule(englishTranscription: string): Promise<Res
     });
 
     const responseData = await response.json();
+
+    if (response.status >= 300) {
+      console.error(`throwing intention error`);
+      throw new Error("something went wrong");
+    }
 
     return {
       status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
@@ -178,6 +193,11 @@ export async function dsResponseModule(
     });
 
     const responseData = await response.json();
+
+    if (response.status >= 300) {
+      console.error(`throwing ds error`);
+      throw new Error("something went wrong");
+    }
 
     return {
       status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },

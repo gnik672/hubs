@@ -872,7 +872,22 @@ export const webXRUserBindings = addSetsToBindings({
       priority: 4
     }
   ],
-
+  [sets.rightCursorHoveringOnAgent]: [
+    {
+      src: { value: rightAxis.joyY },
+      dest: { value: paths.actions.cursor.right.scrollPanel },
+      xform: xforms.scale(0.01),
+      priority: 1
+    }
+  ],
+  [sets.leftCursorHoveringOnAgent]: [
+    {
+      src: { value: leftAxis.joyY },
+      dest: { value: paths.actions.cursor.left.scrollPanel },
+      xform: xforms.scale(0.01),
+      priority: 1
+    }
+  ],
   [sets.rightHandHoveringOnNothing]: [],
   [sets.inputFocused]: []
 });

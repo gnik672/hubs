@@ -126,10 +126,7 @@ AFRAME.registerComponent("translate-badge", {
     // reads room properties. translate button needs to be visible only if translation
     // is allowed and the conversation type is bubble. check if there is need for border check
 
-    const transProps = roomPropertiesReader.transProps;
-    if (!roomPropertiesReader.AllowTrans) return;
-
-    this.allowed = transProps.conversation.type === "bubble";
+    this.allowed = roomPropertiesReader.AllowTrans;
 
     if (!this.allowed) {
       this.el.object3D.visible = false;
@@ -137,7 +134,7 @@ AFRAME.registerComponent("translate-badge", {
     }
 
     // check if there are spatiality constrains
-    if (transProps.spatiality.type === "borders") this.borders = transProps.spatiality.data;
+    if (roomPropertiesReader.translation.type === "borders") this.borders = transProps.spatiality.data;
     else this.withinBorder = true;
   }
 });

@@ -1,18 +1,6 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import {
-  Agent,
-  CursorRaycastable,
-  HeldHandLeft,
-  HeldHandRight,
-  HeldRemoteLeft,
-  HeldRemoteRight,
-  Hidden,
-  Interacted,
-  LookAtUser
-} from "../bit-components";
-import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
+import { Agent, CursorRaycastable, Interacted } from "../bit-components";
 import { PermissionStatus } from "../utils/media-devices-utils";
-import { stageUpdate } from "../systems/single-action-button-system";
 import {
   audioModules,
   intentionModule,
@@ -27,16 +15,13 @@ import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { navSystem } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { oldTranslationSystem } from "./old-translation-system";
 import { UpdatePanelSize, GetTextSize, GetObjSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
-import { AxesHelper, BoxHelper, Mesh, Plane, Quaternion, Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 import { roomPropertiesReader } from "../utils/rooms-properties";
-import { GetObjectives, GetResolved, GetValids, MakeObjectiveResolved, RoomObjectives } from "./progress-tracker";
-import { off } from "process";
+import { GetObjectives, GetResolved, GetValids, MakeObjectiveResolved } from "./progress-tracker";
 import { paths } from "../systems/userinput/paths";
-import { labelOrganizer } from "./room-labels-system";
 import { languageCodes, selectedLanguage } from "./localization-system";
 
 const agentQuery = defineQuery([Agent]);
@@ -44,16 +29,6 @@ const enterAgentQuery = enterQuery(agentQuery);
 const PANEL_PADDING = 0.05;
 let trargetCounter = 0;
 const MAX_PANEL_LENGTH = 0.5;
-
-// const suggestions = [
-//   { type: "navigation", value: "How can I go to the conference room?", done: false },
-//   { type: "navigation", value: "How can I go to the business room?", done: false },
-//   { type: "navigation", value: "How can I go to the booth 1?", done: false },
-//   { type: "navigation", value: "How can I go to the social area?", done: false },
-//   { type: "summarization", value: "Summarize the content of the main presentation", done: false },
-//   { type: "tradeshows", value: "΅Who will I find in the tradeshows?", done: false },
-//   { type: "schedule", value: "Who is presenting in the morning?", done: false }
-// ];
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -229,6 +204,8 @@ export default class VirtualAgent {
     APP.dialog.off("mic-state-changed", this.setMicStatus);
     APP.scene.removeState("agent");
     this.agentParent.obj.visible = false;
+    this.agentParent.obj.position.set(100, 100, 100);
+    this.agentParent.obj.updateMatrix();
     this.ToggleRays(false);
   }
 
@@ -242,6 +219,8 @@ export default class VirtualAgent {
     action(APP.world, CursorRaycastable, this.displayedText.eid);
     action(APP.world, CursorRaycastable, this.agentParent.eid);
     action(APP.world, CursorRaycastable, this.infoPanel.eid);
+    if (this.suggLText.eid) action(APP.world, CursorRaycastable, this.suggLText.eid);
+    if (this.suggRText.eid) action(APP.world, CursorRaycastable, this.suggRText.eid);
   }
 
   Remove() {
@@ -315,14 +294,9 @@ export default class VirtualAgent {
 
     const panelSize = this.panel.size || GetObjSize(this.panel.obj);
     const textSize = GetTextSize(this.displayedText.obj);
-
     const worldQuaternion = this.panel.obj.getWorldQuaternion(new Quaternion());
-
-    // const xGlobal = new Vector3(1, 0, 0).applyQuaternion(worldQuaternion).normalize();
     const yGlobal = new Vector3(0, 1, 0).applyQuaternion(worldQuaternion).normalize();
-    // const zGlobal = new Vector3(0, 0, 1).applyQuaternion(worldQuaternion).normalize();
     const worldPosition = this.panel.obj.getWorldPosition(new Vector3());
-
     const umidPoint = new Vector3().addVectors(
       worldPosition,
       yGlobal.clone().multiplyScalar(MAX_PANEL_LENGTH / 2 - PANEL_PADDING)
@@ -332,26 +306,15 @@ export default class VirtualAgent {
       yGlobal.clone().multiplyScalar(-MAX_PANEL_LENGTH / 2 + PANEL_PADDING)
     );
 
-    // const ulPoint = new Vector3().addVectors(umidPoint, xGlobal.clone().multiplyScalar(-MAX_PANEL_LENGTH / 2));
-    // const urPoint = new Vector3().addVectors(umidPoint, xGlobal.clone().multiplyScalar(MAX_PANEL_LENGTH / 2));
-    // const dlPoint = new Vector3().addVectors(dmidPoint, xGlobal.clone().multiplyScalar(-MAX_PANEL_LENGTH / 2));
-    // const drPoint = new Vector3().addVectors(dmidPoint, xGlobal.clone().multiplyScalar(MAX_PANEL_LENGTH / 2));
-
-    // const upThirdPoint = new Vector3().addVectors(umidPoint, zGlobal.clone());
-    // const downThirdPoint = new Vector3().addVectors(dmidPoint, zGlobal.clone());
-
-    // this.clippingPlaneUp.setFromCoplanarPoints(ulPoint, urPoint, upThirdPoint);
-    // this.clippingPlaneDown.setFromCoplanarPoints(drPoint, dlPoint, downThirdPoint);
-
     this.clippingPlaneUp.constant = umidPoint.y;
     this.clippingPlaneDown.constant = -dmidPoint.y;
-
     const movement = userinput.get(paths.actions.cursor.right.scrollPanel)
       ? userinput.get(paths.actions.cursor.right.scrollPanel)
+      : userinput.get(paths.actions.cursor.left.scrollPanel)
+      ? userinput.get(paths.actions.cursor.left.scrollPanel)
       : 0;
 
     const initPos = this.displayedText.obj.position;
-    const downBarrier = panelSize[1] / 2 - textSize[1] / 2 - PANEL_PADDING;
     const upBarrier = textSize[1] / 2 - panelSize[1] / 2 + PANEL_PADDING;
 
     if ((initPos.y <= upBarrier && movement > 0) || (initPos.y >= -upBarrier && movement < 0)) {
@@ -541,9 +504,8 @@ export default class VirtualAgent {
     this.panel.obj.visible = false;
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
-    // this.setMicStatus();
+    this.successResult = false;
 
-    // const agentDataObj = [];
     try {
       const langCode = languageCodes[selectedLanguage] || "en";
       this.isProccessing = true;

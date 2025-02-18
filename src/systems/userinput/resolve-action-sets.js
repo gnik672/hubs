@@ -79,22 +79,10 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.leftCursorHoveringOnCamera, hc(world, CameraTool, leftRemoteHovering));
   userinput.toggleSet(sets.rightCursorHoveringOnCamera, hc(world, CameraTool, rightRemoteHovering));
 
-  userinput.toggleSet(
-    sets.leftHandHoveringOnAgent,
-    hc(world, Agent, leftHandHovering) || hc(world, AgentTextPanel, leftHandHovering)
-  );
-  userinput.toggleSet(
-    sets.rightHandHoveringOnAgent,
-    hc(world, Agent, rightHandHovering) || hc(world, AgentTextPanel, rightHandHovering)
-  );
-  userinput.toggleSet(
-    sets.leftCursorHoveringOnAgent,
-    hc(world, Agent, leftRemoteHovering) || hc(world, AgentTextPanel, leftRemoteHovering)
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoveringOnAgent,
-    hc(world, Agent, rightRemoteHovering) || hc(world, AgentTextPanel, rightRemoteHovering)
-  );
+  userinput.toggleSet(sets.leftHandHoveringOnAgent, hc(world, Agent, leftHandHovering));
+  userinput.toggleSet(sets.rightHandHoveringOnAgent, hc(world, Agent, rightHandHovering));
+  userinput.toggleSet(sets.leftCursorHoveringOnAgent, hc(world, Agent, leftRemoteHovering));
+  userinput.toggleSet(sets.rightCursorHoveringOnAgent, hc(world, Agent, rightRemoteHovering));
 
   userinput.toggleSet(
     sets.leftHandHoveringOnInteractable,
