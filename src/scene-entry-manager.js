@@ -83,13 +83,13 @@ export default class SceneEntryManager {
     oldTranslationSystem.Init(reset);
     translationSystem.Init();
     virtualAgent.Init(reset);
-    ResizeHudPanel();
     floorMap.Init(reset);
     navSystem.Init(reset);
     tutorialManager.Init(reset);
     helpButton.Init(reset);
     labelOrganizer.Init();
     presentationSystem.Init(reset);
+    ResizeHudPanel();
     VisitRoom();
 
     if (!reset) {
