@@ -818,8 +818,6 @@ class UIRoot extends Component {
     const isLockedDownDemo = isLockedDownDemoRoom();
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedNameOrPronouns;
 
-    console.log(this.state.waitingOnAudio, this.props.entryDisallowed);
-
     // TODO: What does onEnteringCanceled do?
     return (
       <>
@@ -870,10 +868,6 @@ class UIRoot extends Component {
   renderLanguageSetupPanel = () => {
     // TODO: Show HMD mic not chosen warning
     const { hasAcceptedProfile, hasChangedNameOrPronouns } = this.props.store.state.activity;
-    const isLockedDownDemo = isLockedDownDemoRoom();
-    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedNameOrPronouns;
-
-    console.log("language panel");
 
     return (
       <LanguageSetupModalContainer
