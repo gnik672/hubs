@@ -89,7 +89,7 @@ export default class SceneEntryManager {
     helpButton.Init(reset);
     labelOrganizer.Init();
     presentationSystem.Init(reset);
-    ResizeHudPanel();
+    // ResizeHudPanel();
     VisitRoom();
 
     if (!reset) {

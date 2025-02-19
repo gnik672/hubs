@@ -7,6 +7,7 @@
 import { defineMessage, useIntl } from "react-intl";
 import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { IconTranslationDict } from "../bit-systems/localization-system";
+import { ResizeHudPanel } from "../bit-systems/hub-panel-manager";
 
 AFRAME.registerComponent("icon-button", {
   schema: {
@@ -92,5 +93,7 @@ AFRAME.registerComponent("icon-button", {
 
       this.data.tooltip.querySelector("[text]").setAttribute("text", "value", tooltipText);
     }
+
+    ResizeHudPanel();
   }
 });
