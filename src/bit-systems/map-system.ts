@@ -48,6 +48,7 @@ class FloorMapClass {
   }
 
   Init(reset: boolean) {
+    this.AScene = APP.scene as AScene;
     if (reset) {
       this.AScene.removeEventListener("map-toggle", this.onToggle);
       this.AScene.addEventListener("clear-scene", this.onClear);
@@ -60,7 +61,6 @@ class FloorMapClass {
       return;
     }
 
-    this.AScene = APP.scene as AScene;
     this.AScene.addEventListener("map-toggle", this.onToggle);
     this.AScene.addEventListener("clear-scene", this.onClear);
     this.allowed = true;
