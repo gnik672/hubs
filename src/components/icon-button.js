@@ -4,10 +4,7 @@
  * @component icon-button
  */
 
-import { defineMessage, useIntl } from "react-intl";
-import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { IconTranslationDict } from "../bit-systems/localization-system";
-import { ResizeHudPanel } from "../bit-systems/hub-panel-manager";
 
 AFRAME.registerComponent("icon-button", {
   schema: {
@@ -45,11 +42,13 @@ AFRAME.registerComponent("icon-button", {
     this.updateButtonState();
     this.el.object3D.addEventListener("hovered", this.onHover);
     this.el.object3D.addEventListener("unhovered", this.onHoverOut);
+    // this.el.sceneEl.addEventListener("room_properties_updated", this.updateButtonState);
   },
 
   pause() {
     this.el.object3D.removeEventListener("hovered", this.onHover);
     this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
+    // this.el.sceneEl.removeEventListener("room_properties_updated", this.updateButtonState);
   },
 
   update() {
@@ -57,6 +56,7 @@ AFRAME.registerComponent("icon-button", {
   },
 
   updateButtonState() {
+    console.log(`updating icon-button: ${this.el.className}`);
     const hovering = this.hovering;
     const active = this.data.active;
     const disabled = this.data.disabled;
@@ -93,7 +93,5 @@ AFRAME.registerComponent("icon-button", {
 
       this.data.tooltip.querySelector("[text]").setAttribute("text", "value", tooltipText);
     }
-
-    ResizeHudPanel();
   }
 });

@@ -21,6 +21,7 @@ AFRAME.registerComponent("in-world-hud", {
     APP.dialog.on("mic-state-changed", this.onMicStateChanged);
 
     this.updateButtonStates = () => {
+      console.log(`updating button states`);
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
 
       roomPropertiesReader.waitForProperties().then(() => {
