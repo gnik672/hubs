@@ -72,6 +72,7 @@ class textElement extends objElement {
   set text(message) {
     this.value = message;
     this.obj.text = message;
+    this.obj.updateMatrix();
   }
 }
 class SuggestionElement extends textElement {
@@ -173,6 +174,7 @@ export default class VirtualAgent {
 
     objs.forEach(obj => {
       obj.visible = true;
+      obj.updateMatrix();
     });
 
     GetObjectives().forEach((objective, index) => {
@@ -193,6 +195,7 @@ export default class VirtualAgent {
     objs.forEach((obj, index) => {
       if (index >= types.length) {
         obj.visible = false;
+        obj.updateMatrix();
       }
     });
   }
@@ -221,6 +224,8 @@ export default class VirtualAgent {
     action(APP.world, CursorRaycastable, this.infoPanel.eid);
     if (this.suggLText.eid) action(APP.world, CursorRaycastable, this.suggLText.eid);
     if (this.suggRText.eid) action(APP.world, CursorRaycastable, this.suggRText.eid);
+    if (this.suggestionL.eid) action(APP.world, CursorRaycastable, this.suggestionL.eid);
+    if (this.suggestionR.eid) action(APP.world, CursorRaycastable, this.suggestionR.eid);
   }
 
   Remove() {
@@ -273,8 +278,8 @@ export default class VirtualAgent {
         const size = GetTextSize(textObj);
         size[0] += 2 * PANEL_PADDING;
         size[1] += 2 * PANEL_PADDING;
-        UpdatePanelSize(panelElem.eid, size);
         panelElem.size = size;
+        UpdatePanelSize(panelElem.eid, size);
       };
     };
 
