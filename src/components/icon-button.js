@@ -65,8 +65,10 @@ AFRAME.registerComponent("icon-button", {
       image = "disabledImage";
       this.el.object3D.visible = false;
     } else if (active) {
+      this.el.object3D.visible = true;
       image = hovering ? "activeHoverImage" : "activeImage";
     } else {
+      this.el.object3D.visible = true;
       image = hovering ? "hoverImage" : "image";
     }
 
