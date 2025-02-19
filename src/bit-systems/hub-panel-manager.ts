@@ -2,10 +2,10 @@ import { AElement } from "aframe";
 
 const BTN_OFFSET = 0.15;
 const counters = [-1, 0];
-let counter = -1;
 export function ResizeHudPanel() {
   const hudPanel = document.querySelector("#pilot-tooltip")!;
   const pilotBtns = hudPanel.querySelectorAll("[is-remote-hover-target]") as NodeListOf<AElement>;
+  let counter = -1;
 
   for (let i = 0; i < pilotBtns.length; i++) {
     if (!pilotBtns[i].object3D.visible) continue;
