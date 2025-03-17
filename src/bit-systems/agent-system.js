@@ -508,19 +508,14 @@ export default class VirtualAgent {
       this.isProccessing = true;
       let nmtResponse;
       if (!query) {
-        try {
-          const recordedQuestion = await RecordQuestion(); // question recording
-          const nmtAudioParams = { source_language: langCode, target_language: "en", return_transcription: "true" };
-          nmtResponse = await audioModules(
-            COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
-            recordedQuestion.data.file,
-            nmtAudioParams
-          );
-          // sending to ASR/NMT
-        } catch (error) {
-          console.error({ nmtError: error.message });
-          nmtResponse = "How can I go to the conference room"; // Testing phrase or error query
-        }
+        const recordedQuestion = await RecordQuestion(); // question recording
+        const nmtAudioParams = { source_language: langCode, target_language: "en", return_transcription: "true" };
+        nmtResponse = await audioModules(
+          COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
+          recordedQuestion.data.file,
+          nmtAudioParams
+        );
+        // sending to ASR/NMT
       } else nmtResponse = query;
 
       let intentResponse;
@@ -528,29 +523,22 @@ export default class VirtualAgent {
 
       if (!!intention) intentResponse = intention;
       else {
-        try {
-          const int = await intentionModule(nmtResponse);
-          destination = int.destination;
-          intentResponse = int.intention;
-        } catch (error) {
-          console.error({ intentError: error.message });
-          intentResponse = "navigation";
-          const ind = getRandomInt(Object.keys(navSystem.targetName).length); // Testing intention or error
-          destination = Object.keys(navSystem.targetName)[ind];
-        }
+        const int = await intentionModule(nmtResponse);
+        destination = int.destination;
+        intentResponse = int.intention;
       }
 
       let voxyResponse;
       try {
         if (intentResponse.includes("navigation")) {
           try {
+            const instPath = navSystem.GetInstructionsGraphics(destination);
+            if (instPath.length > 0) navSystem.RenderCues(instPath);
             voxyResponse = await vlModule(destination, COMPONENT_ENDPOINTS.LOCAL_VLM);
           } catch (error) {
             console.error({ vlModuleError: error.message });
             voxyResponse = "Follow the green line to reach your destination";
           }
-          const instPath = navSystem.GetInstructionsGraphics(destination);
-          if (instPath.length > 0) navSystem.RenderCues(instPath);
         } else {
           voxyResponse = await dsResponseModule(nmtResponse, intentResponse, "");
         }
@@ -567,9 +555,11 @@ export default class VirtualAgent {
         this.UpdateTextArray([translatedResponse]); // print the translated response
       }
 
-      if (intentResponse.includes("navigation") && navSystem.dest.active) {
-        this.successResult = true;
-      } else if (intentResponse.includes("program_info") || intentResponse.includes("trade_show")) {
+      if (
+        (intentResponse.includes("navigation") && navSystem.dest.active) ||
+        intentResponse.includes("program_info") ||
+        intentResponse.includes("trade_show")
+      ) {
         this.successResult = true;
       } else {
         this.successResult = false;
