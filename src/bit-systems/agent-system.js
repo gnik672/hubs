@@ -45,8 +45,8 @@ export function AgentSystem(t, userinput) {
   agentQuery(APP.world).forEach(_ => {
     virtualAgent.ButtonInteractions();
     virtualAgent.Animations(t);
-    virtualAgent.agent.obj.updateMatrix();
     virtualAgent.UpdatePanel(userinput);
+    virtualAgent.agentParent.obj.updateWorldMatrix();
   });
 }
 
@@ -164,6 +164,8 @@ export default class VirtualAgent {
     this.ToggleRays(true);
     this.agent.obj.position.copy(this.AgentInitialPosition);
     this.agent.obj.rotation.set(0, 0, 0);
+    this.agentParent.obj.visible = true;
+    this.agentParent.obj.updateWorldMatrix();
   }
 
   FetchSuggestions() {
@@ -173,12 +175,12 @@ export default class VirtualAgent {
 
     objs.forEach(obj => {
       obj.visible = true;
+      obj.updateMatrix();
     });
 
     GetObjectives().forEach((objective, index) => {
       const valids = GetValids();
       const resolved = GetResolved();
-      console.log(valids, resolved, index);
       if (valids[index] && !resolved[index]) {
         if (types.length === 2 || (types.length === 1 && types[0] === objective.type)) return;
 
@@ -193,6 +195,7 @@ export default class VirtualAgent {
     objs.forEach((obj, index) => {
       if (index >= types.length) {
         obj.visible = false;
+        obj.updateMatrix();
       }
     });
   }
@@ -205,7 +208,7 @@ export default class VirtualAgent {
     APP.scene.removeState("agent");
     this.agentParent.obj.visible = false;
     this.agentParent.obj.position.set(100, 100, 100);
-    this.agentParent.obj.updateMatrix();
+    this.agentParent.obj.updateWorldMatrix();
     this.ToggleRays(false);
   }
 
@@ -221,6 +224,8 @@ export default class VirtualAgent {
     action(APP.world, CursorRaycastable, this.infoPanel.eid);
     if (this.suggLText.eid) action(APP.world, CursorRaycastable, this.suggLText.eid);
     if (this.suggRText.eid) action(APP.world, CursorRaycastable, this.suggRText.eid);
+    if (this.suggestionL.eid) action(APP.world, CursorRaycastable, this.suggestionL.eid);
+    if (this.suggestionR.eid) action(APP.world, CursorRaycastable, this.suggestionR.eid);
   }
 
   Remove() {
@@ -253,23 +258,18 @@ export default class VirtualAgent {
     this.suggLText.obj = this.suggestionL.obj.getObjectByName(`${this.suggestionL.obj.name} Label`);
     this.suggRText.obj = this.suggestionR.obj.getObjectByName(`${this.suggestionR.obj.name} Label`);
 
-    console.log(this.suggestionL, this.suggestionR, this.suggLText, this.suggRText); //done working
-
     this.isProccessing = false;
     this.isListening = false;
     this.successResult = false;
     this.micStatus = false;
     this.waitingForResponse = false;
     APP.mediaDevicesManager.micEnabled = false;
-    this.agent.obj.visible = true;
-    this.infoPanel.obj.visible = false;
-    this.agentParent.obj.visible = false;
-
     this.AgentInitialPosition = this.agent.obj.position.clone();
+    // this.agentParent.obj.visible = false;
+    // this.agentParent.obj.updateWorldMatrix();
 
     const suggestionTextSyncHandler = (textObj, panelElem) => {
       return () => {
-        console.log(`sugg button update`);
         const size = GetTextSize(textObj);
         size[0] += 2 * PANEL_PADDING;
         size[1] += 2 * PANEL_PADDING;
@@ -280,13 +280,11 @@ export default class VirtualAgent {
 
     this.listeners.set(this.suggLText, suggestionTextSyncHandler(this.suggLText.obj, this.suggestionL));
     this.listeners.set(this.suggRText, suggestionTextSyncHandler(this.suggRText.obj, this.suggestionR));
-
     this.AddAnimationDots();
-    this.ToggleRays(false);
-
     this.clippingPlaneUp = new THREE.Plane(new Vector3(0, -1, 0), 0);
     this.clippingPlaneDown = new THREE.Plane(new Vector3(0, 1, 0), 0);
     this.displayedText.obj.material.clippingPlanes = [this.clippingPlaneUp, this.clippingPlaneDown];
+    this.Disable();
   }
 
   UpdatePanel(userinput) {
@@ -346,21 +344,16 @@ export default class VirtualAgent {
     const clearSize = GetObjSize(this.clearButton.obj);
 
     const panelSize = size.map(sizeElem => sizeElem + 2 * PANEL_PADDING);
-    if (panelSize[1] > MAX_PANEL_LENGTH) {
-      panelSize[1] = MAX_PANEL_LENGTH;
-      console.log(`resizing panel to max allowed width`);
-    }
+    if (panelSize[1] > MAX_PANEL_LENGTH) panelSize[1] = MAX_PANEL_LENGTH;
 
     UpdatePanelSize(this.panel.eid, panelSize);
     this.panel.size = panelSize;
 
     if (this.successResult) {
       this.clearButton.obj.position.copy(new Vector3(0, -((panelSize[1] + clearSize[1]) / 2 + PANEL_PADDING), 0));
-      this.clearButton.obj.updateMatrix();
       this.clearButton.obj.visible = true;
-    } else {
-      this.clearButton.obj.visible = false;
-    }
+    } else this.clearButton.obj.visible = false;
+    this.clearButton.obj.updateMatrix();
 
     const offset = size[1] / 2 - panelSize[1] / 2 + PANEL_PADDING;
     const initPos = this.displayedText.obj.position.clone();
@@ -374,6 +367,7 @@ export default class VirtualAgent {
 
     this.agentParent.obj.visible = true;
     this.panel.obj.visible = true;
+    this.agentParent.obj.updateWorldMatrix();
   }
 
   UpdateTextArray(newTextArray) {
@@ -405,6 +399,7 @@ export default class VirtualAgent {
     this.nextArrow.obj.visible = this.slideIndex !== this.textArray.length - 1;
     this.prevArrow.obj.visible = this.slideIndex !== 0;
     this.displayedText.obj.text = this.textArray[this.slideIndex];
+    this.agentParent.obj.updateWorldMatrix();
   }
 
   setMicStatus() {
@@ -505,63 +500,92 @@ export default class VirtualAgent {
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
     this.successResult = false;
+    this.ToggleRays(false);
 
     try {
       const langCode = languageCodes[selectedLanguage] || "en";
       this.isProccessing = true;
       let nmtResponse;
       if (!query) {
-        const recordedQuestion = await RecordQuestion(); // question recording
-        const nmtAudioParams = { source_language: langCode, target_language: "en", return_transcription: "true" };
-        nmtResponse = (
-          await audioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordedQuestion.data.file, nmtAudioParams)
-        ).data.translations[0]; // sending to ASR/NMT
+        try {
+          const recordedQuestion = await RecordQuestion(); // question recording
+          const nmtAudioParams = { source_language: langCode, target_language: "en", return_transcription: "true" };
+          nmtResponse = await audioModules(
+            COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
+            recordedQuestion.data.file,
+            nmtAudioParams
+          );
+          // sending to ASR/NMT
+        } catch (error) {
+          console.error({ nmtError: error.message });
+          nmtResponse = "How can I go to the conference room"; // Testing phrase or error query
+        }
       } else nmtResponse = query;
 
-      const intentResponse = !!intention ? intention : (await intentionModule(nmtResponse)).data.intent; // retrieving intention
-      const dsResponse = (await dsResponseModule(nmtResponse, intentResponse, "")).data.response; // retrieving ds response (in case of nav: send also instructions)
+      let intentResponse;
+      let destination;
+
+      if (!!intention) intentResponse = intention;
+      else {
+        try {
+          const int = await intentionModule(nmtResponse);
+          destination = int.destination;
+          intentResponse = int.intention;
+        } catch (error) {
+          console.error({ intentError: error.message });
+          intentResponse = "navigation";
+          const ind = getRandomInt(Object.keys(navSystem.targetName).length); // Testing intention or error
+          destination = Object.keys(navSystem.targetName)[ind];
+        }
+      }
+
+      let voxyResponse;
+      try {
+        if (intentResponse.includes("navigation")) {
+          try {
+            voxyResponse = await vlModule(destination, COMPONENT_ENDPOINTS.LOCAL_VLM);
+          } catch (error) {
+            console.error({ vlModuleError: error.message });
+            voxyResponse = "Follow the green line to reach your destination";
+          }
+          const instPath = navSystem.GetInstructionsGraphics(destination);
+          if (instPath.length > 0) navSystem.RenderCues(instPath);
+        } else {
+          voxyResponse = await dsResponseModule(nmtResponse, intentResponse, "");
+        }
+      } catch (error) {
+        console.error({ dsError: error.message });
+        voxyResponse = this.GetRandomPhrase("error");
+      }
 
       if (langCode === "en") {
-        this.UpdateTextArray([dsResponse]); //print result if language is english
+        this.UpdateTextArray([voxyResponse]); //print result if language is english
       } else {
         const nmtTextParams = { source_language: "en", target_language: langCode };
-        const translatedResponse = (await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams)).data
-          .translations[0]; // translate if language is not english
+        const translatedResponse = await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams); // translate if language is not english
         this.UpdateTextArray([translatedResponse]); // print the translated response
       }
 
-      if (intentResponse.includes("navigation") && navigation.valid) {
+      if (intentResponse.includes("navigation") && navSystem.dest.active) {
         this.successResult = true;
-        navSystem.RenderCues(navigation); // if intent=nav with a valid destination render ques
       } else if (intentResponse.includes("program_info") || intentResponse.includes("trade_show")) {
         this.successResult = true;
       } else {
         this.successResult = false;
       }
 
-      console.log(`results: ${this.successResult} for index: ${index}`);
       if (this.successResult && index >= 0) {
         MakeObjectiveResolved(index, true);
       }
     } catch (error) {
-      console.log("error", error);
-      this.UpdateWithRandomPhrase("error");
-      this.UpdateTextArray([
-        `1914 translation by H. Rackham
-
-"But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?"
-Section 1.10.33 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
-
-"At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat."
-1914 translation by H. Rackham
-
-"On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains."`
-      ]); // display error message on error
+      console.log({ askAgentError: error.message });
+      this.UpdateWithRandomPhrase("error"); // display error message on error
     } finally {
       this.isProccessing = false;
       this.infoPanel.obj.visible = false;
       this.panel.obj.visible = true;
       this.waitingForResponse = false;
+      this.ToggleRays(true);
     }
   }
 
@@ -574,22 +598,12 @@ Section 1.10.33 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
     return navigation;
   }
 
-  async SnapActions() {
-    try {
-      const responses = await Promise.all([SnapPOV(this.agent.obj, false), SnapDepthPOV(false)]);
-      const vlResponse = await vlModule(responses[0], COMPONENT_ENDPOINTS.LXMERT);
-      console.log(vlResponse);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   HandleArrows(renderArrows) {
     this.nextArrow.obj.visible = renderArrows;
     this.prevArrow.obj.visible = renderArrows;
   }
 
-  UpdateWithRandomPhrase(occasion) {
+  GetRandomPhrase(occasion) {
     const phrases = [];
 
     this.occasions[occasion].forEach(occasionKey => {
@@ -600,8 +614,11 @@ Section 1.10.33 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
       phrases.push(availablePhrases[randomIndex]);
     });
 
-    this.UpdateTextArray(phrases.length === 1 ? [phrases[0]] : [phrases.join(" ")]);
-    this.currentOccasion = occasion;
+    return phrases.length === 1 ? [phrases[0]] : [phrases.join(" ")];
+  }
+
+  UpdateWithRandomPhrase(occasion) {
+    this.UpdateTextArray([this.GetRandomPhrase(occasion)]);
   }
 
   GetTypingObj() {

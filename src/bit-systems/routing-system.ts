@@ -327,7 +327,7 @@ export class NavigationSystem {
   mapped: boolean;
   mappedNodes: Array<boolean>;
   paths: Array<Array<Array<number>>>;
-  dest: { active: boolean; pos?: Node; time?: Date };
+  dest: { active: boolean; pos?: Node; time?: number };
   navProps: NavigationProperties;
   cuesEid: number;
   roomPolygon: Vector2[];
@@ -1099,13 +1099,12 @@ export class NavigationSystem {
     return { index: startIndex, angle: angle, destination: stopName, instructions: inst };
   }
 
-  GetInstructions(stopName: string) {
+  GetInstructionsGraphics(stopName: string) {
     const startPos = avatarPos().clone();
     this.RemoveCues();
     const startIndex = this.GetClosestIndices(startPos)[0];
     const stopIndex = this.GetDestIndex(stopName);
-
-    if (stopIndex < 0 || !this.allowed) return { path: [], instructions: [], knowledge: "no location", valid: false };
+    if (stopIndex < 0 || !this.allowed) return [];
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
@@ -1118,6 +1117,33 @@ export class NavigationSystem {
     path.forEach(index => {
       pathVectors.push(this.nodes[index].vector);
     });
+
+    this.dest = { active: true, pos: this.nodes[stopIndex] };
+
+    return pathVectors;
+  }
+
+  GetInstructions(stopName: string) {
+    const startPos = avatarPos().clone();
+    this.RemoveCues();
+    const startIndex = this.GetClosestIndices(startPos)[0];
+    const stopIndex = this.GetDestIndex(stopName);
+
+    if (stopIndex < 0 || !this.allowed) return [];
+
+    if (!this.mappedNodes[startIndex]) {
+      if (this.mapped) this.Reset();
+      this.Dijkstra(startIndex, startPos);
+    }
+
+    const path = this.paths[startIndex][stopIndex];
+    const pathVectors: Array<Vector3> = [];
+
+    path.forEach(index => {
+      pathVectors.push(this.nodes[index].vector);
+    });
+
+    return pathVectors;
 
     const navigation: Navigation = {
       path: pathVectors,
@@ -1375,16 +1401,15 @@ export class NavigationSystem {
     return bb;
   }
 
-  RenderCues(navigation: Navigation) {
+  RenderCues(path: Vector3[]) {
     try {
-      // this.RenderNodes(navigation.path, 0x00ffff);
-      this.cuesEid = renderAsEntity(APP.world, NavigationCues(navigation));
+      this.cuesEid = renderAsEntity(APP.world, NavigationCues(path));
       this.cuesObj = APP.world.eid2obj.get(this.cuesEid)!;
       APP.scene!.object3D.add(this.cuesObj);
       this.dest.active = true;
-      this.dest.time = new Date();
+      this.dest.time = new Date().getTime();
     } catch (error) {
-      //console.log(error);
+      console.error({ renderCuesError: error });
     }
   }
 
@@ -1407,8 +1432,7 @@ export class NavigationSystem {
     if (avatarPos().distanceTo(this.dest.pos!.vector) < 3) {
       this.StopNavigating();
       virtualAgent.UpdateWithRandomPhrase("success");
-    }
-    // else if (new Date() - this.dest.time > 30000) this.StopNavigating("cleared");
+    } else if (new Date().getTime() - this.dest.time! > 30000) this.StopNavigating();
   }
 }
 
@@ -1416,13 +1440,5 @@ export const navSystem = new NavigationSystem();
 
 export function NavigatingSystem(world: HubsWorld) {
   if (!navSystem.dest.active) return;
-  {
-    navSystem.ShouldFinish();
-
-    console.log(
-      `avatar direction`,
-      avatarDirection().toArray().toString(),
-      avatarIgnoreYDirection().toArray().toString()
-    );
-  }
+  navSystem.ShouldFinish();
 }

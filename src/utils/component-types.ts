@@ -7,7 +7,8 @@ export enum COMPONENT_ENDPOINTS {
   LXMERT = "https://dev.voxreality.maggioli-research.gr/lxmert/",
   GPT = "https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/",
   INTENTION = "https://dev.conference-agent-voxreality.lab.synelixis.com/intent_dest/",
-  TASK_RESPONSE = "https://dev.conference-agent-voxreality.lab.synelixis.com/response/"
+  TASK_RESPONSE = "https://dev.conference-agent-voxreality.lab.synelixis.com/response/",
+  LOCAL_VLM = "http://172.23.26.99:5044/navqa"
 }
 
 export enum RECORDER_CODES {
