@@ -292,7 +292,8 @@ export function InteractivePanel({
         width={0.5}
         height={buttonHeight}
         type={BUTTON_TYPES.DEFAULT}
-        text={"AAA"}
+        visible={false}
+        text={"this should not be visible"}
       />
     </entity>
   );
