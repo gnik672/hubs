@@ -32,7 +32,6 @@ export function AgentEntity() {
         ref={agentRef}
         model={{ model: cloneModelFromCache(agentModelSrc).scene }}
         position={[0, 0, 0]}
-        visible={false}
         remoteHoverTarget
         handCollisionTarget
         offersRemoteConstraint
@@ -47,11 +46,6 @@ export function AgentEntity() {
           collisionGroup: COLLISION_LAYERS.INTERACTABLES,
           collisionMask: COLLISION_LAYERS.HANDS
         }}
-        // physicsShape={{
-        //   fit: Fit.MANUAL,
-        //   type: Shape.SPHERE,
-        //   halfExtents: [0.25, 0.5, 0.45]
-        // }}
       >
         <InteractivePanel
           panelRef={panelRef}

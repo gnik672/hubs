@@ -5,7 +5,6 @@ import { AElement } from "aframe";
 import { audioModules, stopRecording, textModule } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { setLocale } from "../utils/i18n";
-import { AvatarUrlModal } from "../react-components/room/AvatarUrlModal";
 import { languageCodes, voxLanugages } from "./localization-system";
 
 interface WsData {
@@ -286,7 +285,6 @@ export class TranslationSystem {
     this.websocket.onopen = () => {
       console.log("connected to websocket");
       this.SendAudioConfig();
-
       this.StartTranscription();
     };
 

@@ -28,16 +28,9 @@ interface instruction {
   distance?: number;
 }
 
-export function NavigationCues(navigation: Navigation) {
+export function NavigationCues(points: Vector3[]) {
   const lines = [];
   const turns: any[] | undefined = [];
-  const points = navigation.path;
-
-  // navigation.instructions.forEach(instruction => {
-  //   if (instruction.action === "turn" || instruction.action === "stairs") {
-  //     turns.push(<entity name={`turn`} model={{ model: GetArrow(instruction) }}></entity>);
-  //   }
-  // });
 
   for (let i = 0; i < points.length - 1; i++) {
     const prev = points[i];
