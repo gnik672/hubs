@@ -1,76 +1,127 @@
-# [Mozilla Hubs](https://hubs.mozilla.com/)
+# Hubs Client
 
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs) [![Discord](https://img.shields.io/discord/498741086295031808)](https://discord.gg/CzAbuGu)
+## Overview
 
-The client-side code for [Mozilla Hubs](https://hubs.mozilla.com/), an online 3D collaboration platform that works for desktop, mobile, and VR platforms.
+The Hubs client contains all modifications to the source code of the Hubs Foundation Hubs repo.
 
-[Learn more about Hubs](https://hubs.mozilla.com/docs/welcome.html)
+## Table of Contents
 
-## Getting Started
+- [Environments](#environments)
+- [Hubs Services](#hubs-services)
+- [Project Structure](#project-structure)
+- [Technologies](#technologies)
+- [Deployments](#deployments)
+- [Integration with External APIs](#integration-with-external-apis)
 
-If you would like to run Hubs on your own servers, check out [Hubs Cloud](https://hubs.mozilla.com/docs/hubs-cloud-intro.html).
+## Environments
 
-If you would like to deploy a custom client to your existing Hubs Cloud instance please refer to [this guide](https://hubs.mozilla.com/docs/hubs-cloud-custom-clients.html).
+- Development
 
-If you would like to contribute to the main fork of the Hubs client please see the [contributor guide](./CONTRIBUTING.md).
+For development, a [Hubs Compose](https://github.com/Hubs-Foundation/hubs-compose.git) project is deployed to a VM. For more information about installing, initializing, updating, and stopping the services, read the documentation of this project.
 
-If you just want to check out how Hubs works and make your own modifications continue on to our Quick Start Guide.
+- Production
 
-### Quick Start
+For production, a [Hubs Community Edition (HCE)](https://github.com/Hubs-Foundation/hubs-cloud/tree/master/community-edition) project is deployed in a [Google Kubernetes Engine](https://git.synelixis.com/voxreality/gke-vr-conference).
 
-[Install NodeJS](https://nodejs.org) if you haven't already. We use 16.16.0 on our build servers. If you work on multiple javascript projects it may be useful to use something like [NVM](https://github.com/nvm-sh/nvm) to manage multiple versions of node for you.
+## Hubs Services
 
-Run the following commands:
+For the VR conference, we have forked 2 out of all the services of the HCE.
 
-```bash
-git clone https://github.com/mozilla/hubs.git
-cd hubs
-# nvm use v16.16.0 # if using NVM
-npm ci
-npm run dev
+- [`Hubs-client`](https://github.com/kontopoulosdm/hubs): A frontend component where all visualization takes place. The application communicates with the backend server `Reticulum` and the WebRTC server for audio and video communication `Dialog`.
+
+- [`Dialog`](https://github.com/kontopoulosdm/dialog): A custom WebRTC server with custom logic for networking transcription of users to all room participants. Additional features include:
+  - Raise hand in the conference room for the Q&A session
+  - Accept hand raise (when you are the presenter)
+  - Send info about presenter info to new users
+
+Not custom forked, but used during development:
+
+- [`Spoke`](https://github.com/Hubs-Foundation/Spoke): A scene editor where we build the environment of each VR conference's scenes for production. To have the same result in the development project, we export the created scene in `obj` format, upload it to the `conference repo`, and manually link the file to a development room.
+
+From scratch, we have developed two different APIs to communicate with hubs, in order to avoid modification in `Reticulum`.
+
+- [`Conference Repo`](https://git.synelixis.com/voxreality/conference-repo): Contains info about required assets for every room and every potential user. Holds a list of allowed resources for every user in every room. Supports file serving to the application (labels, slides, etc).
+
+- [`Vox logger`](https://git.synelixis.com/voxreality/vox-logger): Used to store information about user interactions with the application during pilots. Has integration with an S3 bucket to hold the created data.
+
+## Project Structure
+
+Important directories of the project include:
+
+```
+/src
+├── assets
+│   ├── ...
+├── bit-systems
+│   ├── ...
+├── prefabs
+│   ├── ...
+├── react-components
+│   ├── ...
+├── systems
+│   ├── ...
+├── utils
+│   ├── ...
+│
+├── hub.html
+└── hub.js
 ```
 
-The backend dev server is configured with CORS to only accept connections from "hubs.local:8080", so you will need to access it from that host. To do this, you likely want to add "hubs.local" and "hubs-proxy.local" to the [local "hosts" file](https://phoenixnap.com/kb/how-to-edit-hosts-file-in-windows-mac-or-linux) on your computer:
+- `Assets`: Contains all media & localization files. To update the user panel in VR mode, read the `/doc/spritesheet-generation.md` file.
 
-```
-127.0.0.1	hubs.local
-127.0.0.1	hubs-proxy.local
-```
+- `bit-systems`: Contains all bitECS systems of the application's main loop. Significant systems constructed for the needs of the VR conference include:
 
-Then visit https://hubs.local:8080 (note: HTTPS is required, you'll need to accept the warning for the self-signed SSL certificate)
+  - `agent-system.js`: Virtual Agent functionality. The system is bound to the existence of an agent object (`/src/prefabs/agent.tsx`). This component communicates in sequence with multiple AI components:
+    - `voice-translation` AI component
+    - `intent-recognition` AI component
+    - `vision-language-navigation (navVQA)` AI component
+    - `dialogue-agent` AI component
+    - `text-translation` AI component
+  - `routing-system.ts`: System for generating the shortest path from the user's location to a requested direction. In the previous pilot, this knowledge was generated to be propagated to the `dialog-agent` and generate a human-like answer. Now this knowledge is fetched from the `navVQA` component. The system also creates visual indicators to the destination (will be used for this pilot also).
+  - `translation-system.ts`: Handles audio translation. This system utilizes the changes of the `Dialog` server. In rooms where translation is permitted, the producer transcribes their audio and sends it to the server. On the receiver end, once the user collects the sent text, they translate it and render it to the panel.
+  - `presentation-system.ts`: Has similar functionality to the `translation-system` but for the conference room where the main presentation will take place. Also includes methods for the Q&A session. The goal for the presenter is to utilize a `script-translation` AI component that translates text based on a predefined script.
+  - `tutorial-system.ts`: A system for an introductory interactive tutorial taking place in the lobby room.
+  - `help-system.ts`: A system that renders help slides for the user, accessible in every room.
+  - `map-system.ts`: A system that indicates the position of the user relative to the room.
+  - `room-label-system.ts`: A system that, on room entry, renders labels on the wall of the room in the user's selected language.
+  - `localization-system.ts`: Holds textual info in all 5 application's languages and has relevant methods.
 
-> Note: When running the Hubs client locally, you will still connect to the development versions of our [Janus WebRTC](https://github.com/mozilla/janus-plugin-sfu) and [reticulum](https://github.com/mozilla/reticulum) servers. These servers do not allow being accessed outside of localhost. If you want to host your own Hubs servers, please check out [Hubs Cloud](https://hubs.mozilla.com/docs/hubs-cloud-intro.html).
+- `Prefabs`: Holds used 3D objects in a `tsx` format.
+- `Systems`: Contains old AFRAME components. Many of those components and systems are still used inside the application, so existing solutions that need a functionality extension require code modification of the AFRAME files. These include:
+  - `translate-badge`
+  - `hud-controller`
+  - `translate-panel`
 
-## Documentation
+For more info, read the [AFRAME documentation](https://aframe.io/docs/1.7.0/introduction/).
 
-The Hubs documentation can be found [here](https://hubs.mozilla.com/docs).
+- `react-components`: Includes all React elements. Here we modified the dialog box before entering the room to include the user's language. Additionally, we have added custom icons in the bottom bar for all added features and we have added a button to give permission to users that have their hand raised (in the conference room).
 
-## Community
+- `utils`: Utility scripts such as:
 
-Join us on our [Discord Server](https://discord.gg/CzAbuGu) or [follow us on Twitter](https://twitter.com/MozillaHubs).
+  - `ml-adapters`: Functions to send requests to the AI components.
+  - `room-properties`: Functions to load room properties from the conference repo API.
 
-## Contributing
+- `hub.html`: The root HTML page of the room.
+- `hubs.js`: The root JS script of the room.
 
-Read our [contributor guide](./CONTRIBUTING.md) to learn how you can submit bug reports, feature requests, and pull requests.
+## Technologies
 
-We're also looking for help with localization. The Hubs redesign has a lot of new text and we need help from people like you to translate it. Follow the [localization docs](./src/assets/locales/README.md) to get started.
+For a comprehensive understanding of the hubs functionality, you should check:
 
-Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it.
+- [Aframe](https://aframe.io/)
+- [Three.js](https://threejs.org/)
+- [WebRTC](https://webrtc.org/)
 
-## Additional Resources
+## Deployments
 
-* [Reticulum](https://github.com/mozilla/reticulum) - Phoenix-based backend for managing state and presence.
-* [NAF Janus Adapter](https://github.com/mozilla/naf-janus-adapter) - A [Networked A-Frame](https://github.com/networked-aframe) adapter for the Janus SFU service.
-* [Janus Gateway](https://github.com/meetecho/janus-gateway) - A WebRTC proxy used for centralizing network traffic in this client.
-* [Janus SFU Plugin](https://github.com/mozilla/janus-plugin-sfu) - Plugins for Janus which enables it to act as a SFU.
-* [Hubs-Ops](https://github.com/mozilla/hubs-ops) - Infrastructure as code + management tools for running necessary backend services on AWS.
+To deploy to production, you should apply your commits to the `main` branch of the application. The repo has a `CI/CD` pipeline that builds and pushes a docker image to Syn's Docker Hub and applies a change to the GKE cluster through `flux`.
 
-## Privacy
+## Integration with External APIs
 
-Mozilla and Hubs believe that privacy is fundamental to a healthy internet. Read our [privacy policy](https://www.mozilla.org/en-US/privacy/hubs/) for more info.
+`Reticulum` is written in Elixir and is configured with specific `CSP` and `CORS` rules. To override them, you should apply changes to the GKE manifest file in the `custom csp rules` of its `config map`. Hubs only allows `https` connections.
 
+External APIs include:
 
-## License
-
-Hubs is licensed with the [Mozilla Public License 2.0](./LICENSE)
-
+- AI models
+- Conference repo
+- Vox logger
