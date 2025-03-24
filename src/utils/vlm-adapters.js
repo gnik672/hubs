@@ -44,7 +44,7 @@ orthoRenderTarget.texture.minFilter = THREE.LinearFilter;
 orthoCamera.position.z = 5;
 orthoScene.add(plane);
 
-export async function SnapPOV(agentObj, savefile) {
+export async function SnapPOV(agentObj, savefile = false) {
   return new Promise((resolve, reject) => {
     agentObj.visible = false;
 

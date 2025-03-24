@@ -9,7 +9,7 @@ export function UpdatePanelSize(panelEid: number, size: number[] | Float32Array)
   Slice9.size[panelEid].set(size);
   updateSlice9Geometry(APP.world, panelEid);
   const panelObj = APP.world.eid2obj.get(panelEid);
-  panelObj?.updateMatrix();
+  panelObj!.updateMatrix();
 }
 
 export function GetObjSize(obj: Object3D) {
