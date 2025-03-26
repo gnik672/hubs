@@ -25,6 +25,7 @@ import { GetObjectives, GetResolved, GetValids, MakeObjectiveResolved } from "./
 import { paths } from "../systems/userinput/paths";
 import { languageCodes, selectedLanguage } from "./localization-system";
 import { generateUUID } from "three/src/math/MathUtils";
+import { TestWS } from "./translation-system";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -510,6 +511,8 @@ export default class VirtualAgent {
     this.waitingForResponse = true;
     this.successResult = false;
     this.ToggleRays(false);
+
+    TestWS("https://192.168.169.219:5033");
 
     try {
       const langCode = languageCodes[selectedLanguage] || "en";
