@@ -1,14 +1,15 @@
 export enum COMPONENT_ENDPOINTS {
-  TRANSLATE_AUDIO = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio",
-  TRANSLATE_TEXT = "https://audiotranslation.vox.lab.synelixis.com/translate_text",
-  TRANSCRIBE_AUDIO_FILES = "https://audiotranslation.vox.lab.synelixis.com/transcribe_audio_files",
-  TRANSLATE_AUDIO_FILES = "https://audiotranslation.vox.lab.synelixis.com/translate_audio_files",
-  TRANSLATE_LOCAL_AUDIO_FILES = "http://127.0.0.1:8080/translate_audio_files",
-  LXMERT = "https://dev.voxreality.maggioli-research.gr/lxmert/",
-  GPT = "https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/",
-  INTENTION = "https://dev.conference-agent-voxreality.lab.synelixis.com/intent_dest/",
-  TASK_RESPONSE = "https://dev.conference-agent-voxreality.lab.synelixis.com/response/",
-  LOCAL_VLM = "http://172.23.26.99:5044/navqa"
+  TRANSLATE_AUDIO = `https://dev.speech-voxreality.maggioli-research.gr/translate_audio`,
+  LXMERT = `https://dev.voxreality.maggioli-research.gr/lxmert/`,
+  GPT = `https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/`,
+  TRANSLATE_TEXT = `https://audiotranslation.vox.lab.synelixis.com/translate_text`,
+  TRANSCRIBE_AUDIO_FILES = `https://audiotranslation.vox.lab.synelixis.com/transcribe_audio_files`,
+  TRANSLATE_AUDIO_FILES = `https://audiotranslation.vox.lab.synelixis.com/translate_audio_files`,
+  INTENTION = `https://dev.conference-agent-voxreality.lab.synelixis.com/intent_dest/`,
+  TASK_RESPONSE = `https://dev.conference-agent-voxreality.lab.synelixis.com/response/`,
+  MEMORY_RESET = `https://dev.conference-agent-voxreality.lab.synelixis.com/clear_memory`,
+  LOCAL_TRANSLATE_AUDIO_FILES = `http://127.0.0.1:8080/translate_audio_files`,
+  LOCAL_NAVQA = `http://172.23.26.99:5044/navqa`
 }
 
 export enum RECORDER_CODES {

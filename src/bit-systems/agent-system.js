@@ -8,7 +8,8 @@ import {
   vlModule,
   textModule,
   RecordQuestion,
-  stopRecording
+  stopRecording,
+  resetDs
 } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { AgentEntity } from "../prefabs/agent";
@@ -23,6 +24,7 @@ import { roomPropertiesReader } from "../utils/rooms-properties";
 import { GetObjectives, GetResolved, GetValids, MakeObjectiveResolved } from "./progress-tracker";
 import { paths } from "../systems/userinput/paths";
 import { languageCodes, selectedLanguage } from "./localization-system";
+import { generateUUID } from "three/src/math/MathUtils";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -87,6 +89,8 @@ export default class VirtualAgent {
   constructor() {
     this.allowed = null;
 
+    this.uuid = "";
+
     this.agent = new objElement();
     this.nextArrow = new objElement();
     this.prevArrow = new objElement();
@@ -117,6 +121,7 @@ export default class VirtualAgent {
     this.successResult = false;
     this.listeners = new Map();
     this.onClear = this.onClear.bind(this);
+    this.AskAgent = this.AskAgent.bind(this);
     this.UpdatePlanes = this.UpdatePanel.bind(this);
     this.onToggle = this.onToggle.bind(this);
     this.setMicStatus = this.setMicStatus.bind(this);
@@ -143,8 +148,11 @@ export default class VirtualAgent {
       return;
     }
 
+    if (!this.uuid) {
+      this.uuid = generateUUID();
+      console.log(`generated uuid`, this.uuid);
+    }
     this.allowed = true;
-
     APP.scene.addEventListener("agent-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
     this.navProperties = roomPropertiesReader.navProps;
@@ -523,7 +531,8 @@ export default class VirtualAgent {
 
       if (!!intention) intentResponse = intention;
       else {
-        const int = await intentionModule(nmtResponse);
+        console.log(this.uuid);
+        const int = await intentionModule(nmtResponse, this.uuid);
         destination = int.destination;
         intentResponse = int.intention;
       }
@@ -531,16 +540,11 @@ export default class VirtualAgent {
       let voxyResponse;
       try {
         if (intentResponse.includes("navigation")) {
-          try {
-            const instPath = navSystem.GetInstructionsGraphics(destination);
-            if (instPath.length > 0) navSystem.RenderCues(instPath);
-            voxyResponse = await vlModule(destination, COMPONENT_ENDPOINTS.LOCAL_VLM);
-          } catch (error) {
-            console.error({ vlModuleError: error.message });
-            voxyResponse = "Follow the green line to reach your destination";
-          }
+          const instPath = navSystem.GetInstructionsGraphics(destination);
+          if (instPath.length > 0) navSystem.RenderCues(instPath);
+          voxyResponse = await vlModule(destination, COMPONENT_ENDPOINTS.LOCAL_NAVQA);
         } else {
-          voxyResponse = await dsResponseModule(nmtResponse, intentResponse, "");
+          voxyResponse = await dsResponseModule(nmtResponse, intentResponse, this.uuid);
         }
       } catch (error) {
         console.error({ dsError: error.message });
@@ -555,15 +559,11 @@ export default class VirtualAgent {
         this.UpdateTextArray([translatedResponse]); // print the translated response
       }
 
-      if (
+      this.successResult =
         (intentResponse.includes("navigation") && navSystem.dest.active) ||
         intentResponse.includes("program_info") ||
-        intentResponse.includes("trade_show")
-      ) {
-        this.successResult = true;
-      } else {
-        this.successResult = false;
-      }
+        intentResponse.includes("trade_show") ||
+        intentResponse.includes("summary");
 
       if (this.successResult && index >= 0) {
         MakeObjectiveResolved(index, true);
@@ -589,6 +589,8 @@ export default class VirtualAgent {
     return navigation;
   }
 
+  ClearAgentMemory() {}
+
   HandleArrows(renderArrows) {
     this.nextArrow.obj.visible = renderArrows;
     this.prevArrow.obj.visible = renderArrows;
@@ -610,6 +612,11 @@ export default class VirtualAgent {
 
   UpdateWithRandomPhrase(occasion) {
     this.UpdateTextArray([this.GetRandomPhrase(occasion)]);
+  }
+
+  ResetUUID() {
+    resetDs(this.uuid);
+    this.uuid = "";
   }
 
   GetTypingObj() {

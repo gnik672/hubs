@@ -1,3 +1,4 @@
+import { virtualAgent } from "../bit-systems/agent-system";
 import { languageCodes, voxLanugages } from "../bit-systems/localization-system";
 
 export type Room = "lobby" | "conference room" | "main area" | "social area" | "business room" | "unknown";
@@ -113,6 +114,10 @@ class RoomPropertiesReader {
         if (!response.ok) throw new Error("Response not OK");
         const responseProperties = ((await response.json()) as { message: Properties }).message;
         this.roomProps = responseProperties;
+
+        if (this.roomProps.name === "social area") {
+          virtualAgent.ResetUUID();
+        }
 
         APP.scene!.emit("properties_loaded");
       } catch (error) {

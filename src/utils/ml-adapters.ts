@@ -126,10 +126,11 @@ export async function textModule(endPoint: COMPONENT_ENDPOINTS, data: string, pa
   return responseJson.translations[0];
 }
 
-export async function intentionModule(englishTranscription: string) {
+export async function intentionModule(englishTranscription: string, uuid: string) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
-  const data = { user_query: englishTranscription };
+  const data = { user_query: englishTranscription, user_uuid: uuid };
 
+  console.log(data);
   const response = await fetch(COMPONENT_ENDPOINTS.INTENTION, {
     method: "POST",
     headers: headers,
@@ -146,6 +147,7 @@ export async function intentionModule(englishTranscription: string) {
 export async function dsResponseModule(
   userQuery: string,
   intent: string,
+  uuid: string,
   mozillaInput?: string
 ): Promise<ResponseData> {
   const headers = {
@@ -153,12 +155,30 @@ export async function dsResponseModule(
     "Content-Type": "application/json"
   };
 
-  const data = { user_query: userQuery, intent: intent, mozilla_input: mozillaInput };
+  const data = { user_query: userQuery, intent: intent, mozilla_input: mozillaInput || "", user_uuid: uuid };
 
   const response = await fetch(COMPONENT_ENDPOINTS.TASK_RESPONSE, {
     method: "POST",
     headers: headers,
     body: JSON.stringify(data)
+  });
+
+  const responseData = await response.json();
+
+  if (response.status >= 300 || !responseData || !responseData.response)
+    throw new Error("bad response from dialogue agent");
+
+  return responseData.response;
+}
+export async function resetDs(uuid: string) {
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+
+  const response = await fetch(`${COMPONENT_ENDPOINTS.MEMORY_RESET}/?user_uuid=${uuid}`, {
+    method: "POST",
+    headers: headers
   });
 
   const responseData = await response.json();
