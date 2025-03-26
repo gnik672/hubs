@@ -1,6 +1,6 @@
 import { Room, roomPropertiesReader } from "../utils/rooms-properties";
 
-type Category = "navigation" | "tutorial" | "trade_show" | "program_info" | "summarization" | "translation" | "general";
+type Category = "navigation" | "tutorial" | "trade_show" | "program_info" | "summary" | "translation" | "general";
 
 type objectiveFunction = (index: number) => void;
 
@@ -50,22 +50,16 @@ export const RoomObjectives = {
   lobby: [CreateObjective({})],
   "main area": [
     CreateObjective({ type: "navigation", room: "main area", value: "How can I go to the business room?" }),
-    CreateObjective({
-      type: "navigation",
-      room: "main area",
-      value: "How can I go to the booth 1?",
-      validator: index => {
-        validIndices["main area"][index] = false;
-        return;
-      }
-    }),
     CreateObjective({ type: "navigation", room: "main area", value: "How can I go to the social area?" }),
     CreateObjective({ type: "trade_show", room: "main area", value: "Who will I find in the tradeshows?" }),
     CreateObjective({ type: "program_info", room: "main area", value: "Who is presenting in the morning?" }),
     CreateObjective({
-      type: "summarization",
+      type: "summary",
       room: "main area",
-      value: "Summarize the content of the main presentation"
+      value: "Summarize the content of the main presentation",
+      validator: (index: number) => {
+        validIndices["main area"][index] = visitedRooms.includes("conference room");
+      }
     })
   ],
   "conference room": [CreateObjective({})],
@@ -99,6 +93,7 @@ export function VisitRoom() {
 
 export function ProgressSystem() {
   if (!currentRoom) return;
+
   RoomObjectives[currentRoom].forEach((objective, index) => {
     if (resolvedIndices[currentRoom][index]) return;
     if (objective.validator) objective.validator(index);
