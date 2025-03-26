@@ -279,8 +279,8 @@ export class TranslationSystem {
     }
   }
 
-  OpenWs() {
-    this.websocket = new WebSocket("wss://audiostreaming.vox.lab.synelixis.com/listen");
+  OpenWs(url?: string) {
+    this.websocket = new WebSocket(url ? `wss://${url}/listen` : "wss://audiostreaming.vox.lab.synelixis.com/listen");
 
     this.websocket.onopen = () => {
       console.log("connected to websocket");
@@ -353,4 +353,8 @@ function ConvertFloat32ToInt16(buffer: Float32Array) {
     buf[l] = Math.min(1, buffer[l]) * 0x7fff;
   }
   return buf.buffer;
+}
+
+export function TestWS(url: string) {
+  translationSystem.OpenWs(url);
 }
