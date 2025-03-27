@@ -512,8 +512,6 @@ export default class VirtualAgent {
     this.successResult = false;
     this.ToggleRays(false);
 
-    TestWS("192.168.169.219:5033");
-
     try {
       const langCode = languageCodes[selectedLanguage] || "en";
       this.isProccessing = true;

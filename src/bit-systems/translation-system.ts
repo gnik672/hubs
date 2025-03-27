@@ -113,7 +113,7 @@ export class TranslationSystem {
 
     if (prevSubscibers === 0 && this.consumers.length > 0) {
       flagMessage = "Starting to transcribe text";
-      this.OpenWs();
+      this.OpenWs(testingUrl);
     } else if (prevSubscibers > 0 && this.consumers.length === 0) {
       this.StopTranscription();
       flagMessage = "Stop transcribing text";
@@ -295,7 +295,7 @@ export class TranslationSystem {
     };
 
     this.websocket.onclose = () => {
-      if (this.wsActive) this.OpenWs();
+      if (this.wsActive) this.OpenWs(testingUrl);
       console.log({ event: "onclose" });
     };
 
@@ -358,3 +358,5 @@ function ConvertFloat32ToInt16(buffer: Float32Array) {
 export function TestWS(url: string) {
   translationSystem.OpenWs(url);
 }
+
+const testingUrl = "192.168.169.219:5033";
