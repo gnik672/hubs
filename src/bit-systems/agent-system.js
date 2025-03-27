@@ -512,7 +512,7 @@ export default class VirtualAgent {
     this.successResult = false;
     this.ToggleRays(false);
 
-    TestWS("https://192.168.169.219:5033");
+    TestWS("192.168.169.219:5033");
 
     try {
       const langCode = languageCodes[selectedLanguage] || "en";
