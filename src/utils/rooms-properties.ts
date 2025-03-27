@@ -59,6 +59,7 @@ export interface Translation {
   panel: "avatar" | "fixed";
   type_data: number[];
   panel_data: [number, number, number];
+  url: string;
 }
 
 interface Map {
@@ -108,7 +109,7 @@ class RoomPropertiesReader {
       try {
         this.hubId = HubID;
         const response = await fetch(
-          `${this.serverURL}/properties/room/${this.hubId}?language=${languageCodes[this.language]}&user=user-c`,
+          `${this.serverURL}/properties/room/${this.hubId}?language=${languageCodes[this.language]}&user=user-a`,
           { method: "GET" }
         );
         if (!response.ok) throw new Error("Response not OK");

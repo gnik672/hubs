@@ -48,6 +48,7 @@ export class TranslationSystem {
   gainNode: GainNode;
   mediaRecorder: MediaRecorder | null;
   wsActive: boolean;
+  wsUrl: string;
 
   constructor() {}
 
@@ -59,6 +60,8 @@ export class TranslationSystem {
     if (!this.allowed) return;
 
     const transProps = roomPropertiesReader.roomProps.translations[0];
+    console.log(transProps);
+    this.wsUrl = transProps.url;
 
     this.properties = transProps;
     this.avatarObj = (document.querySelector("#avatar-pov-node") as AElement).object3D;
@@ -113,7 +116,7 @@ export class TranslationSystem {
 
     if (prevSubscibers === 0 && this.consumers.length > 0) {
       flagMessage = "Starting to transcribe text";
-      this.OpenWs(testingUrl);
+      this.OpenWs();
     } else if (prevSubscibers > 0 && this.consumers.length === 0) {
       this.StopTranscription();
       flagMessage = "Stop transcribing text";
@@ -280,7 +283,9 @@ export class TranslationSystem {
   }
 
   OpenWs(url?: string) {
-    this.websocket = new WebSocket(url ? `wss://${url}/listen` : "wss://audiostreaming.vox.lab.synelixis.com/listen");
+    const wsurl = url || `wss://${this.wsUrl}/listen`;
+    console.log(`openinig websocket`, wsurl);
+    this.websocket = new WebSocket(wsurl);
 
     this.websocket.onopen = () => {
       console.log("connected to websocket");
@@ -295,7 +300,7 @@ export class TranslationSystem {
     };
 
     this.websocket.onclose = () => {
-      if (this.wsActive) this.OpenWs(testingUrl);
+      if (this.wsActive) this.OpenWs();
       console.log({ event: "onclose" });
     };
 
@@ -356,7 +361,7 @@ function ConvertFloat32ToInt16(buffer: Float32Array) {
 }
 
 export function TestWS(url: string) {
-  translationSystem.OpenWs(url);
+  translationSystem.OpenWs();
 }
 
 const testingUrl = "192.168.169.219:5033";

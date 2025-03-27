@@ -615,9 +615,14 @@ export default class VirtualAgent {
     this.UpdateTextArray([this.GetRandomPhrase(occasion)]);
   }
 
-  ResetUUID() {
-    resetDs(this.uuid);
-    this.uuid = "";
+  async ResetUUID() {
+    if (!this.uuid) return;
+    try {
+      await resetDs(this.uuid);
+      this.uuid = "";
+    } catch (err) {
+      console.error({ resetUuidErr: err });
+    }
   }
 
   GetTypingObj() {
