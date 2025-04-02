@@ -56,7 +56,6 @@ AFRAME.registerComponent("icon-button", {
   },
 
   updateButtonState() {
-    console.log(`updating icon-button: ${this.el.className}`);
     const hovering = this.hovering;
     const active = this.data.active;
     const disabled = this.data.disabled;

@@ -86,7 +86,7 @@ class FloorMapClass {
       | "italian";
     const languageCode = languageCodes[language];
 
-    const mapImage = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.roomProps.maps[0].filename}`;
+    const mapImage = `${roomPropertiesReader.serverURL}/file/${roomPropertiesReader.roomProps.maps[0].filename}`;
     this.entityRef = renderAsEntity(APP.world, FloorMapPanel(this.imageRatio, mapImage, this.scale));
     this.entityObj = APP.world.eid2obj.get(this.entityRef)!;
     this.imageSize = this.GetObjSize(this.entityObj);

@@ -56,6 +56,8 @@ AFRAME.registerComponent("translate-badge", {
 
     this.translateIcon.visible = true;
     this.cancelIcon.visible = false;
+
+    console.log("badgeinfo", this.translateIcon.visible, this.cancelIcon.visible);
   },
 
   UpdateRoomProperties() {
@@ -74,19 +76,21 @@ AFRAME.registerComponent("translate-badge", {
       APP.dialog.subscribeToPeer(this.owner).then(() => {
         this.isTarget = true;
         translationSystem._addTarget(this.owner);
-        this.UpdateIcon();
       });
     } else {
       APP.dialog.unsubscribeFromPeer(this.owner).then(() => {
         this.isTarget = false;
         translationSystem._removeTarget(this.owner);
-        this.UpdateIcon();
       });
     }
+
+    this.UpdateIcon();
   },
   UpdateIcon() {
     this.translateIcon.visible = !this.isTarget;
     this.cancelIcon.visible = this.isTarget;
+    this.translateIcon.updateMatrix();
+    this.cancelIcon.updateMatrix();
   },
 
   tick() {
@@ -112,7 +116,12 @@ AFRAME.registerComponent("translate-badge", {
 
     const shouldBeVisible = this.withinBorder && worldPos.distanceTo(this.camWorldPos) < 2;
 
-    if (isVisible !== shouldBeVisible) this.el.object3D.visible = shouldBeVisible;
+    if (isVisible !== shouldBeVisible) {
+      this.el.object3D.visible = shouldBeVisible;
+      this.UpdateIcon();
+    }
+
+    console.log(this.el.object3D.visible, this.cancelIcon.visible, this.translateIcon.visible);
   },
 
   play() {
@@ -134,7 +143,7 @@ AFRAME.registerComponent("translate-badge", {
     }
 
     // check if there are spatiality constrains
-    if (roomPropertiesReader.translation.type === "borders") this.borders = transProps.spatiality.data;
+    if (roomPropertiesReader.roomProps.translations[0].type === "borders") this.borders = transProps.spatiality.data;
     else this.withinBorder = true;
   }
 });
