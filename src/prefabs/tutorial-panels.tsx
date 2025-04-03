@@ -13,6 +13,7 @@ import { createTexture, loadTexture, loadTextureFromCache } from "../utils/load-
 import { createKTX2Texture } from "../utils/create-basis-texture";
 import { preload } from "../utils/preload";
 import { Label, roomPropertiesReader } from "../utils/rooms-properties";
+import { computeStyles } from "@popperjs/core";
 
 const url = "https://repo.vox.lab.synelixis.com";
 const prevIcon = `${url}/file/prev_icon.png`;
@@ -207,47 +208,51 @@ async function TutorialPanelInit(chapters: string[][][], congratsSlides: Array<s
 
   for (let chapterIndex = 0; chapterIndex < chapters.length; chapterIndex++) {
     const chapter = chapters[chapterIndex];
+
     for (let slideIndex = 0; slideIndex < chapter.length; slideIndex++) {
-      const slide = chapter[slideIndex][0];
-      const texture = await createTexture("image/png", slide);
+      try {
+        const slide = chapter[slideIndex][0];
 
-      console.log(`slide_${chapterIndex}_${slideIndex}`);
+        const texture = await createTexture("image/png", slide);
 
-      const slideEntity: EntityDef = (
-        <entity
-          name={`slide_${chapterIndex}_${slideIndex}`}
-          image={{
-            texture: texture,
-            ratio: ratio,
-            projection: ProjectionMode.FLAT,
-            alphaMode: AlphaMode.Blend,
-            cacheKey: slide
-          }}
-          visible={false}
-          scale={[scale, scale, scale]}
-        ></entity>
-      );
-
-      if (chapter[slideIndex].length > 1) {
-        const gifSlide = chapter[slideIndex][1];
-        const gifTexture = await createTexture("image/gif", gifSlide);
-        slideEntity.children.push(
+        const slideEntity: EntityDef = (
           <entity
-            name={`gif_slide_${chapterIndex}_${slideIndex}`}
+            name={`slide_${chapterIndex}_${slideIndex}`}
             image={{
-              texture: gifTexture,
+              texture: texture,
               ratio: ratio,
               projection: ProjectionMode.FLAT,
               alphaMode: AlphaMode.Blend,
               cacheKey: slide
             }}
-            visible={true}
-            position={[0, 0, 0.001]}
+            visible={false}
+            scale={[scale, scale, scale]}
           ></entity>
         );
-      }
 
-      slideEntities.push(slideEntity);
+        if (chapter[slideIndex].length > 1) {
+          const gifSlide = chapter[slideIndex][1];
+          const gifTexture = await createTexture("image/gif", gifSlide);
+          slideEntity.children.push(
+            <entity
+              name={`gif_slide_${chapterIndex}_${slideIndex}`}
+              image={{
+                texture: gifTexture,
+                ratio: ratio,
+                projection: ProjectionMode.FLAT,
+                alphaMode: AlphaMode.Blend,
+                cacheKey: slide
+              }}
+              visible={true}
+              position={[0, 0, 0.001]}
+            ></entity>
+          );
+        }
+
+        slideEntities.push(slideEntity);
+      } catch (e) {
+        console.error("lobby-console", e);
+      }
     }
   }
 

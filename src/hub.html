@@ -139,10 +139,10 @@
                             class="translateBadge interactable" position="-0.25 -0.35 0.2" scale="0.6 0.6 0.6"
                             visible="true" translate-badge>
                             <a-entity sprite scale="0.165 0.165 0.165" position="0 0 0.02" class="translate_badge_icon"
-                                icon-button="image: translate-text.png; hoverImage: translate-text.png;"></a-entity>
-                            <a-entity sprite scale="0.165 0.165 0.165" position="0 0 0.02"
+                                icon-button="image: translate-text.png; hoverImage: translate-text.png; activeImage:translate-text-hover.png; activeHoverImage:translate-text-hover.png"></a-entity>
+                            <!-- <a-entity sprite scale="0.165 0.165 0.165" position="0 0 0.02"
                                 class="cancel_translate_badge_icon" visible="false" icon-button="image: translate-text-hovered.png; hoverImage:
-                                translate-text-hovered.png;"></a-entity>
+                                translate-text-hovered.png;"></a-entity> -->
                         </a-entity>
                     </a-entity>
 
@@ -812,7 +812,7 @@
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.agent;
-                        activeTooltipText: Agent;
+                        activeTooltipText: hud-panel.agent;
                         image: agent_off.png;
                         hoverImage: agent_off-hover.png;
                         activeImage: agent_on.png;
@@ -821,7 +821,7 @@
                     </a-entity>
 
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite
-                        mic-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic;"
+                        mic-button="tooltip: #hud-tooltip; tooltipText: hud-panel.mic.unmute; activeTooltipText: hud-panel.mic.mute;"
                         scale="0.1 0.1 0.1" position="-0.05 0 0.001" class="hud mic">
                     </a-entity>
 
@@ -829,7 +829,7 @@
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.map;
-                        activeTooltipText: Map;
+                        activeTooltipText: hud-panel.map;
                         image: map_off.png;
                         hoverImage: map_off-hover.png;
                         activeImage: map_on.png;
@@ -840,7 +840,7 @@
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                                 tooltip: #hud-tooltip;
                                 tooltipText: hud-panel.help;
-                                activeTooltipText: Help;
+                                activeTooltipText: hud-panel.help;
                                 image: help_off.png;
                                 hoverImage: help_off-hover.png;
                                 activeImage: help_on.png;
@@ -852,7 +852,7 @@
                     <!-- <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                                 tooltip: #hud-tooltip;
                                 tooltipText: hud-panel.task;
-                                activeTooltipText: Task;
+                                activeTooltipText: hud-panel.task;
                                 image: task_off.png;
                                 hoverImage: task_off-hover.png;
                                 activeImage: task_on.png;
@@ -864,7 +864,7 @@
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.translate;
-                        activeTooltipText: Translate;
+                        activeTooltipText: hud-panel.translate;
                         image: translate_off.png;
                         hoverImage: translate_off-hover.png;
                         activeImage: translate_on.png;
@@ -875,7 +875,7 @@
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.ask;
-                        activeTooltipText: Ask;
+                        activeTooltipText: hud-panel.ask;
                         image: ask_off.png;
                         hoverImage: ask_off-hover.png;
                         activeImage: ask_on.png;

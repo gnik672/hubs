@@ -84,10 +84,15 @@ AFRAME.registerComponent("icon-button", {
 
     if (this.data.tooltip && hovering) {
       let tooltipText;
-      if (this.data.tooltipText && IconTranslationDict[this.data.tooltipText])
-        tooltipText = IconTranslationDict[this.data.tooltipText];
-      else tooltipText = this.data.active ? this.data.activeTooltipText : this.data.tooltipText;
+      console.log(
+        "icon-button-log",
+        IconTranslationDict()[this.data.tooltipText],
+        IconTranslationDict(),
+        this.data.tooltipText
+      );
+      tooltipText = this.data.active ? this.data.activeTooltipText : this.data.tooltipText;
 
+      if (tooltipText && IconTranslationDict()[tooltipText]) tooltipText = IconTranslationDict()[tooltipText];
       tooltipText = disabled ? "" : tooltipText;
 
       this.data.tooltip.querySelector("[text]").setAttribute("text", "value", tooltipText);

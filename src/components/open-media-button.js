@@ -37,7 +37,7 @@ AFRAME.registerComponent("open-media-button", {
             if (url.hash && window.APP.hub.hub_id === hubId) {
               label = "go to";
             } else {
-              label = IconTranslationDict["change-hub.message"];
+              label = IconTranslationDict()["change-hub.message"];
               tutorialManager.changeRoomID = hubId;
             }
           }

@@ -141,8 +141,6 @@ class TutorialManager {
   Tick(world: HubsWorld) {
     if (!this.allowed) return;
 
-    console.log(avatarPos().toArray().toString(), avatarDirection().toArray().toString());
-
     floatingPanelQuery(world).forEach(_ => {
       if (hasComponent(world, Interacted, this.nextRef)) this.Next();
       if (hasComponent(world, Interacted, this.prevRef)) this.Prev();

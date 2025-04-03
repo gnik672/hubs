@@ -27,8 +27,7 @@ AFRAME.registerComponent("translate-badge", {
     this.playerSessionId = null;
 
     this.camWorldPos = new THREE.Vector3();
-    this.translateIcon = this.el.querySelector(".translate_badge_icon").object3D;
-    this.cancelIcon = this.el.querySelector(".cancel_translate_badge_icon").object3D;
+    this.translateIcon = this.el.querySelector(".translate_badge_icon");
 
     NAF.utils
       .getNetworkedEntity(this.el)
@@ -54,10 +53,7 @@ AFRAME.registerComponent("translate-badge", {
         console.error(error);
       });
 
-    this.translateIcon.visible = true;
-    this.cancelIcon.visible = false;
-
-    console.log("badgeinfo", this.translateIcon.visible, this.cancelIcon.visible);
+    this.translateIcon.object3D.visible = true;
   },
 
   UpdateRoomProperties() {
@@ -76,23 +72,16 @@ AFRAME.registerComponent("translate-badge", {
       APP.dialog.subscribeToPeer(this.owner).then(() => {
         this.isTarget = true;
         translationSystem._addTarget(this.owner);
+        this.translateIcon.setAttribute("icon-button", "active", true);
       });
     } else {
       APP.dialog.unsubscribeFromPeer(this.owner).then(() => {
         this.isTarget = false;
         translationSystem._removeTarget(this.owner);
+        this.translateIcon.setAttribute("icon-button", "active", false);
       });
     }
-
-    this.UpdateIcon();
   },
-  UpdateIcon() {
-    this.translateIcon.visible = !this.isTarget;
-    this.cancelIcon.visible = this.isTarget;
-    this.translateIcon.updateMatrix();
-    this.cancelIcon.updateMatrix();
-  },
-
   tick() {
     // if translation is allowed it computes if the button should be visible based on distance and borders
     // if room is not border contstrained then variable expressing this, is set to true and does not ever change
@@ -118,10 +107,7 @@ AFRAME.registerComponent("translate-badge", {
 
     if (isVisible !== shouldBeVisible) {
       this.el.object3D.visible = shouldBeVisible;
-      this.UpdateIcon();
     }
-
-    console.log(this.el.object3D.visible, this.cancelIcon.visible, this.translateIcon.visible);
   },
 
   play() {

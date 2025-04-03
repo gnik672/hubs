@@ -328,7 +328,7 @@ AFRAME.registerComponent("mic-button", {
       this.textEl.setAttribute(
         "text",
         "value",
-        active ? IconTranslationDict["hud-panel.mic"] : IconTranslationDict["hud-panel.mic.muted"]
+        active ? IconTranslationDict()["hud-panel.mic.mute"] : IconTranslationDict()["hud-panel.mic.unmute"]
       );
     }
   }

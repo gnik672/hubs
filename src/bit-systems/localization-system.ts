@@ -20,9 +20,10 @@ const translationIds = [
   "hud-panel.language",
   "hud-panel.help",
   "hud-panel.task",
-  "hud-panel.mic",
-  "hud-panel.mic.muted ",
-  "change-hub.message"
+  "hud-panel.mic.mute",
+  "hud-panel.mic.unmute",
+  "change-hub.message",
+  "hud-panel.ask"
 ];
 
 const placeholderData = createLanguageData([
@@ -34,7 +35,8 @@ const placeholderData = createLanguageData([
   "Task",
   "Mute Mic",
   "Unmute mic",
-  "Visit room"
+  "Visit room",
+  "Raise Hand"
 ]);
 
 const enData = placeholderData;
@@ -47,7 +49,8 @@ const elData = createLanguageData([
   "Στόχος",
   "Σίγαση",
   "Κατάργηση Σίγασης",
-  "Επίσκεψη στο Δωμάτιο"
+  "Επίσκεψη στο Δωμάτιο",
+  "Σηκώστε χέριο"
 ]);
 
 const esData = createLanguageData([
@@ -59,7 +62,8 @@ const esData = createLanguageData([
   "Tarea",
   "Silenciar Micrófono",
   "Activar Micrófono",
-  "Visitar Sala"
+  "Visitar Sala",
+  "Levante la mano"
 ]);
 
 const itData = createLanguageData([
@@ -71,7 +75,8 @@ const itData = createLanguageData([
   "Compito",
   "Disattiva il microfono",
   "Attiva il microfono",
-  "Visita la stanza"
+  "Visita la stanza",
+  "Alzi la mano"
 ]);
 
 const nlData = createLanguageData([
@@ -83,7 +88,8 @@ const nlData = createLanguageData([
   "Taak",
   "Demp je microfoon",
   "Zet de microfoon aan",
-  "Bezoek de kamer"
+  "Bezoek de kamer",
+  "Steekt u uw hand op"
 ]);
 
 const deData = createLanguageData([
@@ -95,7 +101,8 @@ const deData = createLanguageData([
   "Aufgabe",
   "Mikrofon stummschalten",
   "Mikrofon einschalten",
-  "Raum besuchen"
+  "Raum besuchen",
+  "Heben Sie die Hand"
 ]);
 
 // ----------------------------------------------
