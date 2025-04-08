@@ -4,7 +4,6 @@
  * @component translate-badge
  */
 
-import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { translationSystem } from "../bit-systems/translation-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { roomPropertiesReader } from "../utils/rooms-properties";
@@ -98,7 +97,6 @@ AFRAME.registerComponent("translate-badge", {
         worldPos.x < this.borders[1] &&
         worldPos.z > this.borders[2] &&
         worldPos.z < this.borders[3];
-      this.withinBorder = this.withinBorder && oldTranslationSystem.prevBorderState;
     } else {
       this.withinBorder = true;
     }

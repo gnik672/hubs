@@ -3,9 +3,6 @@ import { Label, roomPropertiesReader } from "../utils/rooms-properties";
 import { ArrayVec3, renderAsEntity } from "../utils/jsx-entity";
 import { SimpleImagePanel } from "../prefabs/tutorial-panels";
 import { removeEntity } from "bitecs";
-import { degToRad } from "three/src/math/MathUtils";
-import { oldTranslationSystem } from "./old-translation-system";
-import { languageCodes, voxLanugages } from "./localization-system";
 
 class SceneObject {
   ref: number;
@@ -34,9 +31,6 @@ class RoomLabelOrganizer {
     });
     this.labels = new Array<SceneObject>();
     this.labelProps = roomPropertiesReader.roomProps.labels;
-
-    const language = oldTranslationSystem.mylanguage as voxLanugages;
-    const languageCode = languageCodes[language];
 
     this.labelProps.forEach(label => {
       label.filename = `${roomPropertiesReader.serverURL}/file/${label.filename}`;

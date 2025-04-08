@@ -273,7 +273,6 @@ import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import { navSystem } from "./bit-systems/routing-system";
-import { oldTranslationSystem } from "./bit-systems/old-translation-system";
 import { translationSystem } from "./bit-systems/translation-system";
 import { UpdateLanguage } from "./bit-systems/localization-system";
 

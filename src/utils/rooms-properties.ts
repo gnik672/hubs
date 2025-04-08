@@ -14,6 +14,12 @@ interface Properties {
   congrats: TutorialMaterials[];
   agent: boolean;
   help: HelpSlide[];
+  urls: {
+    navqa_url: string;
+    agent_url: string;
+    translation_url: string;
+    file_translation_url: string;
+  };
 }
 
 export interface Label {
@@ -78,6 +84,12 @@ const invalidProps: Properties = {
   labels: [],
   translations: [],
   congrats: [],
+  urls: {
+    navqa_url: "",
+    agent_url: "",
+    translation_url: "",
+    file_translation_url: ""
+  },
   agent: false
 };
 
@@ -109,7 +121,9 @@ class RoomPropertiesReader {
       try {
         this.hubId = HubID;
         const response = await fetch(
-          `${this.serverURL}/properties/room/${this.hubId}?language=${languageCodes[this.language]}&user=user-a`,
+          `${this.serverURL}/properties/room/${this.hubId}?language=${languageCodes[this.language]}&user=${
+            APP.store.state.profile.displayName
+          }`,
           { method: "GET" }
         );
         if (!response.ok) throw new Error("Response not OK");

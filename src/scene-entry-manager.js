@@ -31,7 +31,6 @@ import { getCurrentHubId, isLockedDownDemoRoom } from "./utils/hub-utils";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
 import { navSystem } from "./bit-systems/routing-system";
-import { oldTranslationSystem } from "./bit-systems/old-translation-system";
 import { languagePanel } from "./bit-systems/language-panel";
 import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";

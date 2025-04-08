@@ -1,15 +1,13 @@
+import { roomPropertiesReader } from "./rooms-properties";
+
 export enum COMPONENT_ENDPOINTS {
-  TRANSLATE_AUDIO = `https://dev.speech-voxreality.maggioli-research.gr/translate_audio`,
-  LXMERT = `https://dev.voxreality.maggioli-research.gr/lxmert/`,
-  GPT = `https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/`,
-  TRANSLATE_TEXT = `https://audiotranslation.vox.lab.synelixis.com/translate_text`,
-  TRANSCRIBE_AUDIO_FILES = `https://audiotranslation.vox.lab.synelixis.com/transcribe_audio_files`,
-  TRANSLATE_AUDIO_FILES = `https://audiotranslation.vox.lab.synelixis.com/translate_audio_files`,
-  INTENTION = `https://dev.conference-agent-voxreality.lab.synelixis.com/intent_dest/`,
-  TASK_RESPONSE = `https://dev.conference-agent-voxreality.lab.synelixis.com/response/`,
-  MEMORY_RESET = `https://dev.conference-agent-voxreality.lab.synelixis.com/clear_memory`,
-  LOCAL_TRANSLATE_AUDIO_FILES = `http://127.0.0.1:8080/translate_audio_files`,
-  LOCAL_NAVQA = `http://172.23.26.99:5044/navqa`
+  TRANSLATE_TEXT = "translate_text",
+  TRANSLATE_AUDIO_FILES = "translate_audio_files",
+  TRANSCRIBE_AUDIO = "listen",
+  INTENTION = "intent_dest/",
+  AGENT_RESPONSE = "response/",
+  MEMORY_RESET = "clear_memory",
+  NAVQA = "navqa"
 }
 
 export enum RECORDER_CODES {
@@ -72,3 +70,17 @@ export const CODE_DESCRIPTIONS: Record<COMPONENT_CODES, string> = {
   [COMPONENT_CODES.UknownTask]: "Uknown Task",
   [COMPONENT_CODES.UnknownDest]: "Uknown Destination"
 };
+
+export function getAIUrls() {
+  const urls = {
+    translate_audio_files: `https://${roomPropertiesReader.roomProps.urls.file_translation_url}/${COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES}`,
+    trasnlate_text: `https://${roomPropertiesReader.roomProps.urls.file_translation_url}/${COMPONENT_ENDPOINTS.TRANSLATE_TEXT}`,
+    transcribe_audio: `wss://${roomPropertiesReader.roomProps.urls.translation_url}/${COMPONENT_ENDPOINTS.TRANSCRIBE_AUDIO}`,
+    intent_dest: `https://${roomPropertiesReader.roomProps.urls.agent_url}/${COMPONENT_ENDPOINTS.INTENTION}`,
+    agent_response: `https://${roomPropertiesReader.roomProps.urls.agent_url}/${COMPONENT_ENDPOINTS.AGENT_RESPONSE}`,
+    clear_memory: `https://${roomPropertiesReader.roomProps.urls.agent_url}/${COMPONENT_ENDPOINTS.MEMORY_RESET}`,
+    navqa: `https://${roomPropertiesReader.roomProps.urls.navqa_url}/${COMPONENT_ENDPOINTS.NAVQA}`
+  };
+
+  return urls;
+}

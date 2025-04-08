@@ -15,12 +15,8 @@ import {
   removeComponent,
   removeEntity
 } from "bitecs";
-import { oldTranslationSystem } from "./old-translation-system";
 import { changeHub } from "../change-hub";
-import { languageCodes } from "./localization-system";
-import { popToBeginningOfHubHistory } from "../utils/history";
-import { touchscreenUserBindings } from "../systems/userinput/bindings/touchscreen-user";
-import { avatarDirection, avatarPos } from "./agent-system";
+
 // import { logger } from "./logging-system";
 
 const CONGRATS_SLIDE_COUNT = 4;
@@ -369,35 +365,41 @@ class TutorialManager {
 
 export const tutorialManager = new TutorialManager();
 
-const CongratsChapter = (): Step[] => {
-  return [
-    {
-      openingFunc: () => {
-        tutorialManager.ToggleArrowVisibility(false);
-        tutorialManager.activeTimeout = setTimeout(() => {
-          tutorialManager.Next();
-          tutorialManager.ToggleArrowVisibility(true);
-        }, 1500);
-      }
-    }
-  ];
-};
-
 const MicUnMutedChapter = (): TutorialChapter => {
-  const onMuting = () => tutorialManager.Next(true);
-
+  const onMuting = (e: any) => {
+    if (!e.enabled) {
+      tutorialManager.Next(true);
+      APP.dialog.off("mic-state-changed", onMuting);
+    }
+  };
   return {
     name: "mic_unmuted",
     steps: [
       {
-        openingFunc: () => tutorialManager.Ascene.addEventListener("action_disable_mic", onMuting, { once: true }),
-        exitFunc: () => tutorialManager.Ascene.removeEventListener("action_disable_mic", onMuting)
+        openingFunc: () => {
+          APP.dialog.on("mic-state-changed", onMuting);
+        },
+        exitFunc: () => {
+          APP.dialog.off("mic-state-changed", onMuting);
+        }
       }
     ]
   };
 };
 
-const onUnmuting = () => tutorialManager.ChangeChapter(MicUnMutedChapter().steps);
+const onUnmuting = (e: any) => {
+  if (e.enabled) {
+    tutorialManager.Next();
+    APP.dialog.off("mic-state-changed", onUnmuting);
+  }
+};
+
+const onMuting = (e: any) => {
+  if (!e.enabled) {
+    tutorialManager.Next(true);
+    APP.dialog.off("mic-state-changed", onMuting);
+  }
+};
 
 const OnMapToggle = () => {
   APP.scene!.addEventListener(
@@ -535,10 +537,18 @@ const lobbyChapters: Array<TutorialChapter> = [
       },
       {
         openingFunc: () => {
-          tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting, { once: true });
+          APP.dialog.on("mic-state-changed", onUnmuting);
         },
         exitFunc: () => {
-          tutorialManager.Ascene.removeEventListener("action_enable_mic", onUnmuting);
+          APP.dialog.off("mic-state-changed", onUnmuting);
+        }
+      },
+      {
+        openingFunc: () => {
+          APP.dialog.on("mic-state-changed", onMuting);
+        },
+        exitFunc: () => {
+          APP.dialog.off("mic-state-changed", onMuting);
         }
       }
     ]

@@ -8,7 +8,6 @@ import { ReactComponent as Italian } from "../icons/it.svg";
 import { ReactComponent as Spanish } from "../icons/es.svg";
 import { FormattedMessage } from "react-intl";
 import { LanguagePopover } from "./LanguagePopover";
-import { oldTranslationSystem } from "../../bit-systems/old-translation-system";
 import { selectedLanguage } from "../../bit-systems/localization-system";
 
 function useTranslate(scene) {

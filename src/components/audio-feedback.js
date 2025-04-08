@@ -3,7 +3,6 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
-import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { IconTranslationDict } from "../bit-systems/localization-system";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.

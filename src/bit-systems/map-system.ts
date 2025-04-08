@@ -9,7 +9,6 @@ import { HubsWorld } from "../app";
 import { radToDeg } from "three/src/math/MathUtils";
 import { logger } from "./logging-system";
 import { faSlash } from "@fortawesome/free-solid-svg-icons";
-import { oldTranslationSystem } from "./old-translation-system";
 import { languageCodes } from "./localization-system";
 
 const mapQuery = defineQuery([FloorMap]);
@@ -77,15 +76,6 @@ class FloorMapClass {
   }
 
   Instantiate() {
-    const language = oldTranslationSystem.mylanguage as
-      | "english"
-      | "spanish"
-      | "german"
-      | "dutch"
-      | "greek"
-      | "italian";
-    const languageCode = languageCodes[language];
-
     const mapImage = `${roomPropertiesReader.serverURL}/file/${roomPropertiesReader.roomProps.maps[0].filename}`;
     this.entityRef = renderAsEntity(APP.world, FloorMapPanel(this.imageRatio, mapImage, this.scale));
     this.entityObj = APP.world.eid2obj.get(this.entityRef)!;

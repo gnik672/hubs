@@ -2,7 +2,6 @@ import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUr
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
-import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { tutorialManager } from "../bit-systems/tutorial-system";
 import { logger } from "../bit-systems/logging-system";
 import { roomPropertiesReader } from "../utils/rooms-properties";

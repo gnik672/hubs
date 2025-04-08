@@ -1,5 +1,4 @@
 import { IconTranslationDict } from "../bit-systems/localization-system";
-import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 
 /**
  * A button with an image, tooltip, hover states.

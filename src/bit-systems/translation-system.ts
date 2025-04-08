@@ -3,7 +3,7 @@ import { generateRandomSentence } from "./presentation-system";
 import { roomPropertiesReader, Translation } from "../utils/rooms-properties";
 import { AElement } from "aframe";
 import { audioModules, stopRecording, textModule } from "../utils/ml-adapters";
-import { COMPONENT_ENDPOINTS } from "../utils/component-types";
+import { COMPONENT_ENDPOINTS, getAIUrls } from "../utils/component-types";
 import { setLocale } from "../utils/i18n";
 import { languageCodes, voxLanugages } from "./localization-system";
 
@@ -49,6 +49,7 @@ export class TranslationSystem {
   mediaRecorder: MediaRecorder | null;
   wsActive: boolean;
   wsUrl: string;
+  translateTextUrl: string;
 
   constructor() {}
 
@@ -62,6 +63,7 @@ export class TranslationSystem {
     const transProps = roomPropertiesReader.roomProps.translations[0];
     console.log(transProps);
     this.wsUrl = transProps.url;
+    this.translateTextUrl = roomPropertiesReader.roomProps.urls.file_translation_url;
 
     this.properties = transProps;
     this.avatarObj = (document.querySelector("#avatar-pov-node") as AElement).object3D;
@@ -129,6 +131,32 @@ export class TranslationSystem {
     );
 
     //logic to start transcribing
+  }
+
+  PresentationTranscription(start: boolean) {
+    let flagMessage;
+    if (start) {
+      flagMessage = "Presenter: Starting to transcribe text";
+      this.OpenWs();
+    } else {
+      this.StopTranscription();
+      flagMessage = "Presenter: Stop transcribing text";
+    }
+
+    console.log(`Presentation Presenter: ${flagMessage}`);
+  }
+
+  AudienceTranscription(start: boolean) {
+    let flagMessage;
+    if (start) {
+      flagMessage = "Audience: Starting to transcribe text";
+      this.OpenWs();
+    } else {
+      this.StopTranscription();
+      flagMessage = "Audience: Stop transcribing text";
+    }
+
+    console.log(`Presentation Audience: ${flagMessage}`);
   }
 
   SendTranscription(message: string) {
@@ -278,14 +306,13 @@ export class TranslationSystem {
         target_language: languageCodes[this.mylanguage],
         return_transcription: "false"
       };
-      return await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, message, nmtTextParams);
+      return await textModule(message, nmtTextParams);
     }
   }
 
-  OpenWs(url?: string) {
-    const wsurl = url || `wss://${this.wsUrl}/listen`;
-    console.log(`openinig websocket`, wsurl);
-    this.websocket = new WebSocket(wsurl);
+  OpenWs() {
+    console.log(`openinig websocket`, getAIUrls().transcribe_audio);
+    this.websocket = new WebSocket(getAIUrls().transcribe_audio);
 
     this.websocket.onopen = () => {
       console.log("connected to websocket");
@@ -359,9 +386,3 @@ function ConvertFloat32ToInt16(buffer: Float32Array) {
   }
   return buf.buffer;
 }
-
-export function TestWS(url: string) {
-  translationSystem.OpenWs();
-}
-
-const testingUrl = "192.168.169.219:5033";

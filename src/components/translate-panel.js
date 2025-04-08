@@ -5,7 +5,6 @@
  */
 
 import { Vector3 } from "three";
-import { oldTranslationSystem } from "../bit-systems/old-translation-system";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { selectedLanguage } from "../bit-systems/localization-system";
 

@@ -6,10 +6,11 @@ import { FixedText } from "../prefabs/fixed-panel";
 import { degToRad } from "three/src/math/MathUtils";
 import { removeEntity } from "bitecs";
 import { audioModules, textModule } from "../utils/ml-adapters";
-import { COMPONENT_ENDPOINTS } from "../utils/component-types";
+import { COMPONENT_ENDPOINTS, getAIUrls } from "../utils/component-types";
 import { UpdateFixedPanelText, UpdatePanelColor } from "./fixed-panel-system";
 import { languageCodes, voxLanugages } from "./localization-system";
 import HubChannel from "../utils/hub-channel";
+import { translationSystem } from "./translation-system";
 
 export class PresentationSystem {
   presenterState: boolean;
@@ -23,7 +24,7 @@ export class PresentationSystem {
   allowed: boolean;
   presenterBorders: number[];
   properties: Translation;
-  mylanguage: voxLanugages | null;
+  mylanguage: voxLanugages;
   active: boolean;
   questionQueue: string[];
   raisedHand: boolean;
@@ -32,6 +33,7 @@ export class PresentationSystem {
   audienceColor: Color;
   devCounter: number;
   handTimeout: NodeJS.Timeout;
+  webSocket: WebSocket;
 
   constructor() {
     this.presenter = "";
@@ -175,9 +177,10 @@ export class PresentationSystem {
       this.UpdatePresenterInfo(isPresenter ? this.peerId : "");
       this.questionQueue = [];
       if (this.presenterState) lastLoggedTime = Date.now();
-
       this.presenterState = isPresenter;
       this.canUnmute = isPresenter;
+      translationSystem.PresentationTranscription(isPresenter);
+
       // APP.scene!.addEventListener("toggle_translation", this.ToggleHand);
     }
   }
@@ -230,7 +233,7 @@ export class PresentationSystem {
         return_transcription: "false"
       };
 
-      const translateRespone = await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, transcription, inferenceParams);
+      const translateRespone = await textModule(transcription, inferenceParams);
       return translateRespone.data?.translations![0]!;
     } catch (error) {
       console.log(`fetch aborted`);

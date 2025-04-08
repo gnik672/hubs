@@ -11,7 +11,7 @@ import {
   stopRecording,
   resetDs
 } from "../utils/ml-adapters";
-import { COMPONENT_ENDPOINTS } from "../utils/component-types";
+import { COMPONENT_ENDPOINTS, getAIUrls } from "../utils/component-types";
 import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { navSystem } from "./routing-system";
@@ -25,7 +25,6 @@ import { GetObjectives, GetResolved, GetValids, MakeObjectiveResolved } from "./
 import { paths } from "../systems/userinput/paths";
 import { languageCodes, selectedLanguage } from "./localization-system";
 import { generateUUID } from "three/src/math/MathUtils";
-import { TestWS } from "./translation-system";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -91,6 +90,9 @@ export default class VirtualAgent {
     this.allowed = null;
 
     this.uuid = "";
+    this.url = "";
+    this.translateTextUrl = "";
+    this.translateAudioUrl = "";
 
     this.agent = new objElement();
     this.nextArrow = new objElement();
@@ -148,6 +150,10 @@ export default class VirtualAgent {
       console.warn("Virtual Agent is not enabled in this room");
       return;
     }
+
+    this.url = `https://${roomPropertiesReader.roomProps.urls.agent_url}`;
+    this.translateTextUrl = roomPropertiesReader.roomProps.urls.translation_url;
+    this.translateAudioUrl = roomPropertiesReader.roomProps.urls.file_translation_url;
 
     if (!this.uuid) {
       this.uuid = generateUUID();
@@ -519,11 +525,7 @@ export default class VirtualAgent {
       if (!query) {
         const recordedQuestion = await RecordQuestion(); // question recording
         const nmtAudioParams = { source_language: langCode, target_language: "en", return_transcription: "true" };
-        nmtResponse = await audioModules(
-          COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
-          recordedQuestion.data.file,
-          nmtAudioParams
-        );
+        nmtResponse = await audioModules(getAIUrls().translate_audio_files, recordedQuestion.data.file, nmtAudioParams);
         // sending to ASR/NMT
       } else nmtResponse = query;
 
@@ -535,15 +537,16 @@ export default class VirtualAgent {
         console.log(this.uuid);
         const int = await intentionModule(nmtResponse, this.uuid);
         destination = int.destination;
-        intentResponse = int.intention;
+        intentResponse = int.intent;
       }
 
       let voxyResponse;
       try {
+        console.log(intentResponse);
         if (intentResponse.includes("navigation")) {
           const instPath = navSystem.GetInstructionsGraphics(destination);
           if (instPath.length > 0) navSystem.RenderCues(instPath);
-          voxyResponse = await vlModule(destination, COMPONENT_ENDPOINTS.LOCAL_NAVQA);
+          voxyResponse = await vlModule(destination);
         } else {
           voxyResponse = await dsResponseModule(nmtResponse, intentResponse, this.uuid);
         }
@@ -556,7 +559,7 @@ export default class VirtualAgent {
         this.UpdateTextArray([voxyResponse]); //print result if language is english
       } else {
         const nmtTextParams = { source_language: "en", target_language: langCode };
-        const translatedResponse = await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams); // translate if language is not english
+        const translatedResponse = await textModule(sentence, nmtTextParams); // translate if language is not english
         this.UpdateTextArray([translatedResponse]); // print the translated response
       }
 

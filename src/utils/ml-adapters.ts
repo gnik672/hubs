@@ -1,6 +1,6 @@
 import { Object3D, WebGLRenderTarget } from "three";
 import { virtualAgent } from "../bit-systems/agent-system";
-import { ResponseData, COMPONENT_ENDPOINTS, COMPONENT_CODES, CODE_DESCRIPTIONS } from "./component-types";
+import { ResponseData, COMPONENT_ENDPOINTS, COMPONENT_CODES, CODE_DESCRIPTIONS, getAIUrls } from "./component-types";
 import { SoundAnalyzer } from "./silence-detector";
 import { AElement } from "aframe";
 import { degToRad } from "three/src/math/MathUtils";
@@ -103,14 +103,14 @@ export async function audioModules(
   return responseData.translations[0];
 }
 
-export async function textModule(endPoint: COMPONENT_ENDPOINTS, data: string, parameters: Record<string, any>) {
+export async function textModule(data: string, parameters: Record<string, any>) {
   const queryString = Object.keys(parameters)
     .map(key => `${key}=${parameters[key]}`)
     .join("&");
 
   const requestBody = { text: data };
 
-  const response = await fetch(endPoint + `?${queryString}`, {
+  const response = await fetch(getAIUrls().trasnlate_text + `?${queryString}`, {
     method: "POST",
     headers: {
       accept: "application/json",
@@ -130,8 +130,8 @@ export async function intentionModule(englishTranscription: string, uuid: string
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
   const data = { user_query: englishTranscription, user_uuid: uuid };
 
-  console.log(data);
-  const response = await fetch(COMPONENT_ENDPOINTS.INTENTION, {
+  console.log(getAIUrls().intent_dest, data);
+  const response = await fetch(getAIUrls().intent_dest, {
     method: "POST",
     headers: headers,
     body: JSON.stringify(data)
@@ -157,7 +157,7 @@ export async function dsResponseModule(
 
   const data = { user_query: userQuery, intent: intent, mozilla_input: mozillaInput || "", user_uuid: uuid };
 
-  const response = await fetch(COMPONENT_ENDPOINTS.TASK_RESPONSE, {
+  const response = await fetch(getAIUrls().agent_response, {
     method: "POST",
     headers: headers,
     body: JSON.stringify(data)
@@ -189,7 +189,7 @@ export async function resetDs(uuid: string) {
   return responseData.response;
 }
 
-export async function vlModule(destination: string, vlModule: COMPONENT_ENDPOINTS) {
+export async function vlModule(destination: string) {
   const formData = new FormData();
   const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
 
@@ -213,7 +213,7 @@ export async function vlModule(destination: string, vlModule: COMPONENT_ENDPOINT
 
   const pov = await SnapPov();
   formData.append("file", pov, "camera_pov.png");
-  const response = await fetch(`${vlModule}?question=${destination}`, {
+  const response = await fetch(`${getAIUrls().navqa}?question=${destination}`, {
     method: "POST",
     body: formData
   });

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { oldTranslationSystem } from "../../../bit-systems/old-translation-system";
 import { setLocale } from "../../../utils/i18n";
 import { translationSystem } from "../../../bit-systems/translation-system";
 import {

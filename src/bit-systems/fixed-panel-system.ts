@@ -7,7 +7,6 @@ import { GreetingPhrases } from "../components/translate-panel";
 
 import { GetTextSize } from "../utils/interactive-panels";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
-import { oldTranslationSystem } from "./old-translation-system";
 import { voxLanugages } from "./localization-system";
 import { presentationSystem } from "./presentation-system";
 
