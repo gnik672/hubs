@@ -191,6 +191,8 @@ export async function resetDs(uuid: string) {
 
 export async function vlModule(destination: string) {
   const formData = new FormData();
+  virtualAgent.agent.obj!.visible = false;
+  virtualAgent.agent.obj!.updateMatrix();
   const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
 
   await new Promise<void>(resolve => {
@@ -221,21 +223,20 @@ export async function vlModule(destination: string) {
   const data = await response.json();
 
   if (response.status >= 300 || !data || !data.Directions) throw new Error("bad response from vl module");
-
+  virtualAgent.agent.obj!.visible = true;
+  virtualAgent.agent.obj!.updateMatrix();
   return data.Directions;
 }
 
 export async function SnapPov() {
-  virtualAgent.agent.obj!.visible = false;
-  virtualAgent.agent.obj!.updateMatrix();
   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
   APP.scene?.renderer.setRenderTarget(renderTarget);
   APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
   APP.scene?.renderer.setRenderTarget(null);
   const canvas = APP.scene!.renderer.domElement;
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
   virtualAgent.agent.obj!.visible = true;
   virtualAgent.agent.obj!.updateMatrix();
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
   if (!blob) throw new Error("something went wrong");
   return blob;
 }

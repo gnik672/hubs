@@ -552,9 +552,10 @@ export default class VirtualAgent {
       try {
         console.log(intentResponse, dest);
         if (intentResponse.includes("navigation")) {
+          if (dest === "no location") throw new Error({ intentError: "no location" });
           const instPath = navSystem.GetInstructionsGraphics(dest);
-          if (instPath.length > 0) navSystem.RenderCues(instPath);
           voxyResponse = await vlModule(dest);
+          if (instPath.length > 0) navSystem.RenderCues(instPath);
         } else {
           voxyResponse = await dsResponseModule(nmtResponse, intentResponse, this.uuid);
         }
