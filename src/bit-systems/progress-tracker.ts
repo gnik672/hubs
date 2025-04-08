@@ -28,6 +28,7 @@ interface ObjectiveCreationParams {
   completed?: boolean;
   value?: string;
   valid?: boolean;
+  destination?: string;
   room?: Room;
   validator?: objectiveFunction;
   checker?: objectiveFunction;
@@ -38,7 +39,7 @@ function CreateObjective(params: ObjectiveCreationParams): Objective {
     type: params.type || ObjectiveDefaultValues.type,
     room: params.room || ObjectiveDefaultValues.room,
     value: params.value || ObjectiveDefaultValues.value,
-    destination: params.value || "",
+    destination: params.destination || "",
     completed: params.completed || ObjectiveDefaultValues.completed,
     valid: params.valid || ObjectiveDefaultValues.valid,
     validator: params.validator || ObjectiveDefaultValues.validator,
@@ -51,8 +52,18 @@ let currentRoom: Room;
 export const RoomObjectives = {
   lobby: [CreateObjective({})],
   "main area": [
-    CreateObjective({ type: "navigation", room: "main area", value: "How can I go to the business room?" }),
-    CreateObjective({ type: "navigation", room: "main area", value: "How can I go to the social area?" }),
+    CreateObjective({
+      type: "navigation",
+      room: "main area",
+      destination: "business room",
+      value: "How can I go to the business room?"
+    }),
+    CreateObjective({
+      type: "navigation",
+      room: "main area",
+      destination: "social area",
+      value: "How can I go to the social area?"
+    }),
     CreateObjective({ type: "trade_show", room: "main area", value: "Who will I find in the tradeshows?" }),
     CreateObjective({ type: "program_info", room: "main area", value: "Who is presenting in the morning?" }),
     CreateObjective({

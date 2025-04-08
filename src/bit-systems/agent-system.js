@@ -208,6 +208,8 @@ export default class VirtualAgent {
         texts[types.length - 1].destination = objective.destination;
         texts[types.length - 1].index = index;
       }
+
+      console.log("texts", texts);
     });
 
     objs.forEach((obj, index) => {
@@ -463,6 +465,7 @@ export default class VirtualAgent {
       this.AskAgent({
         query: this.suggRText.value,
         intention: this.suggRText.intention,
+        destination: this.suggRText.destination,
         index: this.suggRText.index
       }).then(() => {
         this.FetchSuggestions();
@@ -514,7 +517,7 @@ export default class VirtualAgent {
     });
   }
 
-  async AskAgent({ query, intention, index, destination } = { query: "", intention: "", destination, index: -1 }) {
+  async AskAgent({ query, intention, index, destination } = { query: "", intention: "", destination: "", index: -1 }) {
     this.panel.obj.visible = false;
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
