@@ -9,6 +9,7 @@ interface Objective {
   completed: boolean;
   value: string;
   valid: boolean;
+  destination?: string;
   room: Room;
   validator?: objectiveFunction;
   checker?: objectiveFunction;
@@ -37,6 +38,7 @@ function CreateObjective(params: ObjectiveCreationParams): Objective {
     type: params.type || ObjectiveDefaultValues.type,
     room: params.room || ObjectiveDefaultValues.room,
     value: params.value || ObjectiveDefaultValues.value,
+    destination: params.value || "",
     completed: params.completed || ObjectiveDefaultValues.completed,
     valid: params.valid || ObjectiveDefaultValues.valid,
     validator: params.validator || ObjectiveDefaultValues.validator,

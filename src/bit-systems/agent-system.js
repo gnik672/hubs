@@ -81,6 +81,7 @@ class SuggestionElement extends textElement {
   constructor() {
     super();
     this.intention = null;
+    this.destination = null;
     this.index = -1;
   }
 }
@@ -204,6 +205,7 @@ export default class VirtualAgent {
 
         texts[types.length - 1].text = objective.value;
         texts[types.length - 1].intention = objective.type;
+        texts[types.length - 1].destination = objective.destination;
         texts[types.length - 1].index = index;
       }
     });
@@ -451,6 +453,7 @@ export default class VirtualAgent {
       this.AskAgent({
         query: this.suggLText.value,
         intention: this.suggLText.intention,
+        destination: this.suggLText.destination,
         index: this.suggRText.index
       }).then(() => {
         this.FetchSuggestions();
@@ -511,7 +514,7 @@ export default class VirtualAgent {
     });
   }
 
-  async AskAgent({ query, intention, index } = { query: "", intention: "", index: -1 }) {
+  async AskAgent({ query, intention, index, destination } = { query: "", intention: "", destination, index: -1 }) {
     this.panel.obj.visible = false;
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
@@ -530,23 +533,25 @@ export default class VirtualAgent {
       } else nmtResponse = query;
 
       let intentResponse;
-      let destination;
+      let dest;
 
-      if (!!intention) intentResponse = intention;
-      else {
+      if (!!intention) {
+        intentResponse = intention;
+        dest = destination;
+      } else {
         console.log(this.uuid);
         const int = await intentionModule(nmtResponse, this.uuid);
-        destination = int.destination;
+        dest = int.destination;
         intentResponse = int.intent;
       }
 
       let voxyResponse;
       try {
-        console.log(intentResponse);
+        console.log(intentResponse, dest);
         if (intentResponse.includes("navigation")) {
-          const instPath = navSystem.GetInstructionsGraphics(destination);
+          const instPath = navSystem.GetInstructionsGraphics(dest);
           if (instPath.length > 0) navSystem.RenderCues(instPath);
-          voxyResponse = await vlModule(destination);
+          voxyResponse = await vlModule(dest);
         } else {
           voxyResponse = await dsResponseModule(nmtResponse, intentResponse, this.uuid);
         }
