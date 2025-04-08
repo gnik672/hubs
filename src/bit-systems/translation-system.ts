@@ -148,6 +148,7 @@ export class TranslationSystem {
 
   AudienceTranscription(start: boolean) {
     let flagMessage;
+  
     if (start) {
       flagMessage = "Audience: Starting to transcribe text";
       this.OpenWs();
@@ -313,11 +314,13 @@ export class TranslationSystem {
   OpenWs() {
     console.log(`openinig websocket`, getAIUrls().transcribe_audio);
     this.websocket = new WebSocket(getAIUrls().transcribe_audio);
+    if(!this.peerId) this.peerId = APP.dialog._clientId;
 
     this.websocket.onopen = () => {
       console.log("connected to websocket");
       this.SendAudioConfig();
       this.StartTranscription();
+      // this.wsActive = true;
     };
 
     this.websocket.onmessage = (event: MessageEvent) => {

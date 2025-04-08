@@ -71,7 +71,6 @@ export class PresentationSystem {
     this.properties = roomPropertiesReader.roomProps.translations[0];
     this.presenterBorders = this.properties.type_data;
     this.avatarObj = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
-    this.mylanguage = "english";
 
     APP.scene!.emit("toggle_translation");
 
@@ -80,13 +79,15 @@ export class PresentationSystem {
     respondTime = Date.now();
 
     APP.dialog.enableMicrophone(false);
+      this.RegisterAudienceEvents(true);
+
   }
 
   Tick() {
     if (!this.allowed || !APP.scene!.is("entered")) return;
 
     this.CheckPresenterState();
-    if (this.presenterState) this.PresenterActions(); // TODO: remove this after integrating trans model
+    // if (this.presenterState) this.PresenterActions(); // TODO: remove this after integrating trans model
   }
 
   ToggleSubtitles() {
@@ -180,6 +181,7 @@ export class PresentationSystem {
       this.presenterState = isPresenter;
       this.canUnmute = isPresenter;
       translationSystem.PresentationTranscription(isPresenter);
+      this.RegisterAudienceEvents(!isPresenter);
 
       // APP.scene!.addEventListener("toggle_translation", this.ToggleHand);
     }
@@ -221,8 +223,13 @@ export class PresentationSystem {
     console.log(
       `available transcription: "${transcription}" with language code: "${language}" from producer: "${producer}"`
     );
+    console.log(`my language: ${this.mylanguage}`);
+
+    if(this.mylanguage === language)this.UpdateTranslation(transcription, producer);
+    else {
     const translation = await this.InferenceTranscription(transcription, language);
-    if (translation) this.UpdateTranslation(translation, producer);
+    console.log("translation:", translation);
+    this.UpdateTranslation(translation, producer);}
   }
 
   async InferenceTranscription(transcription: string, senderLanugage: voxLanugages) {
@@ -234,7 +241,7 @@ export class PresentationSystem {
       };
 
       const translateRespone = await textModule(transcription, inferenceParams);
-      return translateRespone.data?.translations![0]!;
+      return translateRespone
     } catch (error) {
       console.log(`fetch aborted`);
       return transcription;
@@ -278,6 +285,21 @@ export class PresentationSystem {
     //   APP.dialog.sendHandRequest(false);
     //   lowerFlag = false;
     // }
+  }
+
+  RegisterAudienceEvents(register: boolean) {
+    if (register) {
+      console.log("registering audience event"); 
+      APP.dialog.on("mic-state-changed", this.AudienceEvent)
+    }
+    else {console.log(`unregistering event`); 
+      APP.dialog.off("mic-state-changed", this.AudienceEvent);
+    }
+  }
+
+  AudienceEvent(e: any) {
+    console.log("audience event", e);
+    translationSystem.AudienceTranscription(e.enabled);
   }
 }
 
