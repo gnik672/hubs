@@ -100,12 +100,23 @@ AFRAME.registerComponent("translate-badge", {
     } else {
       this.withinBorder = true;
     }
-
+    const distance = worldPos.distanceTo(this.camWorldPos);
     const shouldBeVisible = this.withinBorder && worldPos.distanceTo(this.camWorldPos) < 2;
 
     if (isVisible !== shouldBeVisible) {
       this.el.object3D.visible = shouldBeVisible;
     }
+
+      // 👇 New logic: turn off translation if out of range
+  if (this.isTarget && distance >= 2) {
+    APP.dialog.unsubscribeFromPeer(this.owner).then(() => {
+      // console.log(`Auto-disabled translation for ${this.owner} due to distance.`);
+     this.isTarget = false;
+        translationSystem._removeTarget(this.owner);
+       this.translateIcon.setAttribute("icon-button", "active", false);
+      // console.log(`Auto-disabled translation for ${this.owner} due to distance.`);
+    });
+  }
   },
 
   play() {

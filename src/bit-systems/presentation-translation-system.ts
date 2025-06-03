@@ -79,7 +79,9 @@ export class TranslationSystem {
 
     this.websocket_listeners = {};
   }
-  
+
+  onFixedPanelTextUpdate?: (text: string, from: string) => void;
+
 
   AddSubscriber(consumerId: string) {
     let message = "";
@@ -94,24 +96,7 @@ export class TranslationSystem {
 
     console.log(message);
     this.UpdateTranscriptionStatus(prevSubscibers);
-  }
-
-  RemoveSubscriber(consumerId: string) {
-    let message = "";
-    const prevSubscibers = this.consumers.length;
-
-    const consumerIndex = this.consumers.indexOf(consumerId);
-
-    if (consumerIndex < 0) {
-      message = "consumer  not included";
-    } else {
-      this.consumers.splice(consumerIndex, 1);
-      message = `Removing peer: "${consumerId}" to susbcribers`;
-    }
-
-    console.log(message);
-    this.UpdateTranscriptionStatus(prevSubscibers);
-  }
+  } 
 
   IsPeerSubscribed(peerId: string) {
     return this.consumers.indexOf(peerId) >= 0;
@@ -147,13 +132,12 @@ export class TranslationSystem {
     console.log("Presentation transcription")
     let flagMessage;
     if (start) {
-      flagMessage = "Presenter: Starting to transcribe text";
+      flagMessage = " Starting to transcribe text";
       this.OpenWs();
     } else {
       this.StopTranscription();
-      flagMessage = "Presenter: Stop transcribing text";
-    }
-
+      flagMessage = " Stop transcribing text";
+    } 
     console.log(`Presentation Presenter: ${flagMessage}`);
   }
   AudienceListenSocket(presenterId:any) {
@@ -170,9 +154,11 @@ export class TranslationSystem {
 
     // console.log(`Presentation Presenter: ${flagMessage}`);
   }
-
-
-
+  StopSocket() {
+    this.StopTranscription()
+    console.log("close socket")
+   
+  }
   AudienceTranscription(start: boolean) {
     console.log("audience transcriptio")
     let flagMessage;
@@ -187,6 +173,9 @@ export class TranslationSystem {
 
     console.log(`Presentation Audience: ${flagMessage}`);
   }
+
+
+ 
 
   SendTranscription(message: string) {
     console.log(`sending transcribed message: ${message}`);
@@ -252,37 +241,7 @@ export class TranslationSystem {
     this.websocket = null;
 
     console.log("Cleanup completed");
-  }
-
-  UpdateMyLanguage(newLanguage: voxLanugages) {
-    this.mylanguage = newLanguage;
-    APP.store.update({ preferences: { locale: languageCodes[newLanguage] } });
-    setLocale(languageCodes[newLanguage]);
-  }
-
-  SendAudioConfig() {
-    let processingArgs = {};
-
-    processingArgs = {
-      chunk_length_seconds: 3.0,
-      accumulation_chunk_length_seconds: 1.0,
-      chunk_offset_seconds: 0.1
-    };
-
-    const audioConfig = {
-      type: "config",
-      data: {
-        model_name: "openai/whisper-tiny",
-        language: languageCodes[this.mylanguage],
-        processing_args: processingArgs
-      }
-    };
-
-    const data = JSON.stringify(audioConfig);
-    console.log("audio_data_goerge");
-    console.log(data);
-    this.websocket?.send(data);
-  }
+  } 
 
   ProcessAudio(event: AudioProcessingEvent) {
     const inputSampleRate = this.context!.sampleRate;
@@ -296,54 +255,9 @@ export class TranslationSystem {
     if (this.websocket && this.websocket.readyState == 1) {
       this.websocket.send(audioData);
     }
-  }
-
-  UpdateTraget(targetId: string, add: boolean) {
-    //George
-    console.log("targetId")
-    console.log(targetId)
-    if (add) this._addTarget(targetId);
-    else this._removeTarget(targetId);
-  }
-
-  _addTarget(targetId: string) {
-    if (this.targets[targetId]) return;
-
-    this.targets[targetId] = new TranslationTarget(targetId);
-    console.log(`target added: "${targetId}"`);
-//Here is the websocket listen George
-this.OpenWsListen(targetId)
-// George End
-    APP.scene!.emit("show_avatar_panel", targetId);
-  }
-
-  _removeTarget(targetId: string) {
-    if (!this.targets[targetId]) return;
-//George start
-
-    if (this.websocket_listeners[targetId]) {
-      this.websocket_listeners[targetId].close();
-      delete this.websocket_listeners[targetId];
-    }
-  //George end
+  } 
 
 
-    this.targets[targetId].Close();
-    delete this.targets[targetId];
-    console.log(`target removed: "${targetId}"`);
-    APP.scene!.emit("hide_avatar_panel", targetId);
-  }
-
-  async ProccessIncomingTranscription(message: string, language: voxLanugages, from: string) {
-    if (!this.allowed || !this.targets[from]) return;
-
-    console.log(`received transcription from: "${from}". Message: ${message}`);
- 
-    let newMessage="good morning"
-//     const translatedMessage = await this.TranslateText(message, language);
-// let newMessage="good morning"
-    APP.scene!.emit("update_avatar_panel", { id: from, message: newMessage });
-  }
 
   async TranslateText(message: string, language: voxLanugages) {
     if (language === this.mylanguage) return message;
@@ -361,7 +275,7 @@ this.OpenWsListen(targetId)
     console.log(`openinig websocket`, getAIUrls().transcribe_audio);
     console.log(this.peerId, APP.dialog._clientId);
     console.log('this.peerId, APP.dialog._clientId');
-    this.websocket = new WebSocket(getAIUrls().transcribe_audio  + APP.dialog._clientId);
+    this.websocket = new WebSocket(getAIUrls().transcribe_audio  + "presentation");
  
   
     // new WebSocket(getAIUrls().transcribe_audio  + APP.dialog._clientId+ "/en");
@@ -392,7 +306,7 @@ this.OpenWsListen(targetId)
     }; 
   }
   OpenWsListen(targetId: string) {
-   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/de"
+   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/en"
   //  +APP.store.state.preferences.locale
    console.log("Opening listener WebSocket for", targetId, "URL:", url);
  
@@ -402,20 +316,7 @@ this.OpenWsListen(targetId)
      console.log(`WebSocket opened for target ${targetId}`);
    };
  
-  //  ws.onmessage = (event: MessageEvent) => {
-
-  //   console.log(`[WS LISTENER RAW] ${event.data}`);
-  //    try {
-  //      const eventData = JSON.parse(event.data) as WsData;
-  //      console.log(`Message from ${targetId}:`, eventData.text);
-  //     //  this.targets[targetId].UpdateText(eventData.text);
-  //      this.targets[targetId].UpdateText({id: event.data.client_id ,  message:  event.data.translation });
-  //     //  {"translation":"Καλημέρα.","client_id":"b3e9937e-2188-4ecc-836f-df4de82a9bed","language":"ell"}
-  //      console.log(this.targets)
-  //    } catch (e) {
-  //      console.warn(`Invalid message from ${targetId}:`, event.data);
-  //    }
-  //  };
+ 
    ws.onmessage = (event: MessageEvent) => {
     console.log(`[WS LISTENER RAW] ${event.data}`);
     try {
@@ -426,6 +327,7 @@ this.OpenWsListen(targetId)
       console.log(`Message from ${targetId}:`, eventData.text);
       console.log(`Message from ${targetId}:`, eventData );
       this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
+     
       console.log(this.targets)
     } catch (e) {
       console.warn(`Invalid message from ${targetId}:`, event.data);
@@ -434,18 +336,19 @@ this.OpenWsListen(targetId)
  
    ws.onclose = () => {
      console.log(`WebSocket closed for target ${targetId}`);
-     delete this.websocket_listeners[targetId];
+    //  delete this.websocket_listeners[targetId];
    };
  
    ws.onerror = (err) => {
      console.error(`WebSocket error for target ${targetId}`, err);
    };
  
-   this.websocket_listeners[targetId] = ws;} , 3000)
+  //  this.websocket_listeners[targetId] = ws
+   ;} , 3000)
 
   }
   OpenAudienceWsListen(targetId: string) {
-    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/el"
+    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  "presentation" + "/en"
    //  +APP.store.state.preferences.locale
     console.log("Opening listener WebSocket for", targetId, "URL:", url);
   
@@ -455,20 +358,7 @@ this.OpenWsListen(targetId)
       console.log(`WebSocket opened for target ${targetId}`);
     };
   
-   //  ws.onmessage = (event: MessageEvent) => {
- 
-   //   console.log(`[WS LISTENER RAW] ${event.data}`);
-   //    try {
-   //      const eventData = JSON.parse(event.data) as WsData;
-   //      console.log(`Message from ${targetId}:`, eventData.text);
-   //     //  this.targets[targetId].UpdateText(eventData.text);
-   //      this.targets[targetId].UpdateText({id: event.data.client_id ,  message:  event.data.translation });
-   //     //  {"translation":"Καλημέρα.","client_id":"b3e9937e-2188-4ecc-836f-df4de82a9bed","language":"ell"}
-   //      console.log(this.targets)
-   //    } catch (e) {
-   //      console.warn(`Invalid message from ${targetId}:`, event.data);
-   //    }
-   //  };
+  
     ws.onmessage = (event: MessageEvent) => {
      console.log(`[WS LISTENER RAW] ${event.data}`);
      try {
@@ -478,8 +368,13 @@ this.OpenWsListen(targetId)
        console.log(eventDataNew)
        console.log(`Message from ${targetId}:`, eventData.text);
        console.log(`Message from ${targetId}:`, eventData );
-       this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
-       console.log(this.targets)
+       
+      //  this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
+   
+      if (this.onFixedPanelTextUpdate) {
+        this.onFixedPanelTextUpdate(eventDataNew.translation, targetId);
+      }
+      console.log(this.targets)
      } catch (e) {
        console.warn(`Invalid message from ${targetId}:`, event.data);
      }
@@ -487,7 +382,10 @@ this.OpenWsListen(targetId)
   
     ws.onclose = () => {
       console.log(`WebSocket closed for target ${targetId}`);
-      delete this.websocket_listeners[targetId];
+      // if (this.onFixedPanelTextUpdate) {
+      //   this.onFixedPanelTextUpdate("eventDataNew.translation", targetId);
+      // }
+      // delete this.websocket_listeners[targetId];
     };
   
     ws.onerror = (err) => {
@@ -495,30 +393,19 @@ this.OpenWsListen(targetId)
     };
   
     // this.websocket_listeners[targetId] = ws;
-  } , 3000)
+  } , 1000)
  
-   }
-
-  ClosePeer(peerId: string) {
-    if (!this.allowed || !APP.scene!.is("entered")) return;
-    if (this.IsPeerSubscribed(peerId)) this.RemoveSubscriber(peerId);
-    if (this.IsPeerTarget(peerId)) this._removeTarget(peerId);
-  }
+   } 
 
   Tick() {
     if (!this.allowed || !APP.scene!.is("entered")) return;
     // if (this.consumers.length > 0) this.TranscribeText();
-
-    // for (const targetId of Object.keys(this.targets)) {
-    //   // this.checkTranslationDistance(targetId);
-    // }
-   
   }
 }
 
 let lastLoggedTime = 0;
 
-export const translationSystem = new TranslationSystem();
+export const presentationTranslationSystem = new TranslationSystem();
 
 // helping functions
 

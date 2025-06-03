@@ -125,7 +125,12 @@ class TutorialManager {
       return;
     }
 
+    console.log("tutorial6")
+    console.log(roomPropertiesReader.AllowsTutorial)
+
     const tutorial = roomPropertiesReader.roomProps.tutorials[0];
+    console.log("tutorial9")
+    console.log(tutorial)
     tutorial.name = roomPropertiesReader.roomProps.name;
     this.tutorial = tutorial;
     // this.chapters = chaptersDict[tutorial.name].chapters.map(chapter => chapter.steps);
@@ -157,7 +162,9 @@ class TutorialManager {
     const ratio = tutorial.ratio;
 
     if (!Object.keys(chaptersDict).includes(tutorial.name!)) return;
+    console.log("tutorial10")
     const chapters = chaptersDict[tutorial.name!]!.chapters;
+    console.log(chapters)
     this.chapters = [];
     const slideUrls: string[][][] = [];
     const congratsUrls: string[] = [];
@@ -173,7 +180,10 @@ class TutorialManager {
             chapterInd = slideUrls.push([]) - 1;
             newRow = false;
           }
+          console.log("tutorial12")
           const ind = slideUrls[chapterInd].push([`${roomPropertiesReader.serverURL}/file/${tSlide.filename}`]) - 1;
+          console.log(ind)
+    
           includeChapter = true;
           tutorial.tutorialMaterials.forEach(material => {
             if (material.name === tSlide.name && material.index === tSlide.index)
@@ -441,188 +451,382 @@ const MapPanelSteps: Array<Step> = [
 let targetPos: Vector3;
 
 const lobbyChapters: Array<TutorialChapter> = [
-  {
-    name: "welcome_1",
+  // {
+  //   name: "l_r_1",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = false;
+  //         tutorialManager.clickButtonObj.visible = false;
+  //         tutorialManager.prevObj.visible = false;
+  //       },
+  //       exitFunc: () => {
+  //         tutorialManager.prevObj.visible = false;
+  //       }
+  //     }
+  //   ]
+  // },
+
+  // {
+  //   name: "l_r_2",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //      },
+  //     }
+  //   ]
+  // },
+
+  // {
+  //   name: "l_r_3",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //          tutorialManager.clickButtonObj.visible = true;
+  //      },
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "l_r_4",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //      },
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "l_r_5",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //      },
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "l_r_6",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         const displayName = APP?.store?.state?.profile?.displayName;
+  //         if (displayName !== "user-a") {
+  //           // Hide this slide for everyone else
+  //           tutorialManager.panelObj.visible = false;
+  
+  //           // Skip this step entirely
+  //           tutorialManager.Next(); 
+  //           return;
+  //         }
+  
+  //         // Show it if it's user-a
+  //         tutorialManager.panelObj.visible = true;
+  //         tutorialManager.resetButtonObj.visible = true;
+  //         tutorialManager.nextObj.visible = false;
+  //       }
+  //     }
+  //    ]
+  //  },
+  // {
+  //   name: "l_r_6",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //      },
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "l_r_7",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //      },
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "l_r_8",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //      },
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "l_r_9",
+  //   steps: [
+  //     {
+ 
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //          tutorialManager.nextObj.visible = false;
+  //      },
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "l_r_10",
+  //   steps: [
+  //     {
+  //             openingFunc: () => {
+  //               tutorialManager.resetButtonObj.visible = true;
+  //                tutorialManager.nextObj.visible = false;
+  //            },
+  //             exitFunc: () => {
+  //               tutorialManager.resetButtonObj.visible = false;
+  //               tutorialManager.nextObj.visible = false;
+  //            }
+  //            }
+  //   ]
+  // },
+ 
+
+   {
+     name: "welcome_1",
     steps: [
       {
-        openingFunc: () => {
+       openingFunc: () => {
+           tutorialManager.resetButtonObj.visible = false;
+         tutorialManager.clickButtonObj.visible = false;
+        tutorialManager.prevObj.visible = false;
+      },
+         exitFunc: () => {
+           tutorialManager.prevObj.visible = true;
+  }
+       }
+    ]
+    },
+  // {
+  //   name: "welcome_2",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {}
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "click",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.activeTimeout = setTimeout(() => {
+  //           tutorialManager.clickButtonObj.visible = true;
+  //         }, 1000);
+  //       },
+  //       exitFunc: () => {
+  //         tutorialManager.clickButtonObj.visible = false;
+  //       }
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "move",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {}
+  //     },
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+  //       },
+  //       loopFunc: () => {
+  //         const currentPos = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+  //         const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
+  //         if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
+  //       }
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "teleport",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+  //       },
+  //       loopFunc: () => {
+  //         const currentPos = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+  //         const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
+  //         if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
+  //       }
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "turn",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.initDir = tutorialManager.avatarHead.getWorldDirection(new Vector3());
+  //       },
+  //       loopFunc: () => {
+  //         const orientation = tutorialManager.avatarHead.getWorldDirection(new Vector3());
+  //         const radAngle = tutorialManager.initDir.angleTo(orientation.setY(tutorialManager.initDir.y).normalize());
+  //         const angle = THREE.MathUtils.radToDeg(radAngle);
+  //         if (angle >= ANGLE_THRESH) tutorialManager.Next(true);
+  //       }
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "speak",
+  //   agent: true,
+  //   steps: [
+  //     {
+  //       openingFunc: () => {}
+  //     },
+  //     {
+  //       openingFunc: () => {
+  //         APP.dialog.on("mic-state-changed", onUnmuting);
+  //       },
+  //       exitFunc: () => {
+  //         APP.dialog.off("mic-state-changed", onUnmuting);
+  //       }
+  //     },
+  //     {
+  //       openingFunc: () => {
+  //         APP.dialog.on("mic-state-changed", onMuting);
+  //       },
+  //       exitFunc: () => {
+  //         APP.dialog.off("mic-state-changed", onMuting);
+  //       }
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "panel",
+  //   agent: true,
+  //   steps: MapPanelSteps
+  // },
+
+  // {
+  //   name: "finish",
+
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //         tutorialManager.nextObj.visible = false;
+  //       },
+  //       exitFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = false;
+  //         tutorialManager.nextObj.visible = true;
+  //       }
+  //     }
+  //   ]
+  // }
+];
+
+
+
+// document.querySelector("a-scene")?.addEventListener("loaded", () => {
+//   // console.log(APP?.store?.state?.profile)
+//   if (APP?.store?.state?.profile?.displayName === "user-a") {
+//     lobbyChapters.push({
+//       name: "l_r_6",
+//       steps: [
+//         {
+//           openingFunc: () => {
+//             tutorialManager.resetButtonObj.visible = true;
+//             tutorialManager.nextObj.visible = false;
+//           }
+//         }
+//       ]
+//     });
+//   }
+// });
+
+
+
+const tradeshowChapters: Array<TutorialChapter> = [
+//george
+    {
+   name: "welcome_1",
+    steps: [
+        {
+         openingFunc: () => {
           tutorialManager.resetButtonObj.visible = false;
           tutorialManager.clickButtonObj.visible = false;
           tutorialManager.prevObj.visible = false;
+        tutorialManager.activeTimeout = setTimeout(() => {
+                tutorialManager.HidePanel();
+               }, 30000);
         },
-        exitFunc: () => {
+         exitFunc: () => {
           tutorialManager.prevObj.visible = true;
-        }
+       }
       }
     ]
-  },
-  {
-    name: "welcome_2",
-    steps: [
-      {
-        openingFunc: () => {}
-      }
-    ]
-  },
-  {
-    name: "click",
-    steps: [
-      {
-        openingFunc: () => {
-          tutorialManager.activeTimeout = setTimeout(() => {
-            tutorialManager.clickButtonObj.visible = true;
-          }, 1000);
-        },
-        exitFunc: () => {
-          tutorialManager.clickButtonObj.visible = false;
-        }
-      }
-    ]
-  },
-  {
-    name: "move",
-    steps: [
-      {
-        openingFunc: () => {}
-      },
-      {
-        openingFunc: () => {
-          tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
-        },
-        loopFunc: () => {
-          const currentPos = tutorialManager.avatarHead.getWorldPosition(new Vector3());
-          const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
-          if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
-        }
-      }
-    ]
-  },
-  {
-    name: "teleport",
-    steps: [
-      {
-        openingFunc: () => {
-          tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
-        },
-        loopFunc: () => {
-          const currentPos = tutorialManager.avatarHead.getWorldPosition(new Vector3());
-          const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
-          if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
-        }
-      }
-    ]
-  },
-  {
-    name: "turn",
-    steps: [
-      {
-        openingFunc: () => {
-          tutorialManager.initDir = tutorialManager.avatarHead.getWorldDirection(new Vector3());
-        },
-        loopFunc: () => {
-          const orientation = tutorialManager.avatarHead.getWorldDirection(new Vector3());
-          const radAngle = tutorialManager.initDir.angleTo(orientation.setY(tutorialManager.initDir.y).normalize());
-          const angle = THREE.MathUtils.radToDeg(radAngle);
-          if (angle >= ANGLE_THRESH) tutorialManager.Next(true);
-        }
-      }
-    ]
-  },
-  {
-    name: "speak",
-    agent: true,
-    steps: [
-      {
-        openingFunc: () => {}
-      },
-      {
-        openingFunc: () => {
-          APP.dialog.on("mic-state-changed", onUnmuting);
-        },
-        exitFunc: () => {
-          APP.dialog.off("mic-state-changed", onUnmuting);
-        }
-      },
-      {
-        openingFunc: () => {
-          APP.dialog.on("mic-state-changed", onMuting);
-        },
-        exitFunc: () => {
-          APP.dialog.off("mic-state-changed", onMuting);
-        }
-      }
-    ]
-  },
-  {
-    name: "panel",
-    agent: true,
-    steps: MapPanelSteps
-  },
-
-  {
-    name: "finish",
-
-    steps: [
-      {
-        openingFunc: () => {
-          tutorialManager.resetButtonObj.visible = true;
-          tutorialManager.nextObj.visible = false;
-        },
-        exitFunc: () => {
-          tutorialManager.resetButtonObj.visible = false;
-          tutorialManager.nextObj.visible = true;
-        }
-      }
-    ]
-  }
-];
-
-const tradeshowChapters: Array<TutorialChapter> = [
-  {
-    name: "welcome",
-    steps: [
-      {
-        openingFunc: () => {
-          tutorialManager.resetButtonObj.visible = true;
-          tutorialManager.ToggleArrowVisibility(false);
-          tutorialManager.activeTimeout = setTimeout(() => {
-            tutorialManager.HidePanel();
-          }, 30000);
-        }
-      }
-    ]
-  },
-  {
-    name: "welcome",
-    steps: [
-      {
-        openingFunc: () => {
-          tutorialManager.ToggleArrowVisibility(false);
-          tutorialManager.resetButtonObj.visible = true;
-          tutorialManager.activeTimeout = setTimeout(() => {
-            tutorialManager.HidePanel();
-          }, 30000);
-        }
-      }
-    ]
-  }
+   },
+  // {
+  //   name: "welcome",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //         tutorialManager.ToggleArrowVisibility(false);
+  //         tutorialManager.activeTimeout = setTimeout(() => {
+  //           tutorialManager.HidePanel();
+  //         }, 30000);
+  //       }
+  //     }
+  //   ]
+  // },
+  // {
+  //   name: "welcome",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.ToggleArrowVisibility(false);
+  //         tutorialManager.resetButtonObj.visible = true;
+  //         tutorialManager.activeTimeout = setTimeout(() => {
+  //           tutorialManager.HidePanel();
+  //         }, 30000);
+  //       }
+  //     }
+  //   ]
+  // }
 ];
 
 const conferenceChapters: Array<TutorialChapter> = [
-  {
-    name: "welcome",
-    steps: [
-      {
-        openingFunc: () => {
-          tutorialManager.resetButtonObj.visible = true;
-          tutorialManager.ToggleArrowVisibility(false);
-          tutorialManager.activeTimeout = setTimeout(() => {
-            tutorialManager.HidePanel();
-          }, changeTime);
-        }
-      }
-    ]
-  }
+  // {
+  //   name: "welcome",
+  //   steps: [
+  //     {
+  //       openingFunc: () => {
+  //         tutorialManager.resetButtonObj.visible = true;
+  //         tutorialManager.ToggleArrowVisibility(false);
+  //         tutorialManager.activeTimeout = setTimeout(() => {
+  //           tutorialManager.HidePanel();
+  //         }, changeTime);
+  //       }
+  //     }
+  //   ]
+  // }
 ];
 
 const chaptersDict: TutorialDict = {

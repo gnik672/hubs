@@ -3,7 +3,7 @@ import { roomPropertiesReader } from "./rooms-properties";
 export enum COMPONENT_ENDPOINTS {
   TRANSLATE_TEXT = "translate_text",
   TRANSLATE_AUDIO_FILES = "translate_audio_files",
-  TRANSCRIBE_AUDIO = "listen",
+  TRANSCRIBE_AUDIO = "e2e_listen",
   INTENTION = "intent_dest/",
   AGENT_RESPONSE = "response/",
   MEMORY_RESET = "clear_memory",
@@ -22,12 +22,12 @@ export const RECORDER_TEXT: Record<RECORDER_CODES, string> = {
 };
 
 export enum LANGUAGES {
-  ENGLISH = "en",
-  GREEK = "el",
-  SPANISH = "es",
-  ITALIAN = "it",
-  DUTCH = "nl",
-  GERMAN = "de"
+  ENGLISH = "eng",
+  GREEK = "ell",
+  SPANISH = "spa",
+  ITALIAN = "ita",
+  DUTCH = "nld",
+  GERMAN = "deu"
 }
 
 export interface ResponseData {
@@ -75,7 +75,11 @@ export function getAIUrls() {
   const urls = {
     translate_audio_files: `https://${roomPropertiesReader.roomProps.urls.file_translation_url}/${COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES}`,
     trasnlate_text: `https://${roomPropertiesReader.roomProps.urls.file_translation_url}/${COMPONENT_ENDPOINTS.TRANSLATE_TEXT}`,
-    transcribe_audio: `wss://${roomPropertiesReader.roomProps.urls.translation_url}/${COMPONENT_ENDPOINTS.TRANSCRIBE_AUDIO}`,
+    // transcribe_audio: `ws://${roomPropertiesReader.roomProps.urls.translation_url}/ws/speaker/{speaker_id}${COMPONENT_ENDPOINTS.TRANSCRIBE_AUDIO}`,
+    transcribe_audio: `wss://${roomPropertiesReader.roomProps.urls.translation_url}/ws/speaker/` ,
+    transcribe_audio_listen: `wss://${roomPropertiesReader.roomProps.urls.translation_url}/ws/listener/` ,
+  
+    // ws/speaker/{speaker_id}${COMPONENT_ENDPOINTS.TRANSCRIBE_AUDIO}`,
     intent_dest: `https://${roomPropertiesReader.roomProps.urls.agent_url}/${COMPONENT_ENDPOINTS.INTENTION}`,
     agent_response: `https://${roomPropertiesReader.roomProps.urls.agent_url}/${COMPONENT_ENDPOINTS.AGENT_RESPONSE}`,
     clear_memory: `https://${roomPropertiesReader.roomProps.urls.agent_url}/${COMPONENT_ENDPOINTS.MEMORY_RESET}`,
