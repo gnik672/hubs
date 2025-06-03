@@ -306,8 +306,7 @@ export class TranslationSystem {
     }; 
   }
   OpenWsListen(targetId: string) {
-   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/en"
-  //  +APP.store.state.preferences.locale
+   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/" +APP.store.state.preferences.locale
    console.log("Opening listener WebSocket for", targetId, "URL:", url);
  
    const ws = new WebSocket(url);
@@ -348,8 +347,7 @@ export class TranslationSystem {
 
   }
   OpenAudienceWsListen(targetId: string) {
-    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  "presentation" + "/en"
-   //  +APP.store.state.preferences.locale
+    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  "presentation" + "/"   +APP.store.state.preferences.locale
     console.log("Opening listener WebSocket for", targetId, "URL:", url);
   
     const ws = new WebSocket(url);

@@ -392,8 +392,7 @@ this.OpenWsListen(targetId)
     }; 
   }
   OpenWsListen(targetId: string) {
-   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/de"
-  //  +APP.store.state.preferences.locale
+   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/"  +APP.store.state.preferences.locale
    console.log("Opening listener WebSocket for", targetId, "URL:", url);
  
    const ws = new WebSocket(url);
@@ -445,8 +444,7 @@ this.OpenWsListen(targetId)
 
   }
   OpenAudienceWsListen(targetId: string) {
-    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/el"
-   //  +APP.store.state.preferences.locale
+    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/" +APP.store.state.preferences.locale
     console.log("Opening listener WebSocket for", targetId, "URL:", url);
   
     const ws = new WebSocket(url);
