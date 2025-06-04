@@ -128,8 +128,14 @@ export async function textModule(data: string, parameters: Record<string, any>) 
 
 export async function intentionModule(englishTranscription: string, uuid: string) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
-  const data = { user_query: englishTranscription, user_uuid: uuid };
 
+//  let englishTranscriptionNew = englishTranscription.replace(/(\s*)\bFox\b(\s*)/gi, '$1conference$2');
+//   englishTranscription.replace(/(\s*)\belephant\b(\s*)/gi, '$1business$2');
+//   englishTranscription.replace(/(\s*)\bunicorn\b(\s*)/gi, '$1social area$2');
+// console.log(englishTranscription)
+//   const data = { user_query: englishTranscriptionNew, user_uuid: uuid };
+
+  const data = { user_query: englishTranscription, user_uuid: uuid };
   console.log(getAIUrls().intent_dest, data);
   const response = await fetch(getAIUrls().intent_dest, {
     method: "POST",
@@ -215,7 +221,7 @@ export async function vlModule(destination: string) {
 
   const pov = await SnapPov();
   formData.append("file", pov, "camera_pov.png");
-  const response = await fetch(`${getAIUrls().navqa}?question=${destination}`, {
+  const response = await fetch(`${getAIUrls().navqa}/?question=${destination}`, {
     method: "POST",
     body: formData
   });
