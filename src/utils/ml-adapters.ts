@@ -195,10 +195,22 @@ export async function resetDs(uuid: string) {
   return responseData.response;
 }
 
+const hiddenAvatars: Object3D[] = [];
 export async function vlModule(destination: string) {
   const formData = new FormData();
   virtualAgent.agent.obj!.visible = false;
   virtualAgent.agent.obj!.updateMatrix();
+
+ // Hide all avatars (including your own)
+
+ document.querySelectorAll('[networked], [avatar], .avatar').forEach((el: any) => {
+   if (el?.object3D?.visible) {
+     el.object3D.visible = false;
+     hiddenAvatars.push(el.object3D);
+   }
+ });
+
+
   const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
 
   await new Promise<void>(resolve => {
@@ -231,6 +243,8 @@ export async function vlModule(destination: string) {
   if (response.status >= 300 || !data || !data.Directions) throw new Error("bad response from vl module");
   virtualAgent.agent.obj!.visible = true;
   virtualAgent.agent.obj!.updateMatrix();
+
+  hiddenAvatars.forEach(obj => (obj.visible = true));
   return data.Directions;
 }
 
@@ -241,8 +255,19 @@ export async function SnapPov() {
   APP.scene?.renderer.setRenderTarget(null);
   const canvas = APP.scene!.renderer.domElement;
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+  // if (blob) {
+
+  //   saveFile(blob, "png");
+  // }
+
   virtualAgent.agent.obj!.visible = true;
   virtualAgent.agent.obj!.updateMatrix();
+
+  hiddenAvatars.forEach(obj => (obj.visible = true));
+
+  
   if (!blob) throw new Error("something went wrong");
   return blob;
 }
+
+
