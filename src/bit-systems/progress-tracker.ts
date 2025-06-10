@@ -53,27 +53,28 @@ export const RoomObjectives = {
   lobby: [CreateObjective({})],
   "main area": [
     CreateObjective({
-      type: "navigation",
-      room: "main area",
-      destination: "business room",
-      value: "How can I go to the business room?"
-    }),
-    CreateObjective({
-      type: "navigation",
-      room: "main area",
-      destination: "social area",
-      value: "How can I go to the social area?"
-    }),
-    CreateObjective({ type: "trade_show", room: "main area", value: "Who will I find in the tradeshows?" }),
-    CreateObjective({ type: "program_info", room: "main area", value: "Who is presenting in the morning?" }),
-    CreateObjective({
       type: "summary",
       room: "main area",
       value: "Summarize the content of the main presentation",
       validator: (index: number) => {
         validIndices["main area"][index] = visitedRooms.includes("conference room");
       }
-    })
+    }),
+    CreateObjective({
+      type: "navigation",
+      room: "main area",
+      destination: "business room",
+      value: "How can I go to the elephant room?"
+    }),
+    CreateObjective({
+      type: "navigation",
+      room: "main area",
+      destination: "social area",
+      value: "How can I go to the unicorn room?"
+    }),
+    CreateObjective({ type: "trade_show", room: "main area", value: "Who will I find in the tradeshows?" }),
+    CreateObjective({ type: "program_info", room: "main area", value: "Who is presenting in the morning?" }),
+
   ],
   "conference room": [CreateObjective({})],
   "social area": [CreateObjective({})],
@@ -129,4 +130,8 @@ export function MakeObjectiveValid(index: number, valid: boolean) {
 
 export function MakeObjectiveResolved(index: number, valid: boolean) {
   resolvedIndices[currentRoom][index] = valid;
+}
+
+export function GetVisitedRooms(): Room[] {
+  return [...visitedRooms]; // Defensive copy to avoid mutation
 }

@@ -11,6 +11,7 @@ import {
   stopRecording,
   resetDs
 } from "../utils/ml-adapters";
+import { GetVisitedRooms } from "../bit-systems/progress-tracker";
 import { COMPONENT_ENDPOINTS, getAIUrls } from "../utils/component-types";
 import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
@@ -555,20 +556,48 @@ export default class VirtualAgent {
           if (dest === "no location") throw new Error({ intentError: "no location" });
           const instPath = navSystem.GetInstructionsGraphics(dest);
           voxyResponse = await vlModule(dest);
+          console.log("voxyResponse")
+          console.log(voxyResponse)
           if (instPath.length > 0) navSystem.RenderCues(instPath);
+        } 
+        else if (intentResponse.includes("summary")) {
+          const visited = GetVisitedRooms().includes("conference room");
+        
+          if (!visited) {
+            voxyResponse = "The presentation is not finished.";
+          } else {
+            voxyResponse = await dsResponseModule(nmtResponse, intentResponse, this.uuid);
+          }
+        
         } else {
           voxyResponse = await dsResponseModule(nmtResponse, intentResponse, this.uuid);
         }
+          
+        // else {
+        //   console.log("voxyResponse_1")
+        //   console.log(voxyResponse)
+        //   voxyResponse = await dsResponseModule(nmtResponse, intentResponse, this.uuid);
+        // } 
+
       } catch (error) {
         console.error({ dsError: error.message });
         voxyResponse = this.GetRandomPhrase("error");
       }
 
       if (langCode === "en") {
+        console.log("voxyResponse_2")
+        console.log(voxyResponse)
         this.UpdateTextArray([voxyResponse]); //print result if language is english
       } else {
+        console.log("voxyResponse_3")
+        console.log(voxyResponse)
         const nmtTextParams = { source_language: "en", target_language: langCode };
-        const translatedResponse = await textModule(sentence, nmtTextParams); // translate if language is not english
+        console.log(nmtTextParams)
+        console.log("translate_text")
+        // const translatedResponse = await textModule(sentence, nmtTextParams); // translate if language is not english
+        const translatedResponse = await textModule(voxyResponse, nmtTextParams); // translate if language is not english
+      
+       
         this.UpdateTextArray([translatedResponse]); // print the translated response
       }
 
