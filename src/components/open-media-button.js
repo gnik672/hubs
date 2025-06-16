@@ -45,12 +45,123 @@ AFRAME.registerComponent("open-media-button", {
       }
     };
 
+//     this.onClick = async () => {
+//  console.log(window.APP.hub.hub_id)
+
+
+
+//     };
+
     this.onClick = async () => {
       // if (this.label.getAttribute("text") === oldTranslationSystem.VisitButtonText)
       //   logger.AddUiInteraction("visit_room", tutorialManager.changeRoomID);
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
       const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
+
+
+      const username = window?.APP?.store?.state?.profile?.displayName;
+
+
+// from lobby production
+
+if(window.APP.hub.hub_id ===  "QBomv74" ||
+window.APP.hub.hub_id ===  "DdXYP6a" || 
+window.APP.hub.hub_id ===  "zts4Mhv" ||
+  window.APP.hub.hub_id ===  "8LmzBua" ||
+  window.APP.hub.hub_id ===  "hpk8p7Z" || 
+   window.APP.hub.hub_id ===  "nPwkCBC" ||
+    window.APP.hub.hub_id ===  "HdzqxT7" || 
+     window.APP.hub.hub_id ===  "iuUMSDP"  || 
+     window.APP.hub.hub_id ===  "ZwawSJC" || 
+     window.APP.hub.hub_id ===  "pe5ngbm" 
+     ) {
+
+      if (username === "user-a" || username === "user-b" ){
+        const hubId = "DSinvBh"; // Your room ID
+       const waypoint = null;   // Or a specific waypoint ID if needed
+       changeHub(hubId, true, waypoint);
+       return; 
+     }
+     if (username === "user-c" || username === "user-d" ){
+     const hubId = "vCAqAvY"; // Your room ID
+      const waypoint = null;   // Or a specific waypoint ID if needed
+      changeHub(hubId, true, waypoint);
+      return;    }
+      if (username === "user-e" || username === "user-f" ){
+       const hubId = "MZbYQFN"; // Your room ID
+        const waypoint = null;   // Or a specific waypoint ID if needed
+        changeHub(hubId, true, waypoint);
+        return;    }
+        if (username === "user-g" || username === "user-h" ){
+         const hubId = "DzM288m"; // Your room ID
+          const waypoint = null;   // Or a specific waypoint ID if needed
+          changeHub(hubId, true, waypoint);
+          return;    }
+          if (username === "user-i" || username === "user-j" ){
+           const hubId = "zKapQ9v"; // Your room ID
+            const waypoint = null;   // Or a specific waypoint ID if needed
+            changeHub(hubId, true, waypoint);
+            return;    }
+    
+
+     }
+
+                           
+                          
+                       
+                       
+                           
+                         
+                         
+                           
+                         
+    
+
+
+
+      if(window.APP.hub.hub_id ===  "o5VDamq"){
+        if (username === "user-a" || username === "user-b" ){
+           const hubId = "H7yKnL7"; // Your room ID
+          const waypoint = null;   // Or a specific waypoint ID if needed
+          changeHub(hubId, true, waypoint);
+          return; 
+        }
+        if (username === "user-c" || username === "user-d" ){
+        const hubId = "K7Be7u8"; // Your room ID
+         const waypoint = null;   // Or a specific waypoint ID if needed
+         changeHub(hubId, true, waypoint);
+         return;    }
+         if (username === "user-e" || username === "user-f" ){
+          const hubId = "K7Be7u8"; // Your room ID
+           const waypoint = null;   // Or a specific waypoint ID if needed
+           changeHub(hubId, true, waypoint);
+           return;    }
+           if (username === "user-g" || username === "user-h" ){
+            const hubId = "K7Be7u8"; // Your room ID
+             const waypoint = null;   // Or a specific waypoint ID if needed
+             changeHub(hubId, true, waypoint);
+             return;    }
+             if (username === "user-i" || username === "user-j" ){
+              const hubId = "K7Be7u8"; // Your room ID
+               const waypoint = null;   // Or a specific waypoint ID if needed
+               changeHub(hubId, true, waypoint);
+               return;    }
+       
+  
+   }  
+  
+   if(window.APP.hub.hub_id ===  "H7yKnL7"){
+    // Force redirect if this is the specific room we want
+    // if (src === "https://hubs.local:4000/H7yKnL7/") {
+      const hubId = "o5VDamq"; // Your room ID
+      const waypoint = null;   // Or a specific waypoint ID if needed
+      changeHub(hubId, true, waypoint);
+      return;
+    // }
+  
+  } 
+
 
       let hubId;
       if (this.data.onlyOpenLink) {
