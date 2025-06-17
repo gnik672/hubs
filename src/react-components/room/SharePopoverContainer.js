@@ -120,6 +120,12 @@ export function SharePopoverContainer({ scene, hubChannel }) {
     toggleShareCameraToAvatar
   } = useShare(scene, hubChannel);
 
+  const userName = window?.APP?.store?.state?.profile?.displayName
+   
+  if (userName  !== "presenter") {
+    return null; // Don't show Share button to restricted users
+  }
+
   const items = [
     canShareCamera && {
       id: "camera",

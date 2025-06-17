@@ -17,6 +17,13 @@ import { anyEntityWith } from "../../utils/bit-utils";
 import { MyCameraTool } from "../../bit-components";
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
+
+  const userName = window?.APP?.store?.state?.profile?.displayName
+   
+  if (userName  !== "presenter") {
+    return null; // Don't show Share button to restricted users
+  }
+
   const [items, setItems] = useState([]);
 
   useEffect(() => {
