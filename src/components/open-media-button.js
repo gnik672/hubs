@@ -125,6 +125,29 @@ window.APP.hub.hub_id ===  "zts4Mhv" ||
                           
     
    }
+
+   if(window.APP.hub.hub_id ===  "DSinvBh" || 
+   window.APP.hub.hub_id ===  "vCAqAvY" ||
+    window.APP.hub.hub_id ===  "MZbYQFN" || 
+   window.APP.hub.hub_id ===  "DzM288m" || 
+   window.APP.hub.hub_id ===  "zKapQ9v" || 
+   window.APP.hub.hub_id ===  "a9a9C6U" || 
+   window.APP.hub.hub_id ===  "5pUKqhb" || 
+   window.APP.hub.hub_id ===  "sY6HJki" || 
+   window.APP.hub.hub_id ===  "9wwPDe8" || 
+   window.APP.hub.hub_id ===  "hBEMigy" || 
+   window.APP.hub.hub_id ===  "xKkxuwL" || 
+   window.APP.hub.hub_id ===  "ngXS8Dg" || 
+   window.APP.hub.hub_id ===  "Eo8WYHm" || 
+   window.APP.hub.hub_id ===  "P34XsVp" || 
+   window.APP.hub.hub_id ===  "6KRbEwB" || 
+   window.APP.hub.hub_id ===  "VXyBdWu" || 
+   window.APP.hub.hub_id ===  "Arvck4f" ||  
+   window.APP.hub.hub_id ===  "aFNyuny" || 
+   window.APP.hub.hub_id ===  "fkLMpzR" || 
+   window.APP.hub.hub_id ===  "Wrof4qm" 
+   ) {return}
+   
   
  
 
