@@ -11,6 +11,7 @@ import { UpdateFixedPanelText, UpdatePanelColor } from "./fixed-panel-system";
 import { languageCodes, voxLanugages } from "./localization-system";
 import HubChannel from "../utils/hub-channel";
 import { presentationTranslationSystem } from "./presentation-translation-system";
+// import slide1 from "../assets/images/Screenshot.png";
 
 
 import * as THREE from "three";
@@ -55,6 +56,12 @@ blackTextSprite: THREE.Sprite | null = null;
 
   subtitleEl: HTMLElement | null = null;
   subtitleInterval: NodeJS.Timeout | null = null;
+
+  //George start
+  wordBuffer: string[] = [];
+bufferUpdateInterval: NodeJS.Timeout | null = null;
+maxWords: number = 10;
+//George end
 
   constructor() {
     this.presenter = "";
@@ -114,6 +121,7 @@ blackTextSprite: THREE.Sprite | null = null;
    
     const povNode = document.querySelector("#avatar-pov-node");
     console.log("POV node:", povNode);
+    // this.showTutorialSlide()
     // this.addBlackSquareToCamera()
   }
 
@@ -435,29 +443,47 @@ blackTextSprite: THREE.Sprite | null = null;
   }
 
   UpdateTranslation(data: string, producer: string) {
-    if (!this.panelShown) {
-      return; // ✅ Don't do anything if panel isn't shown
+    console.log("p1")
+    if (!this.panelShown && !this.presenterState) {
+      return; // Skip only if no fixed panel AND not the presenter
     }
     let newColor = producer === this.presenter ? this.presenterColor : this.audienceColor;
     if (!this.panelObj) this.ShowPresenterPanel();
     UpdatePanelColor(newColor);
     if(this.panelShown){
       UpdateFixedPanelText(data); 
+      console.log("p2")
     } else {
+      console.log("p3")
       UpdateFixedPanelText("");
     }
     
     // if (this.blackSquareCtx && this.blackSquareTexture) {
-   if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
-      this.blackSquareCtx.clearRect(0, 0, 512, 128);
-      this.blackSquareCtx.font = "bold 64px Arial";
-      this.blackSquareCtx.fillStyle = "white";
-      this.blackSquareCtx.textAlign = "center";
-      this.blackSquareCtx.textBaseline = "middle";
-      this.blackSquareCtx.fillText(data, 256, 64);
+  //  if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
+  //     this.blackSquareCtx.clearRect(0, 0, 512, 128);
+  //     this.blackSquareCtx.font = "bold 64px Arial";
+  //     this.blackSquareCtx.fillStyle = "white";
+  //     this.blackSquareCtx.textAlign = "center";
+  //     this.blackSquareCtx.textBaseline = "middle";
+  //     this.blackSquareCtx.fillText(data, 256, 64);
     
-      this.blackSquareTexture.needsUpdate = true;
-    } 
+  //     this.blackSquareTexture.needsUpdate = true;
+  //   } 
+
+    if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
+      console.log("p3")
+      const newWords = data.split(/\s+/).filter((w: string) => w.length > 0);
+      this.wordBuffer.push(...newWords);
+    
+      if (!this.bufferUpdateInterval) {
+        console.log("p4")
+        this.bufferUpdateInterval = setInterval(() => this.updateBlackSquareText(), 300);
+      }
+    }
+
+
+
+
     console.log(33)
   }
 
@@ -503,10 +529,68 @@ blackTextSprite: THREE.Sprite | null = null;
     }
   }
 
+  updateBlackSquareText() {
+    if (!this.blackSquareCtx || !this.blackSquareTexture) return;
+  
+    if (this.wordBuffer.length === 0) {
+      clearInterval(this.bufferUpdateInterval!);
+      this.bufferUpdateInterval = null;
+      return;
+    }
+  
+    const currentWords = this.wordBuffer.slice(0, this.maxWords);
+    const textToShow = currentWords.join(" ");
+  
+    this.blackSquareCtx.clearRect(0, 0, 512, 128);
+    this.blackSquareCtx.font = "bold 64px Arial";
+    this.blackSquareCtx.fillStyle = "white";
+    this.blackSquareCtx.textAlign = "center";
+    this.blackSquareCtx.textBaseline = "middle";
+    this.blackSquareCtx.fillText(textToShow, 256, 64);
+    this.blackSquareTexture.needsUpdate = true;
+  
+    // Remove shown words
+    this.wordBuffer.splice(0, currentWords.length);
+  }
+
   AudienceEvent(e: any) {
     console.log("audience event", e);
     presentationTranslationSystem.AudienceTranscription(e.enabled);
   }
+
+
+
+  showTutorialSlide() {
+    const cameraRig = document.querySelector("#avatar-pov-node") as AElement;
+  
+    if (!cameraRig) {
+      console.warn("No camera rig found");
+      return;
+    }
+  
+    const rig = cameraRig.object3D;
+  
+    // // ✅ Create the A-Frame image entity
+    // const image = document.createElement("a-image");
+    // image.setAttribute("src", slide1); // 👈 use imported image
+    // image.setAttribute("width", "1.5");
+    // image.setAttribute("height", "1");
+    // image.setAttribute("position", "0 0 -1"); // 👈 1m in front of user
+    // image.setAttribute("transparent", "true");
+    // image.setAttribute("look-at", "[camera]");
+  
+    // // Add to scene
+    // cameraRig.appendChild(image);
+    // console.log("✅ Tutorial slide shown.");
+  }
+
+
+
+
+
+
+
+
 }
 
 export const presentationSystem = new PresentationSystem();
