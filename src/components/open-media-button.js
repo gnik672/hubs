@@ -118,7 +118,7 @@ window.APP.hub.hub_id ===  "zts4Mhv" ||
            changeHub(hubId, true, waypoint);
            return;    }   
            if (username === "user-9" || username === "user-10" ){
-            const hubId = "DzM288m"; // Your room ID
+            const hubId = "zKapQ9v"; // Your room ID
              const waypoint = null;   // Or a specific waypoint ID if needed
              changeHub(hubId, true, waypoint);
              return;    }  
