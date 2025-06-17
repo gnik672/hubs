@@ -19,25 +19,77 @@ class TranslationTarget {
   avatarRef: number;
   name?: string;
   id: string;
+//buffer code
+  buffer: string[] = [];
+  // displayTimer: number | null = null;
+  // displayDelay: number = 500; // milliseconds
+  maxWords: number = 10;
 
   constructor(peerId: string) {
     this.id = peerId;
     APP.scene!.emit("", { id: this.id });
   }
  
-  // UpdateText(newText: string) {
-    UpdateText(eventData:any) {
-      console.log("eventData")
-      console.log(this.name)
-      console.log(eventData)
-      APP.scene!.emit("update_avatar_panel", { id: eventData.id, message: eventData.message });
-      // APP.scene!.emit("update_avatar_panel", { id: eventData.id, message: eventData.message });
-    // APP.scene!.emit("panel_text_update", { id: eventData.id, message: eventData.message });
+  // // UpdateText(newText: string) {
+  //   UpdateText(eventData:any) {
+  //     console.log("eventData")
+  //     console.log(this.name)
+  //     console.log(eventData)
+  //     APP.scene!.emit("update_avatar_panel", { id: eventData.id, message: eventData.message });
+  //     // APP.scene!.emit("update_avatar_panel", { id: eventData.id, message: eventData.message });
+  //   // APP.scene!.emit("panel_text_update", { id: eventData.id, message: eventData.message });
+  // }
+
+  // UpdateText(eventData: any) {
+  //   const incomingText = eventData.message;
+  //   const newWords = incomingText.split(/\s+/);
+  //   this.messageBuffer.push(...newWords);
+
+  //   if (!this.displayTimer) {
+  //     this.displayTimer = window.setInterval(() => this.flushBuffer(), this.displayDelay);
+  //   }
+  // }
+  UpdateText(eventData: any) {
+    const newWords = eventData.message.split(/\s+/).filter((w: string) => w.length > 0);
+    this.buffer.push(...newWords);
+
+    // Keep only the most recent `maxWords` in buffer
+    if (this.buffer.length > this.maxWords) {
+      this.buffer = this.buffer.slice(this.buffer.length - this.maxWords);
+    }
+
+    const currentLine = this.buffer.join(" ");
+    APP.scene!.emit("update_avatar_panel", { id: this.id, message: currentLine });
   }
 
-  Close() {
+  // flushBuffer() {
+  //   if (this.messageBuffer.length === 0) {
+  //     clearInterval(this.displayTimer!);
+  //     this.displayTimer = null;
+  //     return;
+  //   }
+
+  //   const wordsToDisplay = this.messageBuffer.splice(0, this.maxWords);
+  //   const text = wordsToDisplay.join(" ");
+  //   APP.scene!.emit("update_avatar_panel", { id: this.id, message: text });
+  // }
+
+
+
+
+   Close() {
     APP.scene!.emit("remove_translate_target", { id: this.id });
-  }
+   }
+
+
+  // Close() {
+  //   if (this.displayTimer) clearInterval(this.displayTimer);
+  //   APP.scene!.emit("remove_translate_target", { id: this.id });
+  // }
+
+
+
+
 }
 
 export class TranslationSystem {
@@ -159,16 +211,7 @@ export class TranslationSystem {
   AudienceListenSocket(presenterId:any) {
     this.OpenAudienceWsListen(presenterId)
     console.log("Presentation transcription")
-    // let flagMessage;
-    // if (start) {
-    //   flagMessage = "Presenter: Starting to transcribe text";
-    //   this.OpenWs();
-    // } else {
-    //   this.StopTranscription();
-    //   flagMessage = "Presenter: Stop transcribing text";
-    // }
-
-    // console.log(`Presentation Presenter: ${flagMessage}`);
+    
   }
 
 
@@ -375,12 +418,7 @@ this.OpenWsListen(targetId)
       // this.wsActive = true;
     };
 
-    //George start
-    // this.websocket.onmessage = (event: MessageEvent) => {
-    //   const eventData = JSON.parse(event.data) as WsData;
-    //   console.log("Message from trans server:", eventData);
-    //   APP.dialog.SendTranscription(eventData.text, this.mylanguage);
-    // };
+   
 
     this.websocket.onclose = () => {
       if (this.wsActive) this.OpenWs();
@@ -401,20 +439,7 @@ this.OpenWsListen(targetId)
      console.log(`WebSocket opened for target ${targetId}`);
    };
  
-  //  ws.onmessage = (event: MessageEvent) => {
-
-  //   console.log(`[WS LISTENER RAW] ${event.data}`);
-  //    try {
-  //      const eventData = JSON.parse(event.data) as WsData;
-  //      console.log(`Message from ${targetId}:`, eventData.text);
-  //     //  this.targets[targetId].UpdateText(eventData.text);
-  //      this.targets[targetId].UpdateText({id: event.data.client_id ,  message:  event.data.translation });
-  //     //  {"translation":"Καλημέρα.","client_id":"b3e9937e-2188-4ecc-836f-df4de82a9bed","language":"ell"}
-  //      console.log(this.targets)
-  //    } catch (e) {
-  //      console.warn(`Invalid message from ${targetId}:`, event.data);
-  //    }
-  //  };
+   
    ws.onmessage = (event: MessageEvent) => {
     console.log(`[WS LISTENER RAW] ${event.data}`);
     try {
@@ -440,7 +465,7 @@ this.OpenWsListen(targetId)
      console.error(`WebSocket error for target ${targetId}`, err);
    };
  
-   this.websocket_listeners[targetId] = ws;} , 3000)
+   this.websocket_listeners[targetId] = ws;} , 1000)
 
   }
   OpenAudienceWsListen(targetId: string) {
@@ -453,20 +478,7 @@ this.OpenWsListen(targetId)
       console.log(`WebSocket opened for target ${targetId}`);
     };
   
-   //  ws.onmessage = (event: MessageEvent) => {
  
-   //   console.log(`[WS LISTENER RAW] ${event.data}`);
-   //    try {
-   //      const eventData = JSON.parse(event.data) as WsData;
-   //      console.log(`Message from ${targetId}:`, eventData.text);
-   //     //  this.targets[targetId].UpdateText(eventData.text);
-   //      this.targets[targetId].UpdateText({id: event.data.client_id ,  message:  event.data.translation });
-   //     //  {"translation":"Καλημέρα.","client_id":"b3e9937e-2188-4ecc-836f-df4de82a9bed","language":"ell"}
-   //      console.log(this.targets)
-   //    } catch (e) {
-   //      console.warn(`Invalid message from ${targetId}:`, event.data);
-   //    }
-   //  };
     ws.onmessage = (event: MessageEvent) => {
      console.log(`[WS LISTENER RAW] ${event.data}`);
      try {
@@ -493,7 +505,7 @@ this.OpenWsListen(targetId)
     };
   
     // this.websocket_listeners[targetId] = ws;
-  } , 3000)
+  } , 1000)
  
    }
 
