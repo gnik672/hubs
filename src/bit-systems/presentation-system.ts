@@ -143,7 +143,8 @@ maxWords: number = 10;
     const rig = (cameraRig as any).object3D;
   
     // 1. Black background bar
-    const geometry = new THREE.PlaneGeometry(4, 0.3);
+    // const geometry = new THREE.PlaneGeometry(4, 0.3);
+    const geometry = new THREE.PlaneGeometry(8, 0.3);
     const material = new THREE.MeshBasicMaterial({
       color: 0x000000,
       side: THREE.DoubleSide,
@@ -161,16 +162,23 @@ maxWords: number = 10;
   
     // 2. Shared canvas for text
     this.blackSquareCanvas = document.createElement("canvas");
-    this.blackSquareCanvas.width = 512;
-    this.blackSquareCanvas.height = 128;
+    // Double canvas dimensions
+this.blackSquareCanvas.width = 1024;
+this.blackSquareCanvas.height = 128;
+    // this.blackSquareCanvas.width = 512;
+    // this.blackSquareCanvas.height = 128;
   
     this.blackSquareCtx = this.blackSquareCanvas.getContext("2d")!;
-    this.blackSquareCtx.font = "bold 64px Arial";
+    // this.blackSquareCtx.font = "bold 64px Arial";
+    // Reduce font size to half
+this.blackSquareCtx.font = "bold 32px Arial";
     this.blackSquareCtx.fillStyle = "white";
     this.blackSquareCtx.textAlign = "center";
     this.blackSquareCtx.textBaseline = "middle";
-    this.blackSquareCtx.clearRect(0, 0, 512, 128);
-    this.blackSquareCtx.fillText("Waiting...", 256, 64);
+    this.blackSquareCtx.clearRect(0, 0, 1024, 256);
+this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
+    // this.blackSquareCtx.clearRect(0, 0, 512, 128);
+    // this.blackSquareCtx.fillText("Waiting...", 256, 64);
   
     this.blackSquareTexture = new THREE.CanvasTexture(this.blackSquareCanvas);
     this.blackSquareTexture.encoding = THREE.sRGBEncoding;
@@ -182,7 +190,8 @@ maxWords: number = 10;
     });
   
     const textSprite = new THREE.Sprite(spriteMaterial);
-    textSprite.scale.set(2, 0.3, 1);
+    // textSprite.scale.set(2, 0.3, 1);
+    textSprite.scale.set(4, 0.3, 1); // was 2, 0.3
     textSprite.position.set(0, -1.4, -1.99);
     textSprite.renderOrder = 10000;
     rig.add(textSprite);
@@ -548,7 +557,10 @@ maxWords: number = 10;
     this.blackSquareCtx.textBaseline = "middle";
     this.blackSquareCtx.fillText(textToShow, 256, 64);
     this.blackSquareTexture.needsUpdate = true;
-  
+    this.blackSquareCtx.clearRect(0, 0, 1024, 128);
+this.blackSquareCtx.font = "bold 32px Arial";
+// this.blackSquareCtx.fillText(textToShow, 512, 128); // new center
+this.blackSquareCtx.fillText(textToShow, 512, 64); 
     // Remove shown words
     this.wordBuffer.splice(0, currentWords.length);
   }
