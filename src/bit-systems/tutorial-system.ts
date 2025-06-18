@@ -452,7 +452,7 @@ let targetPos: Vector3;
 
 const lobbyChapters: Array<TutorialChapter> = [
      {
-       name: "l_r_1",
+       name: "welcome_1",
        steps: [
          {
            openingFunc: () => {
@@ -469,7 +469,7 @@ const lobbyChapters: Array<TutorialChapter> = [
      },
 
      {
-       name: "l_r_2",
+       name: "welcome_2",
        steps: [
          {
  
@@ -482,7 +482,7 @@ const lobbyChapters: Array<TutorialChapter> = [
      },
 
      {
-       name: "l_r_3",
+       name: "welcome_3",
        steps: [
          {
  
@@ -495,7 +495,7 @@ const lobbyChapters: Array<TutorialChapter> = [
        ]
      },
      {
-       name: "l_r_4",
+       name: "welcome_4",
        steps: [
          {
  
@@ -507,42 +507,7 @@ const lobbyChapters: Array<TutorialChapter> = [
        ]
      },
      {
-       name: "l_r_5",
-       steps: [
-         {
- 
-           openingFunc: () => {
-             tutorialManager.resetButtonObj.visible = true;
-             tutorialManager.nextObj.visible = true;
-          },
-         }
-       ]
-     },
-    //  {
-    //    name: "l_r_6",
-    //    steps: [
-    //      {
-    //        openingFunc: () => {
-    //          const displayName = APP?.store?.state?.profile?.displayName;
-    //          if (displayName !== "user-a") {
-    //               Hide this slide for everyone else
-    //            tutorialManager.panelObj.visible = false;
-  
-    //               Skip this step entirely
-    //            tutorialManager.Next(); 
-    //            return;
-    //          }
-  
-    //             Show it if it's user-a
-    //          tutorialManager.panelObj.visible = true;
-    //          tutorialManager.resetButtonObj.visible = true;
-    //          tutorialManager.nextObj.visible = false;
-    //        }
-    //      }
-    //     ]
-    //   },
-     {
-       name: "l_r_6",
+      name: "welcome_5",
        steps: [
          {
  
@@ -554,19 +519,7 @@ const lobbyChapters: Array<TutorialChapter> = [
        ]
      },
      {
-       name: "l_r_7",
-       steps: [
-         {
- 
-           openingFunc: () => {
-             tutorialManager.resetButtonObj.visible = true;
-              tutorialManager.nextObj.visible = false;
-          },
-         }
-       ]
-     },
-     {
-       name: "l_r_8",
+      name: "welcome_6",
        steps: [
          {
  
@@ -578,7 +531,7 @@ const lobbyChapters: Array<TutorialChapter> = [
        ]
      },
      {
-       name: "l_r_9",
+      name: "welcome_7",
        steps: [
          {
  
@@ -590,20 +543,194 @@ const lobbyChapters: Array<TutorialChapter> = [
        ]
      },
      {
-       name: "l_r_10",
+      name: "welcome_8",
        steps: [
          {
-                 openingFunc: () => {
-                   tutorialManager.resetButtonObj.visible = true;
-                    tutorialManager.nextObj.visible = false;
+ 
+           openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = true;
+             tutorialManager.nextObj.visible = true;
+          },
+         }
+       ]
+     },
+     {
+      name: "moving_1",
+       steps: [
+         {
+ 
+           openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = true;
+             tutorialManager.nextObj.visible = true;
+          },
+         }
+       ]
+     },
+     {
+      name: "moving_2",
+       steps: [
+         {
+ 
+           openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = true;
+             tutorialManager.nextObj.visible = true;
+          },
+         }
+       ]
+     },
+     {
+      name: "moving_3",
+       steps: [
+         {
+ 
+           openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = true;
+             tutorialManager.nextObj.visible = true;
+          },
+         }
+       ]
+     },
+     {
+      name: "moving_4",
+       steps: [
+         {
+ 
+           openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = true;
+             tutorialManager.nextObj.visible = true;
+          },
+         }
+       ]
+     },
+     {
+      name: "pass_to_communication",
+       steps: [
+         {
+ 
+           openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = true;
+             tutorialManager.nextObj.visible = true;
+          },
+         }
+       ]
+     },
+     
+        
+            {
+              name: "m_a_7_with",
+              steps: [
+                {
+        
+                  openingFunc: () => {
+                    tutorialManager.resetButtonObj.visible = true;
+                    tutorialManager.nextObj.visible = true;
+                 },
+                }
+              ]
+              },
+              {
+                name: "m_a_8_with",
+                steps: [
+                  {
+          
+                    openingFunc: () => {
+                      tutorialManager.resetButtonObj.visible = true;
+                      tutorialManager.nextObj.visible = true;
+                   },
+                  }
+                ]
                 },
-                 exitFunc: () => {
-                   tutorialManager.resetButtonObj.visible = false;
-                   tutorialManager.nextObj.visible = false;
-                }
-                }
+                {
+                  name: "m_a_9_with",
+                  steps: [
+                    {
+            
+                      openingFunc: () => {
+                        tutorialManager.resetButtonObj.visible = true;
+                        tutorialManager.nextObj.visible = true;
+                     },
+                    }
+                  ]
+                  },
+                  {
+                    name: "end_communication",
+                     steps: [
+                       {
+               
+                         openingFunc: () => {
+                           tutorialManager.resetButtonObj.visible = true;
+                           tutorialManager.nextObj.visible = true;
+                        },
+                       }
+                     ]
+                   },
+
+                  {
+                    name: "presentation_1",
+                    steps: [
+                      {
+              
+                        openingFunc: () => {
+                          tutorialManager.resetButtonObj.visible = true;
+                          tutorialManager.nextObj.visible = true;
+                       },
+                      }
+                    ]
+                    },
+                    {
+                      name: "presentation_2",
+                      steps: [
+                        {
+                
+                          openingFunc: () => {
+                            tutorialManager.resetButtonObj.visible = true;
+                            tutorialManager.nextObj.visible = true;
+                         },
+                        }
+                      ]
+                      },
+                      {
+                        name: "presentation_3",
+                        steps: [
+                          {
+                  
+                            openingFunc: () => {
+                              tutorialManager.resetButtonObj.visible = true;
+                              tutorialManager.nextObj.visible = true;
+                           },
+                          }
+                        ]
+                        },
+                        {
+                          name: "presentation_4",
+                          steps: [
+                            {
+                    
+                              openingFunc: () => {
+                                tutorialManager.resetButtonObj.visible = true;
+                                tutorialManager.nextObj.visible = true;
+                             },
+                            }
+                          ]
+                          },
+
+
+         
+     {
+       name: "finito",
+       steps: [
+         {
+ 
+           openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = true;
+             tutorialManager.nextObj.visible = true;
+          },
+         }
        ]
-     }
+     },
+      
+    
+    
     //  ,
  
 
