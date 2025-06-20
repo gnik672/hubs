@@ -75,13 +75,36 @@ class Logger {
     this.isProccesingRequest = false;
   }
 
+  // WaitUserRegistration(): Promise<any> {
+  //   console.log("WaitUserRegistration")
+  //   console.log(this.registered)
+  //   if (this.registered) return Promise.resolve(null);
+  //   else
+  //     return new Promise(resolve => {
+  //       APP.scene!.addEventListener("user_registered", resolve, { once: true });
+  //     });
+  // }
+
   WaitUserRegistration(): Promise<any> {
+    console.log("WaitUserRegistration");
+  
     if (this.registered) return Promise.resolve(null);
-    else
-      return new Promise(resolve => {
-        APP.scene!.addEventListener("user_registered", resolve, { once: true });
-      });
+  
+    if (!APP || !APP.scene) {
+      console.warn("APP or APP.scene is not available.");
+      return Promise.reject("Scene not ready");
+    }
+  
+    // Trigger registration
+    this.RegisterUser();
+  
+    return new Promise(resolve => {
+      APP.scene!.addEventListener("user_registered", resolve, { once: true });
+    });
   }
+
+
+
 
   async RegisterUser(reset: boolean = false) {
     if (reset || this.registered) return;
