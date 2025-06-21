@@ -273,7 +273,8 @@ AFRAME.registerComponent("open-media-button", {
         
         
            await exitImmersive();
-           window.open(newUrl);
+           location.href = newUrl;
+          //  window.open(newUrl);
       }
 return
       
