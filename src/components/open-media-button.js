@@ -113,67 +113,67 @@ AFRAME.registerComponent("open-media-button", {
         let newUrl
         if(this.src.includes("DSinvBh") ){
           if(username === "user-1" ||username === "user-2" ) {
-            newUrl =  this.src.replace("DSinvBh", "DSinvBh");
+            newUrl =  "DSinvBh"
           }
           if(username === "user-3" ||username === "user-4" ) {
-            newUrl =   this.src.replace("AxFm4cE", "vCAqAvY"); 
+            newUrl =   "vCAqAvY"
           }
           if(username === "user-5" ||username === "user-6" ) {
-            newUrl =       this.src.replace("DSinvBh", "MZbYQFN");
+            newUrl =      "MZbYQFN"
           }
           if(username === "user-7" ||username === "user-8" ) {
-            newUrl =    this.src.replace("DSinvBh", "DzM288m");
+            newUrl =      "DzM288m"
           }
           if(username === "user-9" ||username === "user-10" ) {
-            newUrl =     this.src.replace("DSinvBh", "zKapQ9v");
+            newUrl =      "zKapQ9v"
           }  
 
           if(username === "user-11" ||username === "user-12" ) {
-            newUrl =   this.src.replace("DSinvBh", "a9a9C6U");
+            newUrl =    "a9a9C6U"
              }
              if(username === "user-13" ||username === "user-14" ) {
-               newUrl =   this.src.replace("DSinvBh", "5pUKqhb"); 
+               newUrl =     "5pUKqhb"
              }
              if(username === "user-15" ||username === "user-16" ) {
-              newUrl =  this.src.replace("DSinvBh", "sY6HJki");
+              newUrl =   "sY6HJki"
              }
              if(username === "user-17" ||username === "user-18" ) {
-              newUrl =    this.src.replace("DSinvBh", "9wwPDe8");
+              newUrl =     "9wwPDe8"
              }
              if(username === "user-19" ||username === "user-20" ) {
-              newUrl =     this.src.replace("DSinvBh", "hBEMigy"); 
+              newUrl =      "hBEMigy"
              }  
 
          if(username === "user-21" ||username === "user-22" ) {
-          newUrl = this.src.replace("DSinvBh", "xKkxuwL");
+          newUrl =  "xKkxuwL"
            }
            if(username === "user-23" ||username === "user-24" ) {
-             newUrl =  this.src.replace("DSinvBh", "ngXS8Dg"); 
+             newUrl =   "ngXS8Dg"
            }
            if(username === "user-25" ||username === "user-26" ) {
-            newUrl =   this.src.replace("DSinvBh", "Eo8WYHm");
+            newUrl =    "Eo8WYHm"
            }
            if(username === "user-27" ||username === "user-28" ) {
-            newUrl =   this.src.replace("DSinvBh", "P34XsVp");
+            newUrl =     "P34XsVp"
            }
            if(username === "user-29" ||username === "user-30" ) {
-            newUrl =   this.src.replace("DSinvBh", "6KRbEwB"); 
+            newUrl =     "6KRbEwB"
               }  
 
            if(username === "user-31" ||username === "user-32" ) {
-            newUrl = this.src.replace("DSinvBh", "VXyBdWu");
+            newUrl =   "VXyBdWu"
             }
                if(username === "user-33" ||username === "user-34" ) {
-           newUrl =  this.src.replace("DSinvBh", "Arvck4f"); 
+           newUrl =    "Arvck4f"
             }
            if(username === "user-35" ||username === "user-36" ) {
-            newUrl =   this.src.replace("DSinvBh", "aFNyuny");
+            newUrl =     "aFNyuny"
              }
             if(username === "user-37" ||username === "user-38" ) {
-             newUrl =  this.src.replace("DSinvBh", "fkLMpzR");
+             newUrl =   "fkLMpzR"
              }
               if(username === "user-39" ||username === "user-40" ) {
-              newUrl =  this.src.replace("DSinvBh", "Wrof4qm"); 
+              newUrl =   "Wrof4qm"
              }   
          }  
 
@@ -182,28 +182,28 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10"
           ) {
-            newUrl = this.src.replace("TfszbgC", "TfszbgC"); 
+            newUrl =  "TfszbgC"
           }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
           || username === "user-19" ||username === "user-20"
           ) {
-            newUrl = this.src.replace("TfszbgC", "CDvPjH9"); 
+            newUrl =   "CDvPjH9"
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
           || username === "user-29" ||username === "user-30"
           ) {
-            newUrl = this.src.replace("TfszbgC", "uYLmstU"); 
+            newUrl =   "uYLmstU"
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
           || username === "user-39" ||username === "user-40"
           ) {
-            newUrl = this.src.replace("TfszbgC", "4P2AN2P");  
+            newUrl =   "4P2AN2P"  
           } 
     
          }  
@@ -213,28 +213,28 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10"
           ) {
-            newUrl = this.src.replace("AxFm4cE", "Lf5offt"); 
+            newUrl =   "Lf5offt"
           }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
           || username === "user-19" ||username === "user-20"
           ) {
-            newUrl = this.src.replace("AxFm4cE", "5tsdP2w"); 
+            newUrl =   "5tsdP2w" 
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
           || username === "user-29" ||username === "user-30"
           ) {
-            newUrl = this.src.replace("AxFm4cE", "wmJrZRW"); 
+            newUrl =  "wmJrZRW"
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
           || username === "user-39" ||username === "user-40"
           ) {
-            newUrl = this.src.replace("AxFm4cE", "JqLXc2T");  
+            newUrl = "JqLXc2T" 
           } 
     
          }  
@@ -244,36 +244,40 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10"
           ) {
-            newUrl = this.src.replace("pptdq9h", "pptdq9h"); 
-          }
+            newUrl  = "pptdq9h" }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
           || username === "user-19" ||username === "user-20"
           ) {
-            newUrl = this.src.replace("pptdq9h", "Ux9B9zu"); 
+            newUrl =  "Ux9B9zu"
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
           || username === "user-29" ||username === "user-30"
           ) {
-            newUrl = this.src.replace("pptdq9h", "FwL5nC4"); 
+            newUrl = "FwL5nC4"
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
           || username === "user-39" ||username === "user-40"
           ) {
-            newUrl = this.src.replace("pptdq9h", "fnC7hcb");  
+         
+newUrl = "fnC7hcb"
           } 
     
          }  
 
+         const hubId = newUrl; // Your room ID
+         const waypoint = null;   // Or a specific waypoint ID if needed
+         changeHub(hubId, true, waypoint);
+         return; 
+
         
         
-           await exitImmersive();
-           location.href = newUrl;
+          //  await exitImmersive();
           //  window.open(newUrl);
       }
 return
