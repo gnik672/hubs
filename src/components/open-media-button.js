@@ -113,67 +113,67 @@ AFRAME.registerComponent("open-media-button", {
         let newUrl
         if(this.src.includes("DSinvBh") ){
           if(username === "user-1" ||username === "user-2" ) {
-            newUrl =  this.url.replace("DSinvBh", "DSinvBh");
+            newUrl =  this.src.replace("DSinvBh", "DSinvBh");
           }
           if(username === "user-3" ||username === "user-4" ) {
             newUrl =   this.src.replace("AxFm4cE", "vCAqAvY"); 
           }
           if(username === "user-5" ||username === "user-6" ) {
-            newUrl =       this.url.replace("DSinvBh", "MZbYQFN");
+            newUrl =       this.src.replace("DSinvBh", "MZbYQFN");
           }
           if(username === "user-7" ||username === "user-8" ) {
-            newUrl =    this.url.replace("DSinvBh", "DzM288m");
+            newUrl =    this.src.replace("DSinvBh", "DzM288m");
           }
           if(username === "user-9" ||username === "user-10" ) {
-            newUrl =     this.url.replace("DSinvBh", "zKapQ9v");
+            newUrl =     this.src.replace("DSinvBh", "zKapQ9v");
           }  
 
           if(username === "user-11" ||username === "user-12" ) {
-            newUrl =   this.url.replace("DSinvBh", "a9a9C6U");
+            newUrl =   this.src.replace("DSinvBh", "a9a9C6U");
              }
              if(username === "user-13" ||username === "user-14" ) {
                newUrl =   this.src.replace("DSinvBh", "5pUKqhb"); 
              }
              if(username === "user-15" ||username === "user-16" ) {
-              newUrl =  this.url.replace("DSinvBh", "sY6HJki");
+              newUrl =  this.src.replace("DSinvBh", "sY6HJki");
              }
              if(username === "user-17" ||username === "user-18" ) {
-              newUrl =    this.url.replace("DSinvBh", "9wwPDe8");
+              newUrl =    this.src.replace("DSinvBh", "9wwPDe8");
              }
              if(username === "user-19" ||username === "user-20" ) {
-              newUrl =     this.url.replace("DSinvBh", "hBEMigy"); 
+              newUrl =     this.src.replace("DSinvBh", "hBEMigy"); 
              }  
 
          if(username === "user-21" ||username === "user-22" ) {
-          newUrl = this.url.replace("DSinvBh", "xKkxuwL");
+          newUrl = this.src.replace("DSinvBh", "xKkxuwL");
            }
            if(username === "user-23" ||username === "user-24" ) {
              newUrl =  this.src.replace("DSinvBh", "ngXS8Dg"); 
            }
            if(username === "user-25" ||username === "user-26" ) {
-            newUrl =   this.url.replace("DSinvBh", "Eo8WYHm");
+            newUrl =   this.src.replace("DSinvBh", "Eo8WYHm");
            }
            if(username === "user-27" ||username === "user-28" ) {
-            newUrl =   this.url.replace("DSinvBh", "P34XsVp");
+            newUrl =   this.src.replace("DSinvBh", "P34XsVp");
            }
            if(username === "user-29" ||username === "user-30" ) {
-            newUrl =   this.url.replace("DSinvBh", "6KRbEwB"); 
+            newUrl =   this.src.replace("DSinvBh", "6KRbEwB"); 
               }  
 
            if(username === "user-31" ||username === "user-32" ) {
-            newUrl = this.url.replace("DSinvBh", "VXyBdWu");
+            newUrl = this.src.replace("DSinvBh", "VXyBdWu");
             }
                if(username === "user-33" ||username === "user-34" ) {
            newUrl =  this.src.replace("DSinvBh", "Arvck4f"); 
             }
            if(username === "user-35" ||username === "user-36" ) {
-            newUrl =   this.url.replace("DSinvBh", "aFNyuny");
+            newUrl =   this.src.replace("DSinvBh", "aFNyuny");
              }
             if(username === "user-37" ||username === "user-38" ) {
-             newUrl =  this.url.replace("DSinvBh", "fkLMpzR");
+             newUrl =  this.src.replace("DSinvBh", "fkLMpzR");
              }
               if(username === "user-39" ||username === "user-40" ) {
-              newUrl =  this.url.replace("DSinvBh", "Wrof4qm"); 
+              newUrl =  this.src.replace("DSinvBh", "Wrof4qm"); 
              }   
          }  
 
@@ -182,28 +182,28 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10"
           ) {
-            newUrl = this.url.replace("TfszbgC", "TfszbgC"); 
+            newUrl = this.src.replace("TfszbgC", "TfszbgC"); 
           }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
           || username === "user-19" ||username === "user-20"
           ) {
-            newUrl = this.url.replace("TfszbgC", "CDvPjH9"); 
+            newUrl = this.src.replace("TfszbgC", "CDvPjH9"); 
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
           || username === "user-29" ||username === "user-30"
           ) {
-            newUrl = this.url.replace("TfszbgC", "uYLmstU"); 
+            newUrl = this.src.replace("TfszbgC", "uYLmstU"); 
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
           || username === "user-39" ||username === "user-40"
           ) {
-            newUrl = this.url.replace("TfszbgC", "4P2AN2P");  
+            newUrl = this.src.replace("TfszbgC", "4P2AN2P");  
           } 
     
          }  
@@ -213,28 +213,28 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10"
           ) {
-            newUrl = this.url.replace("AxFm4cE", "Lf5offt"); 
+            newUrl = this.src.replace("AxFm4cE", "Lf5offt"); 
           }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
           || username === "user-19" ||username === "user-20"
           ) {
-            newUrl = this.url.replace("AxFm4cE", "5tsdP2w"); 
+            newUrl = this.src.replace("AxFm4cE", "5tsdP2w"); 
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
           || username === "user-29" ||username === "user-30"
           ) {
-            newUrl = this.url.replace("AxFm4cE", "wmJrZRW"); 
+            newUrl = this.src.replace("AxFm4cE", "wmJrZRW"); 
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
           || username === "user-39" ||username === "user-40"
           ) {
-            newUrl = this.url.replace("AxFm4cE", "JqLXc2T");  
+            newUrl = this.src.replace("AxFm4cE", "JqLXc2T");  
           } 
     
          }  
@@ -244,28 +244,28 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10"
           ) {
-            newUrl = this.url.replace("pptdq9h", "pptdq9h"); 
+            newUrl = this.src.replace("pptdq9h", "pptdq9h"); 
           }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
           || username === "user-19" ||username === "user-20"
           ) {
-            newUrl = this.url.replace("pptdq9h", "Ux9B9zu"); 
+            newUrl = this.src.replace("pptdq9h", "Ux9B9zu"); 
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
           || username === "user-29" ||username === "user-30"
           ) {
-            newUrl = this.url.replace("pptdq9h", "FwL5nC4"); 
+            newUrl = this.src.replace("pptdq9h", "FwL5nC4"); 
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
           || username === "user-39" ||username === "user-40"
           ) {
-            newUrl = this.url.replace("pptdq9h", "fnC7hcb");  
+            newUrl = this.src.replace("pptdq9h", "fnC7hcb");  
           } 
     
          }  
