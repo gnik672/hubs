@@ -88,6 +88,7 @@ import "./components/text-button";
 import "./components/block-button";
 import "./components/translate-button";
 import "./components/translate-badge";
+// import "./components/proximity-mute";
 import "./components/translate-panel";
 import "./components/mute-button";
 import "./components/kick-button";
@@ -143,6 +144,7 @@ import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
 import "./components/mirror";
+import "./components/live-clock";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -372,13 +374,13 @@ function mountUI(props = {}) {
                 <OAuthScreenContainer oauthInfo={props.oauthInfo} />
               )
               
-              // : props.roomUnavailableReason ? (
-              //   <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
-              // ) 
-
-              : props.roomUnavailableReason && props.roomUnavailableReason !== ExitReason.full ? (
+               : props.roomUnavailableReason ? (
                 <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
-              )
+               ) 
+
+              // : props.roomUnavailableReason && props.roomUnavailableReason !== ExitReason.full ? (
+              //   <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
+              // )
               
               
               : (
@@ -442,6 +444,12 @@ export async function getSceneUrlForHub(hub) {
 }
 
 export async function updateEnvironmentForHub(hub, entryManager) {
+  console.log(hub.slug)
+  if (hub.slug === "main area") {
+    window.location.href = "https://hubs.local:4000/H7yKnL7/";
+    return;
+  }
+
   console.log("Updating environment for hub");
   const sceneUrl = await getSceneUrlForHub(hub);
 
@@ -597,6 +605,13 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   }
 
   const hub = data.hubs[0];
+console.log("changehub")
+  // 🔁 BONUS: Conditional redirection based on room
+if (hub.slug === "main area") {
+  window.location.href = "https://hubs.local:4000/H7yKnL7/";
+  return;
+}
+
 
   console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
