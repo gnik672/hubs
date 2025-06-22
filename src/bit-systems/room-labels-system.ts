@@ -40,17 +40,17 @@ class RoomLabelOrganizer {
     this.labels = new Array<SceneObject>();
     this.labelProps = roomPropertiesReader.roomProps.labels;
 
-    // this.labelProps.forEach(label => {
-    //   label.filename = `${roomPropertiesReader.serverURL}/file/${label.filename}`;
-    //   const ref = renderAsEntity(APP.world, SimpleImagePanel(label));
+    this.labelProps.forEach(label => {
+      label.filename = `${roomPropertiesReader.serverURL}/file/${label.filename}`;
+      const ref = renderAsEntity(APP.world, SimpleImagePanel(label));
 
-    //   const labelEntity = new SceneObject(ref);
-    //   APP.world.scene.add(labelEntity.obj);
-    //   //George
-    //   console.log(`LabelabelEntity}:` );
-    //   console.log(`Label ${labelEntity.obj.position.x}:` );
-    //   this.labels.push(labelEntity);
-    // });
+      const labelEntity = new SceneObject(ref);
+      APP.world.scene.add(labelEntity.obj);
+      //George
+      console.log(`LabelabelEntity}:` );
+      console.log(`Label ${labelEntity.obj.position.x}:` );
+      this.labels.push(labelEntity);
+    });
   }
 }
 
