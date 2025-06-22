@@ -72,33 +72,11 @@ AFRAME.registerComponent("open-media-button", {
 
 
       const username = window?.APP?.store?.state?.profile?.displayName;
+      const currentRoomId = window.APP?.hub?.hub_id;
 
-      // let hubIdt  
-
- 
-      // if ((hubIdt = await isHubsRoomUrl(this.src))) {
-      //   // 👇 Redirect override logic
-      //   if (hubIdt === "TfszbgC") {
-      //     const newHubId = "TfszbgD";
-      //     const base = this.src.split("#")[0];
-      //     this.src = base.replace(/\/[^/]+\/?$/, "/" + newHubId);
-      //     hubIdt = newHubId;
-      //     console.log("Overriding destination: ABC1234 ➡ XYZ9999");
-      //   }
+      let newUrl;
+      let waypoint = null;
     
-      //   const url = new URL(this.src);
-      //   if (url.hash && window.APP.hub.hub_id === hubIdt) {
-      //     window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
-      //   } else if (await isLocalHubsUrl(this.src)) {
-      //     const waypoint = url.hash && url.hash.substring(1);
-      //     changeHub(hubIdt, true, waypoint);
-      //   } else {
-      //     await exitImmersive();
-      //     location.href = this.src;
-      //   }
-    
-      //   return;
-      // }
     
       // Fallback for other types of content
       if (await isLocalHubsAvatarUrl(this.src)) {
@@ -110,7 +88,9 @@ AFRAME.registerComponent("open-media-button", {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else { 
         console.log(this.src)
-        let newUrl
+        // const hubId ; // Your room ID
+        // let waypoint = null;
+        // let newUrl
         if(this.src.includes("DSinvBh") ){
           if(username === "user-1" ||username === "user-2" ) {
             newUrl =  "DSinvBh"
@@ -251,6 +231,7 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-19" ||username === "user-20"
           ) {
             newUrl =  "Ux9B9zu"
+           
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
@@ -258,6 +239,7 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-29" ||username === "user-30"
           ) {
             newUrl = "FwL5nC4"
+           
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
@@ -265,22 +247,65 @@ AFRAME.registerComponent("open-media-button", {
           || username === "user-39" ||username === "user-40"
           ) {
          
-newUrl = "fnC7hcb"
-          } 
+              newUrl = "fnC7hcb"
+ 
+          }  
+
+
+          if (
+            currentRoomId === "Lf5offt" ||
+            currentRoomId === "5tsdP2w" ||
+            currentRoomId === "wmJrZRW" ||
+            currentRoomId === "JqLXc2T"
+          ) {
+            waypoint = "conference";
+          } else if (
+            currentRoomId === "TfszbgC" ||
+            currentRoomId === "CDvPjH9" ||
+            currentRoomId === "uYLmstU" ||
+            currentRoomId === "4P2AN2P"
+          ) {
+            waypoint = "social";
+          } else if (
+            currentRoomId === "DSinvBh" ||
+            currentRoomId === "vCAqAvY" ||
+            currentRoomId === "MZbYQFN" ||
+            currentRoomId === "DzM288m" ||
+            currentRoomId === "zKapQ9v" ||
+            currentRoomId === "a9a9C6U" ||
+            currentRoomId === "5pUKqhb" ||
+            currentRoomId === "sY6HJki" ||
+            currentRoomId === "9wwPDe8" ||
+            currentRoomId === "hBEMigy" ||
+            currentRoomId === "xKkxuwL" ||
+            currentRoomId === "ngXS8Dg" ||
+            currentRoomId === "Eo8WYHm" ||
+            currentRoomId === "P34XsVp" ||
+            currentRoomId === "6KRbEwB" ||
+            currentRoomId === "VXyBdWu" ||
+            currentRoomId === "Arvck4f" ||
+            currentRoomId === "aFNyuny" ||
+            currentRoomId === "fkLMpzR" ||
+            currentRoomId === "Wrof4qm"
+          ) {
+            waypoint = "business";
+          }   
     
          }  
+if(!this.src.includes("pptdq9h")&&!this.src.includes( "AxFm4cE")&&!this.src.includes("TfszbgC") && !this.src.includes("DSinvBh")){
+  newUrl = "o5VDamq"
+}
 
-         const hubId = newUrl; // Your room ID
-         const waypoint = null;   // Or a specific waypoint ID if needed
-         changeHub(hubId, true, waypoint);
-         return; 
+          // Or a specific waypoint ID if needed
+         changeHub(newUrl, true, waypoint);
+       return; 
 
         
         
           //  await exitImmersive();
           //  window.open(newUrl);
       }
-return
+// return
       
 
       let hubId;
