@@ -263,53 +263,27 @@ export async function vlModule(destination: string) {
   return data.Directions;
 }
 
-// export async function SnapPov() {
-//   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
-//   APP.scene?.renderer.setRenderTarget(renderTarget);
-//   APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
-//   APP.scene?.renderer.setRenderTarget(null);
-//   const canvas = APP.scene!.renderer.domElement;
-//   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-//    if (blob) {
+export async function SnapPov() {
+  const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  APP.scene?.renderer.setRenderTarget(renderTarget);
+  APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
+  APP.scene?.renderer.setRenderTarget(null);
+  const canvas = APP.scene!.renderer.domElement;
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+  //  if (blob) {
 
-//      saveFile(blob, "png");
-//   }
+  //    saveFile(blob, "png");
+  // }
 
-//   virtualAgent.agent.obj!.visible = true;
-//   virtualAgent.agent.obj!.updateMatrix();
+  virtualAgent.agent.obj!.visible = true;
+  virtualAgent.agent.obj!.updateMatrix();
 
-//   hiddenAvatars.forEach(obj => (obj.visible = true));
-//   hiddenLabels.forEach(obj => (obj.visible = true));
+  hiddenAvatars.forEach(obj => (obj.visible = true));
+  hiddenLabels.forEach(obj => (obj.visible = true));
 
   
-//   if (!blob) throw new Error("something went wrong");
-//   return blob;
-// }
-
-export async function SnapPov(): Promise<Blob> {
-  if (!APP.scene || !APP.scene.renderer) {
-    throw new Error("Scene or renderer not initialized.");
-  }
-
-  const canvas = APP.scene.renderer.domElement;
-
-  // Capture the image as a base64 data URL
-  const dataUrl = canvas.toDataURL("image/png");
-
-  // Optional: Save to file immediately
-  const link = document.createElement("a");
-  link.download = "camera_pov.png";
-  link.href = dataUrl;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  // Convert base64 to Blob
-  const response = await fetch(dataUrl);
-  const blob = await response.blob();
-
-  if (!blob) throw new Error("Failed to create image blob from canvas.");
-
+  if (!blob) throw new Error("something went wrong");
   return blob;
 }
+
 
