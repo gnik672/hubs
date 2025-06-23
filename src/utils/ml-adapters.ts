@@ -201,7 +201,14 @@ export async function resetDs(uuid: string) {
 const hiddenAvatars: Object3D[] = [];
 const hiddenLabels: Object3D[] = [];
 export async function vlModule(destination: string) {
+
+  
   const formData = new FormData();
+//added
+  const povBlob = await SnapPov();
+formData.append("file", povBlob, "camera_pov.png");
+//finished added
+
   virtualAgent.agent.obj!.visible = false;
   virtualAgent.agent.obj!.updateMatrix();
 
@@ -312,14 +319,14 @@ export async function vlModule(destination: string) {
 //   return blob;
 // }
 
-export async function SnapPov() {
+export async function SnapPov(): Promise<Blob> {
   const povNode = document.querySelector("#avatar-pov-node") as AElement;
   if (!povNode) throw new Error("Missing avatar-pov-node");
 
   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
   const camera = new THREE.PerspectiveCamera();
 
-  // Copy the real-world headset transform (position + rotation)
+  // Copy headset pose
   povNode.object3D.updateMatrixWorld(true);
   camera.position.copy(povNode.object3D.getWorldPosition(new THREE.Vector3()));
   camera.quaternion.copy(povNode.object3D.getWorldQuaternion(new THREE.Quaternion()));
@@ -329,21 +336,48 @@ export async function SnapPov() {
   APP.scene?.renderer.render(APP.scene!.object3D, camera);
   APP.scene?.renderer.setRenderTarget(null);
 
-  const canvas = APP.scene!.renderer.domElement;
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+  // Create an offscreen canvas to extract image from render target
+  const readCanvas = document.createElement("canvas");
+  readCanvas.width = window.innerWidth;
+  readCanvas.height = window.innerHeight;
+  const readCtx = readCanvas.getContext("2d");
 
-     virtualAgent.agent.obj!.visible = true;
-    virtualAgent.agent.obj!.updateMatrix();
+  const pixels = new Uint8Array(window.innerWidth * window.innerHeight * 4);
+  APP.scene?.renderer.readRenderTargetPixels(
+    renderTarget,
+    0,
+    0,
+    window.innerWidth,
+    window.innerHeight,
+    pixels
+  );
 
-     hiddenAvatars.forEach(obj => (obj.visible = true));
-    hiddenLabels.forEach(obj => (obj.visible = true)); 
+  // Draw pixels into canvas
+  const imageData = new ImageData(
+    new Uint8ClampedArray(pixels),
+    window.innerWidth,
+    window.innerHeight
+  );
+  readCtx?.putImageData(imageData, 0, 0);
 
-  // if (blob) {
-  //   saveFile(blob, "png");
-  //   return blob;
-  // }
 
-  throw new Error("Failed to capture snapshot");
+ 
+  
+
+  // Convert canvas to Blob
+  const blob: Blob | null = await new Promise(resolve => readCanvas.toBlob(resolve, "image/png"));
+  virtualAgent.agent.obj!.visible = true;
+  virtualAgent.agent.obj!.updateMatrix();
+
+ hiddenAvatars.forEach(obj => (obj.visible = true));
+ hiddenLabels.forEach(obj => (obj.visible = true)); 
+
+  if (blob) {
+    saveFile(blob, "png");
+   }
+ 
+  if (!blob) throw new Error("Failed to convert canvas to Blob");
+
+  return blob;
 }
-
 
