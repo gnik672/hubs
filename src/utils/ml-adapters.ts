@@ -286,40 +286,30 @@ export async function vlModule(destination: string) {
 //   return blob;
 // }
 
-export async function SnapPov() {
-  if (!APP.scene || !APP.scene.renderer || !APP.scene.object3D) {
-    throw new Error("Scene not ready yet");
+export async function SnapPov(): Promise<Blob> {
+  if (!APP.scene || !APP.scene.renderer) {
+    throw new Error("Scene or renderer not initialized.");
   }
 
-  const renderer = APP.scene.renderer;
-  const scene = APP.scene.object3D;
+  const canvas = APP.scene.renderer.domElement;
 
-  const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
-  renderer.setRenderTarget(renderTarget);
+  // Capture the image as a base64 data URL
+  const dataUrl = canvas.toDataURL("image/png");
 
-  const isXR = renderer.xr.isPresenting;
-  const camera = isXR ? renderer.xr.getCamera() : APP.scene.camera!;
+  // Optional: Save to file immediately
+  const link = document.createElement("a");
+  link.download = "camera_pov.png";
+  link.href = dataUrl;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
-  renderer.render(scene, camera);
-  renderer.setRenderTarget(null);
+  // Convert base64 to Blob
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
 
-  const canvas = renderer.domElement;
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-
-  if (blob) {
-
-        saveFile(blob, "png");
-       }
-
-    virtualAgent.agent.obj!.visible = true;
-    virtualAgent.agent.obj!.updateMatrix();
-
-   hiddenAvatars.forEach(obj => (obj.visible = true));
-   hiddenLabels.forEach(obj => (obj.visible = true));
-
-  if (!blob) throw new Error("Snapshot failed");
+  if (!blob) throw new Error("Failed to create image blob from canvas.");
 
   return blob;
 }
-
 
