@@ -286,30 +286,64 @@ export async function vlModule(destination: string) {
 //   return blob;
 // }
 
+// export async function SnapPov() {
+//   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+//   APP.scene?.renderer.setRenderTarget(renderTarget);
+
+//   const xrCamera = APP.scene!.renderer.xr.getCamera(); // ✅ No argument
+//   APP.scene?.renderer.render(APP.scene!.object3D, xrCamera);
+
+//   APP.scene?.renderer.setRenderTarget(null);
+//   const canvas = APP.scene!.renderer.domElement;
+
+//   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+
+//     // if (blob) {
+//     //   saveFile(blob, "png");
+//     // }
+
+//     virtualAgent.agent.obj!.visible = true;
+//    virtualAgent.agent.obj!.updateMatrix();
+
+//    hiddenAvatars.forEach(obj => (obj.visible = true));
+//    hiddenLabels.forEach(obj => (obj.visible = true)); 
+
+//   if (!blob) throw new Error("something went wrong");
+//   return blob;
+// }
+
 export async function SnapPov() {
+  const povNode = document.querySelector("#avatar-pov-node") as AElement;
+  if (!povNode) throw new Error("Missing avatar-pov-node");
+
   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  const camera = new THREE.PerspectiveCamera();
+
+  // Copy the real-world headset transform (position + rotation)
+  povNode.object3D.updateMatrixWorld(true);
+  camera.position.copy(povNode.object3D.getWorldPosition(new THREE.Vector3()));
+  camera.quaternion.copy(povNode.object3D.getWorldQuaternion(new THREE.Quaternion()));
+  camera.updateMatrixWorld(true);
+
   APP.scene?.renderer.setRenderTarget(renderTarget);
-
-  const xrCamera = APP.scene!.renderer.xr.getCamera(); // ✅ No argument
-  APP.scene?.renderer.render(APP.scene!.object3D, xrCamera);
-
+  APP.scene?.renderer.render(APP.scene!.object3D, camera);
   APP.scene?.renderer.setRenderTarget(null);
-  const canvas = APP.scene!.renderer.domElement;
 
+  const canvas = APP.scene!.renderer.domElement;
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
 
-    // if (blob) {
-    //   saveFile(blob, "png");
-    // }
+     virtualAgent.agent.obj!.visible = true;
+    virtualAgent.agent.obj!.updateMatrix();
 
-    virtualAgent.agent.obj!.visible = true;
-   virtualAgent.agent.obj!.updateMatrix();
+     hiddenAvatars.forEach(obj => (obj.visible = true));
+    hiddenLabels.forEach(obj => (obj.visible = true)); 
 
-   hiddenAvatars.forEach(obj => (obj.visible = true));
-   hiddenLabels.forEach(obj => (obj.visible = true)); 
+  // if (blob) {
+  //   saveFile(blob, "png");
+  //   return blob;
+  // }
 
-  if (!blob) throw new Error("something went wrong");
-  return blob;
+  throw new Error("Failed to capture snapshot");
 }
 
 
