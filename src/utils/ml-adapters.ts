@@ -4,6 +4,8 @@ import { ResponseData, COMPONENT_ENDPOINTS, COMPONENT_CODES, CODE_DESCRIPTIONS, 
 import { SoundAnalyzer } from "./silence-detector";
 import { AElement } from "aframe";
 import { degToRad } from "three/src/math/MathUtils";
+import { labelOrganizer } from "../bit-systems/room-labels-system"; // Adjust the path to your actual labelOrganizer module
+
 
 let mediaRecorder: MediaRecorder | null = null;
 let chunks: any[] = [];
@@ -104,12 +106,14 @@ export async function audioModules(
 }
 
 export async function textModule(data: string, parameters: Record<string, any>) {
+  console.log("translate_text_1")
+ 
   const queryString = Object.keys(parameters)
     .map(key => `${key}=${parameters[key]}`)
     .join("&");
 
   const requestBody = { text: data };
-
+  console.log("translate_text_2")
   const response = await fetch(getAIUrls().trasnlate_text + `?${queryString}`, {
     method: "POST",
     headers: {
@@ -118,24 +122,23 @@ export async function textModule(data: string, parameters: Record<string, any>) 
     },
     body: JSON.stringify(requestBody)
   });
-
+  console.log("translate_text_3")
   const responseJson = await response.json();
   if (response.status >= 300 || !responseJson || !responseJson.translations[0])
     throw new Error("Bad response from text translation module");
-
+    console.log("translate_text")
   return responseJson.translations[0];
 }
 
 export async function intentionModule(englishTranscription: string, uuid: string) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
 
-//  let englishTranscriptionNew = englishTranscription.replace(/(\s*)\bFox\b(\s*)/gi, '$1conference$2');
-//   englishTranscription.replace(/(\s*)\belephant\b(\s*)/gi, '$1business$2');
-//   englishTranscription.replace(/(\s*)\bunicorn\b(\s*)/gi, '$1social area$2');
-// console.log(englishTranscription)
+  let englishTranscriptionNew = englishTranscription.replace(/(\s*)\bFox\b(\s*)/gi, '$1conference$2').replace(/(\s*)\belephant\b(\s*)/gi, '$1business$2')
+ .replace(/(\s*)\bunicorn\b(\s*)/gi, '$1social area$2').replace(/(\s*)\bpenguin\b(\s*)/gi, '$1tradeshows$2');
+ console.log(englishTranscription)
 //   const data = { user_query: englishTranscriptionNew, user_uuid: uuid };
 
-  const data = { user_query: englishTranscription, user_uuid: uuid };
+  const data = { user_query: englishTranscriptionNew, user_uuid: uuid };
   console.log(getAIUrls().intent_dest, data);
   const response = await fetch(getAIUrls().intent_dest, {
     method: "POST",
@@ -196,12 +199,23 @@ export async function resetDs(uuid: string) {
 }
 
 const hiddenAvatars: Object3D[] = [];
+const hiddenLabels: Object3D[] = [];
 export async function vlModule(destination: string) {
   const formData = new FormData();
   virtualAgent.agent.obj!.visible = false;
   virtualAgent.agent.obj!.updateMatrix();
 
  // Hide all avatars (including your own)
+
+ 
+ labelOrganizer.labels.forEach(label => {
+   if (label.obj.visible && (label.obj.position.x === 9) && ( label.obj.position.z === 42.1)  ) {
+     console.log(label)
+     label.obj.visible = false;
+     hiddenLabels.push(label.obj);
+   }
+ }); 
+
 
  document.querySelectorAll('[networked], [avatar], .avatar').forEach((el: any) => {
    if (el?.object3D?.visible) {
@@ -245,27 +259,55 @@ export async function vlModule(destination: string) {
   virtualAgent.agent.obj!.updateMatrix();
 
   hiddenAvatars.forEach(obj => (obj.visible = true));
+  hiddenLabels.forEach(obj => (obj.visible = true));
   return data.Directions;
 }
+
+// export async function SnapPov() {
+//   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+//   APP.scene?.renderer.setRenderTarget(renderTarget);
+//   APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
+//   APP.scene?.renderer.setRenderTarget(null);
+//   const canvas = APP.scene!.renderer.domElement;
+//   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+//    if (blob) {
+
+//      saveFile(blob, "png");
+//   }
+
+//   virtualAgent.agent.obj!.visible = true;
+//   virtualAgent.agent.obj!.updateMatrix();
+
+//   hiddenAvatars.forEach(obj => (obj.visible = true));
+//   hiddenLabels.forEach(obj => (obj.visible = true));
+
+  
+//   if (!blob) throw new Error("something went wrong");
+//   return blob;
+// }
 
 export async function SnapPov() {
   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
   APP.scene?.renderer.setRenderTarget(renderTarget);
-  APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
+
+  const xrCamera = APP.scene!.renderer.xr.getCamera(); // ✅ No argument
+  APP.scene?.renderer.render(APP.scene!.object3D, xrCamera);
+
   APP.scene?.renderer.setRenderTarget(null);
   const canvas = APP.scene!.renderer.domElement;
+
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-  // if (blob) {
 
-  //   saveFile(blob, "png");
-  // }
+    // if (blob) {
+    //   saveFile(blob, "png");
+    // }
 
-  virtualAgent.agent.obj!.visible = true;
-  virtualAgent.agent.obj!.updateMatrix();
+    virtualAgent.agent.obj!.visible = true;
+   virtualAgent.agent.obj!.updateMatrix();
 
-  hiddenAvatars.forEach(obj => (obj.visible = true));
+   hiddenAvatars.forEach(obj => (obj.visible = true));
+   hiddenLabels.forEach(obj => (obj.visible = true)); 
 
-  
   if (!blob) throw new Error("something went wrong");
   return blob;
 }
