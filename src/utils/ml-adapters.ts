@@ -241,31 +241,54 @@ export async function SnapPov(): Promise<Blob> {
   const renderer = APP.scene?.renderer!;
   const scene = APP.scene?.object3D!;
   const xr = renderer.xr;
-  const fakeCamera = new THREE.PerspectiveCamera();
-  const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 
+  const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  const screenshotCamera = new THREE.PerspectiveCamera();
+
+  // 📌 Try to copy XR camera pose if XR is active
   if (xr?.isPresenting) {
-    const xrCamera = xr.getCamera() as THREE.ArrayCamera;
-    const eyeCamera = xrCamera.cameras[0] as THREE.PerspectiveCamera;
-    copyXRCameraPose(eyeCamera, fakeCamera);
+    const xrCamera = xr.getCamera();
+    if ((xrCamera as THREE.ArrayCamera).isArrayCamera) {
+      const arrayCam = xrCamera as THREE.ArrayCamera;
+      const eyeCamera = arrayCam.cameras[0] as THREE.PerspectiveCamera;
+
+      screenshotCamera.matrixWorld.copy(eyeCamera.matrixWorld);
+      screenshotCamera.matrix.copy(eyeCamera.matrix);
+      screenshotCamera.projectionMatrix.copy(eyeCamera.projectionMatrix);
+      screenshotCamera.projectionMatrixInverse.copy(eyeCamera.projectionMatrixInverse);
+      screenshotCamera.matrixWorldInverse.copy(eyeCamera.matrixWorldInverse);
+      screenshotCamera.position.copy(eyeCamera.position);
+      screenshotCamera.quaternion.copy(eyeCamera.quaternion);
+    } else {
+      throw new Error("XR camera is not an ArrayCamera");
+    }
   } else {
-    fakeCamera.copy(APP.scene!.camera as THREE.PerspectiveCamera);
+    // Use default camera (desktop mode)
+    screenshotCamera.copy(APP.scene!.camera as THREE.PerspectiveCamera);
   }
 
+  // 🚫 Hide UI elements
   virtualAgent.agent.obj!.visible = false;
   hiddenAvatars.forEach(obj => (obj.visible = false));
   hiddenLabels.forEach(obj => (obj.visible = false));
 
-  const wasXREnabled = renderer.xr.enabled;
+  // 📴 Temporarily disable XR
+  const xrEnabled = renderer.xr.enabled;
   renderer.xr.enabled = false;
-  renderer.setRenderTarget(renderTarget);
-  renderer.render(scene, fakeCamera);
-  renderer.setRenderTarget(null);
-  renderer.xr.enabled = wasXREnabled;
 
+  // 🖼️ Render scene to offscreen buffer
+  renderer.setRenderTarget(renderTarget);
+  renderer.render(scene, screenshotCamera);
+  renderer.setRenderTarget(null);
+
+  // ✅ Restore XR
+  renderer.xr.enabled = xrEnabled;
+
+  // 📷 Grab the screenshot from canvas
   const canvas = renderer.domElement;
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-
+  
+  // ♻️ Restore visibility
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => (obj.visible = true));
   hiddenLabels.forEach(obj => (obj.visible = true));
@@ -277,3 +300,4 @@ export async function SnapPov(): Promise<Blob> {
   if (!blob) throw new Error("Failed to capture screenshot.");
   return blob;
 }
+
