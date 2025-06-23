@@ -1,14 +1,20 @@
+import * as THREE from "three";
 import { Object3D, WebGLRenderTarget } from "three";
-import { virtualAgent } from "../bit-systems/agent-system";
-import { ResponseData, COMPONENT_ENDPOINTS, COMPONENT_CODES, CODE_DESCRIPTIONS, getAIUrls } from "./component-types";
-import { SoundAnalyzer } from "./silence-detector";
 import { AElement } from "aframe";
 import { degToRad } from "three/src/math/MathUtils";
-import { labelOrganizer } from "../bit-systems/room-labels-system"; // Adjust the path to your actual labelOrganizer module
-
+import { virtualAgent } from "../bit-systems/agent-system";
+import { labelOrganizer } from "../bit-systems/room-labels-system";
+import {
+  ResponseData,
+  COMPONENT_ENDPOINTS,
+  COMPONENT_CODES,
+  CODE_DESCRIPTIONS,
+  getAIUrls
+} from "./component-types";
+import { SoundAnalyzer } from "./silence-detector";
 
 let mediaRecorder: MediaRecorder | null = null;
-let chunks: any[] = [];
+let chunks: Blob[] = [];
 export let isRecording = false;
 
 export async function RecordQuestion(): Promise<any> {
@@ -21,19 +27,12 @@ export async function RecordQuestion(): Promise<any> {
 
     const soundAnalyzer = new SoundAnalyzer({ stream: recordingStream });
 
-    soundAnalyzer.on("start", () => {
-      virtualAgent.isListening = true;
-    });
-
-    soundAnalyzer.on("stop", () => {
-      virtualAgent.isListening = false;
-    });
+    soundAnalyzer.on("start", () => (virtualAgent.isListening = true));
+    soundAnalyzer.on("stop", () => (virtualAgent.isListening = false));
 
     soundAnalyzer.Start();
 
-    mediaRecorder.ondataavailable = event => {
-      chunks.push(event.data);
-    };
+    mediaRecorder.ondataavailable = event => chunks.push(event.data);
 
     mediaRecorder.onstop = () => {
       const recordingBlob = new Blob(chunks, { type: "audio/wav" });
@@ -44,12 +43,15 @@ export async function RecordQuestion(): Promise<any> {
       soundAnalyzer.Stop();
 
       resolve({
-        status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
+        status: {
+          code: COMPONENT_CODES.Successful,
+          text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful]
+        },
         data: { file: recordingBlob }
       });
     };
 
-    mediaRecorder.onerror = event => {
+    mediaRecorder.onerror = () => {
       reject({
         status: {
           code: COMPONENT_CODES.MediaRecorderError,
@@ -64,21 +66,19 @@ export async function RecordQuestion(): Promise<any> {
 }
 
 export function stopRecording() {
-  mediaRecorder!.stop();
+  mediaRecorder?.stop();
   isRecording = false;
 }
 
 export function saveFile(blob: Blob, ext: string) {
   const blobUrl = URL.createObjectURL(blob);
-  const downloadLink = document.createElement("a");
-
-  downloadLink.href = blobUrl;
-  downloadLink.download = "file.".concat(ext);
-  downloadLink.click();
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = `file.${ext}`;
+  link.click();
   URL.revokeObjectURL(blobUrl);
 }
 
-// TODO: make this function inference in a vague way
 export async function audioModules(
   endPoint: COMPONENT_ENDPOINTS,
   data: Blob,
@@ -87,112 +87,94 @@ export async function audioModules(
 ) {
   const formData = new FormData();
   formData.append("audio_files", data, "recording.wav");
-  const queryString = Object.keys(parameters)
-    .map(key => `${key}=${parameters[key]}`)
-    .join("&");
 
-  const response = await fetch(endPoint + `?${queryString}`, {
+  const queryString = new URLSearchParams(parameters).toString();
+  const response = await fetch(`${endPoint}?${queryString}`, {
     method: "POST",
     body: formData,
-    signal: signal
+    signal
   });
 
   const responseData = await response.json();
-
-  if (response.status >= 300 || !responseData || !responseData.translations[0])
+  if (response.status >= 300 || !responseData?.translations?.[0])
     throw new Error("Bad response from translation server");
 
   return responseData.translations[0];
 }
 
 export async function textModule(data: string, parameters: Record<string, any>) {
-  console.log("translate_text_1")
- 
-  const queryString = Object.keys(parameters)
-    .map(key => `${key}=${parameters[key]}`)
-    .join("&");
-
-  const requestBody = { text: data };
-  console.log("translate_text_2")
-  const response = await fetch(getAIUrls().trasnlate_text + `?${queryString}`, {
+  const queryString = new URLSearchParams(parameters).toString();
+  const response = await fetch(`${getAIUrls().trasnlate_text}?${queryString}`, {
     method: "POST",
-    headers: {
-      accept: "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(requestBody)
+    headers: { accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({ text: data })
   });
-  console.log("translate_text_3")
+
   const responseJson = await response.json();
-  if (response.status >= 300 || !responseJson || !responseJson.translations[0])
+  if (response.status >= 300 || !responseJson?.translations?.[0])
     throw new Error("Bad response from text translation module");
-    console.log("translate_text")
+
   return responseJson.translations[0];
 }
 
 export async function intentionModule(englishTranscription: string, uuid: string) {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
+  const replacements: Record<string, string> = {
+    fox: "conference",
+    elephant: "business",
+    unicorn: "social area",
+    penguin: "tradeshows"
+  };
 
-  let englishTranscriptionNew = englishTranscription.replace(/(\s*)\bFox\b(\s*)/gi, '$1conference$2').replace(/(\s*)\belephant\b(\s*)/gi, '$1business$2')
- .replace(/(\s*)\bunicorn\b(\s*)/gi, '$1social area$2').replace(/(\s*)\bpenguin\b(\s*)/gi, '$1tradeshows$2');
- console.log(englishTranscription)
-//   const data = { user_query: englishTranscriptionNew, user_uuid: uuid };
+  const pattern = new RegExp(Object.keys(replacements).join("|"), "gi");
+  const englishTranscriptionNew = englishTranscription.replace(pattern, match => replacements[match.toLowerCase()]);
 
-  const data = { user_query: englishTranscriptionNew, user_uuid: uuid };
-  console.log(getAIUrls().intent_dest, data);
   const response = await fetch(getAIUrls().intent_dest, {
     method: "POST",
-    headers: headers,
-    body: JSON.stringify(data)
+    headers,
+    body: JSON.stringify({ user_query: englishTranscriptionNew, user_uuid: uuid })
   });
 
   const responseData = await response.json();
-
   if (response.status >= 300 || !responseData) throw new Error("Bad response from intention module");
-
   return responseData;
+}
+
+function copyXRCameraPose(source: THREE.PerspectiveCamera, target: THREE.PerspectiveCamera) {
+  target.position.copy(source.position);
+  target.quaternion.copy(source.quaternion);
+  target.projectionMatrix.copy(source.projectionMatrix);
+  target.projectionMatrixInverse.copy(source.projectionMatrixInverse);
 }
 
 export async function dsResponseModule(
   userQuery: string,
   intent: string,
   uuid: string,
-  mozillaInput?: string
+  mozillaInput = ""
 ): Promise<ResponseData> {
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json"
-  };
-
-  const data = { user_query: userQuery, intent: intent, mozilla_input: mozillaInput || "", user_uuid: uuid };
+  const headers = { Accept: "application/json", "Content-Type": "application/json" };
+  const body = JSON.stringify({ user_query: userQuery, intent, mozilla_input: mozillaInput, user_uuid: uuid });
 
   const response = await fetch(getAIUrls().agent_response, {
     method: "POST",
-    headers: headers,
-    body: JSON.stringify(data)
+    headers,
+    body
   });
 
   const responseData = await response.json();
-
-  if (response.status >= 300 || !responseData || !responseData.response)
-    throw new Error("bad response from dialogue agent");
-
+  if (response.status >= 300 || !responseData?.response) throw new Error("bad response from dialogue agent");
   return responseData.response;
 }
-export async function resetDs(uuid: string) {
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json"
-  };
 
+export async function resetDs(uuid: string) {
   const response = await fetch(`${COMPONENT_ENDPOINTS.MEMORY_RESET}/?user_uuid=${uuid}`, {
     method: "POST",
-    headers: headers
+    headers: { Accept: "application/json", "Content-Type": "application/json" }
   });
 
   const responseData = await response.json();
-
-  if (response.status >= 300 || !responseData || !responseData.response)
+  if (response.status >= 300 || !responseData?.response)
     throw new Error("bad response from dialogue agent");
 
   return responseData.response;
@@ -200,33 +182,27 @@ export async function resetDs(uuid: string) {
 
 const hiddenAvatars: Object3D[] = [];
 const hiddenLabels: Object3D[] = [];
+
 export async function vlModule(destination: string) {
   const formData = new FormData();
   virtualAgent.agent.obj!.visible = false;
   virtualAgent.agent.obj!.updateMatrix();
 
- // Hide all avatars (including your own)
+  labelOrganizer.labels.forEach(label => {
+    if (label.obj.visible && label.obj.position.x === 9 && label.obj.position.z === 42.1) {
+      label.obj.visible = false;
+      hiddenLabels.push(label.obj);
+    }
+  });
 
- 
- labelOrganizer.labels.forEach(label => {
-   if (label.obj.visible && (label.obj.position.x === 9) && ( label.obj.position.z === 42.1)  ) {
-     console.log(label)
-     label.obj.visible = false;
-     hiddenLabels.push(label.obj);
-   }
- }); 
-
-
- document.querySelectorAll('[networked], [avatar], .avatar').forEach((el: any) => {
-   if (el?.object3D?.visible) {
-     el.object3D.visible = false;
-     hiddenAvatars.push(el.object3D);
-   }
- });
-
+  document.querySelectorAll('[networked], [avatar], .avatar').forEach((el: any) => {
+    if (el?.object3D?.visible) {
+      el.object3D.visible = false;
+      hiddenAvatars.push(el.object3D);
+    }
+  });
 
   const avatarHead = (document.querySelector("#avatar-pov-node") as AElement).object3D;
-
   await new Promise<void>(resolve => {
     const checkTilt = () => {
       if (
@@ -237,13 +213,11 @@ export async function vlModule(destination: string) {
       ) {
         resolve();
       } else {
-        console.log(`waiting to correct tilt`);
-        requestAnimationFrame(checkTilt); // Keeps checking without freezing
+        requestAnimationFrame(checkTilt);
       }
     };
     checkTilt();
   });
-  // avatarHead.rotation.set(getRandom(-15, 15), 0, getRandomNumber(-10, 10));
 
   const pov = await SnapPov();
   formData.append("file", pov, "camera_pov.png");
@@ -253,37 +227,53 @@ export async function vlModule(destination: string) {
   });
 
   const data = await response.json();
+  if (response.status >= 300 || !data?.Directions) throw new Error("bad response from vl module");
 
-  if (response.status >= 300 || !data || !data.Directions) throw new Error("bad response from vl module");
   virtualAgent.agent.obj!.visible = true;
   virtualAgent.agent.obj!.updateMatrix();
-
   hiddenAvatars.forEach(obj => (obj.visible = true));
   hiddenLabels.forEach(obj => (obj.visible = true));
+
   return data.Directions;
 }
 
-export async function SnapPov() {
-  const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
-  APP.scene?.renderer.setRenderTarget(renderTarget);
-  APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
-  APP.scene?.renderer.setRenderTarget(null);
-  const canvas = APP.scene!.renderer.domElement;
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-  //  if (blob) {
+export async function SnapPov(): Promise<Blob> {
+  const renderer = APP.scene?.renderer!;
+  const scene = APP.scene?.object3D!;
+  const xr = renderer.xr;
+  const fakeCamera = new THREE.PerspectiveCamera();
+  const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 
-  //    saveFile(blob, "png");
-  // }
+  if (xr?.isPresenting) {
+    const xrCamera = xr.getCamera() as THREE.ArrayCamera;
+    const eyeCamera = xrCamera.cameras[0] as THREE.PerspectiveCamera;
+    copyXRCameraPose(eyeCamera, fakeCamera);
+  } else {
+    fakeCamera.copy(APP.scene!.camera as THREE.PerspectiveCamera);
+  }
+
+  virtualAgent.agent.obj!.visible = false;
+  hiddenAvatars.forEach(obj => (obj.visible = false));
+  hiddenLabels.forEach(obj => (obj.visible = false));
+
+  const wasXREnabled = renderer.xr.enabled;
+  renderer.xr.enabled = false;
+  renderer.setRenderTarget(renderTarget);
+  renderer.render(scene, fakeCamera);
+  renderer.setRenderTarget(null);
+  renderer.xr.enabled = wasXREnabled;
+
+  const canvas = renderer.domElement;
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
 
   virtualAgent.agent.obj!.visible = true;
-  virtualAgent.agent.obj!.updateMatrix();
-
   hiddenAvatars.forEach(obj => (obj.visible = true));
   hiddenLabels.forEach(obj => (obj.visible = true));
+  if (blob) {
 
-  
-  if (!blob) throw new Error("something went wrong");
+    saveFile(blob, "png");
+ }
+
+  if (!blob) throw new Error("Failed to capture screenshot.");
   return blob;
 }
-
-
