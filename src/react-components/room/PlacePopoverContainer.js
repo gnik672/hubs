@@ -20,7 +20,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
 
   const userName = window?.APP?.store?.state?.profile?.displayName
    
-  if (userName  !== "presenter") {
+  if (userName  !== "presenter-1" && userName  !== "presenter-2" && userName  !== "presenter-3" && userName  !== "presenter-4"    ) {
     return null; // Don't show Share button to restricted users
   }
 

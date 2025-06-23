@@ -160,28 +160,32 @@ AFRAME.registerComponent("open-media-button", {
          if(this.src.includes("TfszbgC") ){
           if(username === "user-1" ||username === "user-2" || username === "user-3" ||username === "user-4" 
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
-          || username === "user-9" ||username === "user-10"
+          || username === "user-9" ||username === "user-10" || username === "presenter-1" || 
+          username === "Maggioli-1" || username === "CERTH-1"  
           ) {
             newUrl =  "TfszbgC"
           }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
-          || username === "user-19" ||username === "user-20"
+          || username === "user-19" ||username === "user-20" || username === "presenter-2" || 
+          username === "Maggioli-2" || username === "CERTH-2"  
           ) {
             newUrl =   "CDvPjH9"
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
-          || username === "user-29" ||username === "user-30"
+          || username === "user-29" ||username === "user-30" || username === "presenter-3" || 
+          username === "Maggioli-3" || username === "CERTH-3"  
           ) {
             newUrl =   "uYLmstU"
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
-          || username === "user-39" ||username === "user-40"
+          || username === "user-39" ||username === "user-40" || username === "presenter-4" || 
+          username === "Maggioli-4" || username === "CERTH-4" 
           ) {
             newUrl =   "4P2AN2P"  
           } 
@@ -191,28 +195,32 @@ AFRAME.registerComponent("open-media-button", {
          if(this.src.includes("AxFm4cE") ){
           if(username === "user-1" ||username === "user-2" || username === "user-3" ||username === "user-4" 
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
-          || username === "user-9" ||username === "user-10"
+          || username === "user-9" ||username === "user-10"  || username === "presenter-1" || 
+          username === "Maggioli-1" || username === "CERTH-1"  
           ) {
             newUrl =   "Lf5offt"
           }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
-          || username === "user-19" ||username === "user-20"
+          || username === "user-19" ||username === "user-20" || username === "presenter-2" || 
+          username === "Maggioli-2" || username === "CERTH-2" 
           ) {
             newUrl =   "5tsdP2w" 
           }
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
-          || username === "user-29" ||username === "user-30"
+          || username === "user-29" ||username === "user-30" || username === "presenter-3" || 
+          username === "Maggioli-3" || username === "CERTH-3" 
           ) {
             newUrl =  "wmJrZRW"
           }
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
-          || username === "user-39" ||username === "user-40"
+          || username === "user-39" ||username === "user-40" || username === "presenter-4" || 
+          username === "Maggioli-4" || username === "CERTH-4" 
           ) {
             newUrl = "JqLXc2T" 
           } 
@@ -222,13 +230,15 @@ AFRAME.registerComponent("open-media-button", {
          if(this.src.includes("pptdq9h") ){
           if(username === "user-1" ||username === "user-2" || username === "user-3" ||username === "user-4" 
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
-          || username === "user-9" ||username === "user-10"
+          || username === "user-9" ||username === "user-10" || username === "presenter-1" || 
+          username === "Maggioli-1" || username === "CERTH-1"  
           ) {
             newUrl  = "pptdq9h" }
 
           if(username === "user-11" ||username === "user-12" || username === "user-13" ||username === "user-14" 
           || username === "user-15" ||username === "user-16" || username === "user-17" ||username === "user-18"
-          || username === "user-19" ||username === "user-20"
+          || username === "user-19" ||username === "user-20" || username === "presenter-2" || 
+          username === "Maggioli-2" || username === "CERTH-2"  
           ) {
             newUrl =  "Ux9B9zu"
            
@@ -236,7 +246,8 @@ AFRAME.registerComponent("open-media-button", {
 
           if(username === "user-21" ||username === "user-22" || username === "user-23" ||username === "user-24" 
           || username === "user-25" ||username === "user-26" || username === "user-27" ||username === "user-28"
-          || username === "user-29" ||username === "user-30"
+          || username === "user-29" ||username === "user-30" || username === "presenter-3" || 
+          username === "Maggioli-3" || username === "CERTH-3"  
           ) {
             newUrl = "FwL5nC4"
            
@@ -244,7 +255,8 @@ AFRAME.registerComponent("open-media-button", {
 
           if(username === "user-31" ||username === "user-32" || username === "user-33" ||username === "user-34" 
           || username === "user-35" ||username === "user-36" || username === "user-37" ||username === "user-38"
-          || username === "user-39" ||username === "user-40"
+          || username === "user-39" ||username === "user-40" || username === "presenter-4" || 
+          username === "Maggioli-4" || username === "CERTH-4"  
           ) {
          
               newUrl = "fnC7hcb"
