@@ -263,26 +263,57 @@ export async function vlModule(destination: string) {
   return data.Directions;
 }
 
-export async function SnapPov() {
-  const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
-  APP.scene?.renderer.setRenderTarget(renderTarget);
-  APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
-  APP.scene?.renderer.setRenderTarget(null);
-  const canvas = APP.scene!.renderer.domElement;
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-   if (blob) {
+// export async function SnapPov() {
+//   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+//   APP.scene?.renderer.setRenderTarget(renderTarget);
+//   APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
+//   APP.scene?.renderer.setRenderTarget(null);
+//   const canvas = APP.scene!.renderer.domElement;
+//   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+//    if (blob) {
 
-     saveFile(blob, "png");
-  }
+//      saveFile(blob, "png");
+//   }
 
-  virtualAgent.agent.obj!.visible = true;
-  virtualAgent.agent.obj!.updateMatrix();
+//   virtualAgent.agent.obj!.visible = true;
+//   virtualAgent.agent.obj!.updateMatrix();
 
-  hiddenAvatars.forEach(obj => (obj.visible = true));
-  hiddenLabels.forEach(obj => (obj.visible = true));
+//   hiddenAvatars.forEach(obj => (obj.visible = true));
+//   hiddenLabels.forEach(obj => (obj.visible = true));
 
   
-  if (!blob) throw new Error("something went wrong");
+//   if (!blob) throw new Error("something went wrong");
+//   return blob;
+// }
+
+export async function SnapPov() {
+  const renderer = APP.scene?.renderer;
+  const scene = APP.scene?.object3D;
+
+  // Create offscreen render target
+  const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  renderer?.setRenderTarget(renderTarget);
+
+  // Detect if XR is active
+  const xrCamera = renderer?.xr.isPresenting ? renderer.xr.getCamera() : APP.scene?.camera;
+
+  // 🔥 Render from the correct perspective (Meta headset pose in XR mode)
+  if(scene && xrCamera ){
+    renderer?.render(scene, xrCamera);}
+
+  // Reset render target
+  renderer?.setRenderTarget(null);
+
+  // Get screenshot from canvas
+  const canvas = renderer?.domElement;
+  const blob = await new Promise<Blob | null>(resolve => canvas?.toBlob(resolve, "image/png"));
+
+  if (blob) {
+
+         saveFile(blob, "png");
+     }
+  if (!blob) throw new Error("Failed to create image from POV");
+
   return blob;
 }
 
