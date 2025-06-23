@@ -201,11 +201,7 @@ export async function resetDs(uuid: string) {
 const hiddenAvatars: Object3D[] = [];
 const hiddenLabels: Object3D[] = [];
 export async function vlModule(destination: string) {
-
-  
   const formData = new FormData();
- 
-
   virtualAgent.agent.obj!.visible = false;
   virtualAgent.agent.obj!.updateMatrix();
 
@@ -267,94 +263,27 @@ export async function vlModule(destination: string) {
   return data.Directions;
 }
 
-// export async function SnapPov() {
-//   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
-//   APP.scene?.renderer.setRenderTarget(renderTarget);
-//   APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
-//   APP.scene?.renderer.setRenderTarget(null);
-//   const canvas = APP.scene!.renderer.domElement;
-//   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-//    if (blob) {
+export async function SnapPov() {
+  const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  APP.scene?.renderer.setRenderTarget(renderTarget);
+  APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
+  APP.scene?.renderer.setRenderTarget(null);
+  const canvas = APP.scene!.renderer.domElement;
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+   if (blob) {
 
-//      saveFile(blob, "png");
-//   }
+     saveFile(blob, "png");
+  }
 
-//   virtualAgent.agent.obj!.visible = true;
-//   virtualAgent.agent.obj!.updateMatrix();
+  virtualAgent.agent.obj!.visible = true;
+  virtualAgent.agent.obj!.updateMatrix();
 
-//   hiddenAvatars.forEach(obj => (obj.visible = true));
-//   hiddenLabels.forEach(obj => (obj.visible = true));
+  hiddenAvatars.forEach(obj => (obj.visible = true));
+  hiddenLabels.forEach(obj => (obj.visible = true));
 
   
-//   if (!blob) throw new Error("something went wrong");
-//   return blob;
-// }
-
-// export async function SnapPov() {
-//   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
-//   APP.scene?.renderer.setRenderTarget(renderTarget);
-
-//   const xrCamera = APP.scene!.renderer.xr.getCamera(); // ✅ No argument
-//   APP.scene?.renderer.render(APP.scene!.object3D, xrCamera);
-
-//   APP.scene?.renderer.setRenderTarget(null);
-//   const canvas = APP.scene!.renderer.domElement;
-
-//   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-
-//     // if (blob) {
-//     //   saveFile(blob, "png");
-//     // }
-
-//     virtualAgent.agent.obj!.visible = true;
-//    virtualAgent.agent.obj!.updateMatrix();
-
-//    hiddenAvatars.forEach(obj => (obj.visible = true));
-//    hiddenLabels.forEach(obj => (obj.visible = true)); 
-
-//   if (!blob) throw new Error("something went wrong");
-//   return blob;
-// }
-
-export async function SnapPov(): Promise<Blob> {
-  const renderer = APP.scene?.renderer;
-  const scene = APP.scene?.object3D;
-
-  if (!renderer || !scene) throw new Error("Missing renderer or scene");
-
-  const xrCamera = renderer.xr.getCamera(); // ✅ Correct usage (returns ArrayCamera)
-
-  // Use first view (left eye)
-  const viewCamera = xrCamera.cameras?.[0] || xrCamera;
-
-  const width = 1024;
-  const height = 1024;
-  const renderTarget = new THREE.WebGLRenderTarget(width, height);
-
-  renderer.setRenderTarget(renderTarget);
-  renderer.render(scene, viewCamera);
-  renderer.setRenderTarget(null);
-
-  const pixels = new Uint8Array(width * height * 4);
-  renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const ctx = canvas.getContext("2d");
-  const imageData = new ImageData(new Uint8ClampedArray(pixels), width, height);
-  ctx?.putImageData(imageData, 0, 0);
-
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-
-      virtualAgent.agent.obj!.visible = true;
-     virtualAgent.agent.obj!.updateMatrix();
-
-    hiddenAvatars.forEach(obj => (obj.visible = true));
-    hiddenLabels.forEach(obj => (obj.visible = true)); 
-  if (!blob) throw new Error("Failed to create image blob");
-
+  if (!blob) throw new Error("something went wrong");
   return blob;
 }
+
 
