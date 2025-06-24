@@ -272,7 +272,7 @@ export async function SnapPov(): Promise<Blob> {
   // Hide agent & labels
   virtualAgent.agent.obj!.visible = false;
   hiddenAvatars.forEach(obj => obj.visible = false);
-  hiddenLabels.forEach(obj => obj.visible = false);
+  // hiddenLabels.forEach(obj => obj.visible = false);
 
   // Backup previous settings
   const prevRenderTarget = renderer.getRenderTarget();
@@ -311,11 +311,16 @@ export async function SnapPov(): Promise<Blob> {
 
   // Restore everything
   renderer.setRenderTarget(prevRenderTarget);
-  renderer.setSize(prevSize.x, prevSize.y);
+  // renderer.setSize(prevSize.x, prevSize.y);
+  const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
+screenshotCamera.aspect = width / height;
+screenshotCamera.updateProjectionMatrix();
+
+renderer.render(scene, screenshotCamera);
   renderer.xr.enabled = prevXrEnabled;
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => obj.visible = true);
   hiddenLabels.forEach(obj => obj.visible = true);
-
+//
   return blob;
 }
