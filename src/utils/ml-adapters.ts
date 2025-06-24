@@ -262,7 +262,7 @@ export async function SnapPov(): Promise<Blob> {
   const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
 
   const width = 1024;
-  const height = Math.floor(1024 / 2.5);
+  const height = 459
 
   const renderTarget = new THREE.WebGLRenderTarget(width, height, {
     format: THREE.RGBAFormat,
