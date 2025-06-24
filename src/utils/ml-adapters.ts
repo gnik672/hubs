@@ -255,72 +255,70 @@ export async function vlModule(destination: string) {
   return data.Directions;
 }
 
-const fakeCamera = new THREE.PerspectiveCamera();
+// const fakeCamera = new THREE.PerspectiveCamera();
 export async function SnapPov(): Promise<Blob> {
-  const renderer = APP.scene?.renderer!;
-  const scene = APP.scene?.object3D!;
-  const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
+  const shotWidth = 1024; // or any width you want
+  const shotHeight = 459; // for your 10:4 ratio
 
-  const width = 1024;
-  const height = 459
 
-  const renderTarget = new THREE.WebGLRenderTarget(width, height, {
-    format: THREE.RGBAFormat,
-    type: THREE.UnsignedByteType
+  // Create an offscreen canvas and renderer
+  const hiddenCanvas = document.createElement('canvas');
+  const screenshotRenderer = new THREE.WebGLRenderer({
+    canvas: hiddenCanvas,
+    preserveDrawingBuffer: false,
   });
+  screenshotRenderer.setSize(shotWidth, shotHeight);
+  screenshotRenderer.setPixelRatio(1);
 
-  // Hide agent & labels
+  // Create a render target to render to
+  const renderTarget = new THREE.WebGLRenderTarget(shotWidth, shotHeight);
+  screenshotRenderer.setRenderTarget(renderTarget);
+
+  // Create a screenshot camera matching the user's POV
+  const camera = new THREE.PerspectiveCamera();
+  if (APP.scene?.renderer.xr?.isPresenting) {
+    const xrCam = APP.scene.renderer.xr.getCamera() as THREE.ArrayCamera;
+    const eyeCamera = xrCam.cameras[0] as THREE.PerspectiveCamera;
+    camera.position.copy(eyeCamera.position);
+    camera.quaternion.copy(eyeCamera.quaternion);
+    camera.projectionMatrix.copy(eyeCamera.projectionMatrix);
+  } else {
+    camera.copy(APP.scene!.camera as THREE.PerspectiveCamera);
+  }
+
+  // Hide avatars/labels
   virtualAgent.agent.obj!.visible = false;
   hiddenAvatars.forEach(obj => obj.visible = false);
   // hiddenLabels.forEach(obj => obj.visible = false);
 
-  // Backup previous settings
-  const prevRenderTarget = renderer.getRenderTarget();
-  const prevSize = renderer.getSize(new THREE.Vector2());
-  const prevXrEnabled = renderer.xr.enabled;
-
-  renderer.xr.enabled = false; // Disable XR for screenshot rendering
-  renderer.setRenderTarget(renderTarget);
-  renderer.setSize(width, height, false); // Render without resizing the canvas
-  renderer.render(scene, camera);
+  // Render to the offscreen render target
+  screenshotRenderer.render(APP.scene!.object3D, camera);
 
   // Read pixels
-  const pixels = new Uint8Array(width * height * 4);
-  renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
+  const pixels = new Uint8Array(shotWidth * shotHeight * 4);
+  screenshotRenderer.readRenderTargetPixels(
+    renderTarget, 0, 0, shotWidth, shotHeight, pixels
+  );
 
-  // Create an off-screen canvas
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d")!;
-  const imageData = ctx.createImageData(width, height);
+  // Put pixel data into canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = shotWidth;
+  canvas.height = shotHeight;
+  const ctx = canvas.getContext('2d')!;
+  const imageData = ctx.createImageData(shotWidth, shotHeight);
   imageData.data.set(pixels);
-
-  // Flip Y-axis (WebGL vs Canvas)
   flipImageDataY(imageData);
   ctx.putImageData(imageData, 0, 0);
 
-  // Convert to PNG
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-  if (blob) {
+  // Convert to Blob
+  const blob: Blob = await new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/png'));
 
-    saveFile(blob, "png");
- }
-  
-  if (!blob) throw new Error("Failed to generate screenshot blob.");
-
-  // Restore everything
-  renderer.setRenderTarget(prevRenderTarget);
-  renderer.setSize(prevSize.x, prevSize.y);
- // const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
-// screenshotCamera.aspect = width / height;
-// screenshotCamera.updateProjectionMatrix();
-
-// renderer.render(scene, screenshotCamera);
-  renderer.xr.enabled = prevXrEnabled;
+  // Restore visibility
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => obj.visible = true);
-  hiddenLabels.forEach(obj => obj.visible = true);
-//
+  // hiddenLabels.forEach(obj => obj.visible = true);
+
   return blob;
 }
+
+
