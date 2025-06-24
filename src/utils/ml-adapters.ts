@@ -262,7 +262,7 @@ export async function SnapPov(): Promise<Blob> {
   const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
 
   const width = 1024;
-  const height = 1024;
+  const height = Math.floor(1024 / 2.5);
 
   const renderTarget = new THREE.WebGLRenderTarget(width, height, {
     format: THREE.RGBAFormat,
@@ -311,12 +311,12 @@ export async function SnapPov(): Promise<Blob> {
 
   // Restore everything
   renderer.setRenderTarget(prevRenderTarget);
-  // renderer.setSize(prevSize.x, prevSize.y);
-  const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
-screenshotCamera.aspect = width / height;
-screenshotCamera.updateProjectionMatrix();
+  renderer.setSize(prevSize.x, prevSize.y);
+ // const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
+// screenshotCamera.aspect = width / height;
+// screenshotCamera.updateProjectionMatrix();
 
-renderer.render(scene, screenshotCamera);
+// renderer.render(scene, screenshotCamera);
   renderer.xr.enabled = prevXrEnabled;
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => obj.visible = true);
