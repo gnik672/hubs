@@ -256,44 +256,36 @@ export async function vlModule(destination: string) {
 }
 
 // const fakeCamera = new THREE.PerspectiveCamera();
-async function SnapPov() {
+async  function SnapPov() {
+  const renderer = APP.scene?.renderer!;
   const scene = APP.scene?.object3D!;
   const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
 
   const width = 1024;
   const height = 459;
 
-  // ✅ Create a hidden canvas and offscreen renderer
-  const screenshotCanvas = document.createElement('canvas');
-  const screenshotRenderer = new THREE.WebGLRenderer({
-    canvas: screenshotCanvas,
-    preserveDrawingBuffer: false,
-    antialias: true,
-    alpha: true,
-  });
-  screenshotRenderer.setSize(width, height);
-  screenshotRenderer.setPixelRatio(1);
-
-  // ✅ Create render target for offscreen rendering
   const renderTarget = new THREE.WebGLRenderTarget(width, height, {
     format: THREE.RGBAFormat,
     type: THREE.UnsignedByteType,
   });
 
-  // ✅ Hide temporary objects (labels, avatars, etc.)
+  // Hide objects
   virtualAgent.agent.obj!.visible = false;
   hiddenAvatars.forEach(obj => obj.visible = false);
   hiddenLabels.forEach(obj => obj.visible = false);
 
-  // ✅ Render the scene offscreen
-  screenshotRenderer.setRenderTarget(renderTarget);
-  screenshotRenderer.render(scene, camera);
+  // Save current state
+  const prevTarget = renderer.getRenderTarget();
 
-  // ✅ Read pixels from render target
+  // Render to texture (no XR toggle, no resize!)
+  renderer.setRenderTarget(renderTarget);
+  renderer.render(scene, camera);
+  renderer.setRenderTarget(prevTarget);
+
+  // Read pixels
   const pixels = new Uint8Array(width * height * 4);
-  screenshotRenderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
+  renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
 
-  // ✅ Create offscreen canvas to convert pixels to PNG
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -303,16 +295,14 @@ async function SnapPov() {
   flipImageDataY(imageData);
   ctx.putImageData(imageData, 0, 0);
 
-  // ✅ Convert to PNG Blob
   const blob = await new Promise<Blob | null>(resolve =>
     canvas.toBlob(resolve, 'image/png')
   );
   if (!blob) throw new Error('Failed to generate screenshot blob.');
 
-  // ✅ Save the screenshot
   saveFile(blob, 'png');
 
-  // ✅ Restore visibility of hidden objects
+  // Restore visibility
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => obj.visible = true);
   hiddenLabels.forEach(obj => obj.visible = true);
