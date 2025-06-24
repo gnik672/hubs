@@ -302,6 +302,11 @@ export async function SnapPov(): Promise<Blob> {
 
   // Convert to PNG
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+  if (blob) {
+
+    saveFile(blob, "png");
+ }
+  
   if (!blob) throw new Error("Failed to generate screenshot blob.");
 
   // Restore everything
