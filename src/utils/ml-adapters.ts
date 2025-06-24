@@ -255,62 +255,72 @@ export async function vlModule(destination: string) {
   return data.Directions;
 }
 
-// const fakeCamera = new THREE.PerspectiveCamera();
-async  function SnapPov() {
+const fakeCamera = new THREE.PerspectiveCamera();
+export async function SnapPov(): Promise<Blob> {
   const renderer = APP.scene?.renderer!;
   const scene = APP.scene?.object3D!;
   const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
 
   const width = 1024;
-  const height = 459;
+  const height = 459
 
   const renderTarget = new THREE.WebGLRenderTarget(width, height, {
     format: THREE.RGBAFormat,
-    type: THREE.UnsignedByteType,
+    type: THREE.UnsignedByteType
   });
 
-  // Hide objects
+  // Hide agent & labels
   virtualAgent.agent.obj!.visible = false;
   hiddenAvatars.forEach(obj => obj.visible = false);
-  hiddenLabels.forEach(obj => obj.visible = false);
+  // hiddenLabels.forEach(obj => obj.visible = false);
 
-  // Save current state
-  const prevTarget = renderer.getRenderTarget();
+  // Backup previous settings
+  const prevRenderTarget = renderer.getRenderTarget();
+  const prevSize = renderer.getSize(new THREE.Vector2());
+  const prevXrEnabled = renderer.xr.enabled;
 
-  // Render to texture (no XR toggle, no resize!)
+  renderer.xr.enabled = false; // Disable XR for screenshot rendering
   renderer.setRenderTarget(renderTarget);
+  renderer.setSize(width, height, false); // Render without resizing the canvas
   renderer.render(scene, camera);
-  renderer.setRenderTarget(prevTarget);
 
   // Read pixels
   const pixels = new Uint8Array(width * height * 4);
   renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
 
-  const canvas = document.createElement('canvas');
+  // Create an off-screen canvas
+  const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext("2d")!;
   const imageData = ctx.createImageData(width, height);
   imageData.data.set(pixels);
+
+  // Flip Y-axis (WebGL vs Canvas)
   flipImageDataY(imageData);
   ctx.putImageData(imageData, 0, 0);
 
-  const blob = await new Promise<Blob | null>(resolve =>
-    canvas.toBlob(resolve, 'image/png')
-  );
-  if (!blob) throw new Error('Failed to generate screenshot blob.');
+  // Convert to PNG
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+  if (blob) {
 
-  saveFile(blob, 'png');
+    saveFile(blob, "png");
+ }
+  
+  if (!blob) throw new Error("Failed to generate screenshot blob.");
 
-  // Restore visibility
+  // Restore everything
+  renderer.setRenderTarget(prevRenderTarget);
+  renderer.setSize(prevSize.x, prevSize.y);
+ // const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
+// screenshotCamera.aspect = width / height;
+// screenshotCamera.updateProjectionMatrix();
+
+// renderer.render(scene, screenshotCamera);
+  renderer.xr.enabled = prevXrEnabled;
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => obj.visible = true);
   hiddenLabels.forEach(obj => obj.visible = true);
-
+//
   return blob;
 }
-
- 
-
-
-
