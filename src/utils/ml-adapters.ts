@@ -220,7 +220,7 @@ export async function vlModule(destination: string) {
   });
 
   const pov = await SnapPov();
-  formData.append("file", pov, "camera_pov.png");
+   formData.append("file", pov, "camera_pov.png");
   const response = await fetch(`${getAIUrls().navqa}/?question=${destination}`, {
     method: "POST",
     body: formData
@@ -237,67 +237,51 @@ export async function vlModule(destination: string) {
   return data.Directions;
 }
 
+const fakeCamera = new THREE.PerspectiveCamera();
 export async function SnapPov(): Promise<Blob> {
-  const renderer = APP.scene?.renderer!;
-  const scene = APP.scene?.object3D!;
-  const xr = renderer.xr;
-
-  const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
-  const screenshotCamera = new THREE.PerspectiveCamera();
-
-  // 📌 Try to copy XR camera pose if XR is active
-  if (xr?.isPresenting) {
-    const xrCamera = xr.getCamera();
-    if ((xrCamera as THREE.ArrayCamera).isArrayCamera) {
-      const arrayCam = xrCamera as THREE.ArrayCamera;
-      const eyeCamera = arrayCam.cameras[0] as THREE.PerspectiveCamera;
-
-      screenshotCamera.matrixWorld.copy(eyeCamera.matrixWorld);
-      screenshotCamera.matrix.copy(eyeCamera.matrix);
-      screenshotCamera.projectionMatrix.copy(eyeCamera.projectionMatrix);
-      screenshotCamera.projectionMatrixInverse.copy(eyeCamera.projectionMatrixInverse);
-      screenshotCamera.matrixWorldInverse.copy(eyeCamera.matrixWorldInverse);
-      screenshotCamera.position.copy(eyeCamera.position);
-      screenshotCamera.quaternion.copy(eyeCamera.quaternion);
-    } else {
-      throw new Error("XR camera is not an ArrayCamera");
+  return new Promise((resolve, reject) => {
+    // Get the A-Frame scene
+    const sceneEl = document.querySelector('a-scene');
+    if (!sceneEl) {
+      console.error('No A-Frame scene found');
+      reject('No A-Frame scene found');
+      return;
     }
-  } else {
-    // Use default camera (desktop mode)
-    screenshotCamera.copy(APP.scene!.camera as THREE.PerspectiveCamera);
-  }
 
-  // 🚫 Hide UI elements
-  virtualAgent.agent.obj!.visible = false;
-  hiddenAvatars.forEach(obj => (obj.visible = false));
-  hiddenLabels.forEach(obj => (obj.visible = false));
+    // Get the renderer
+    const renderer = (sceneEl as any).renderer;
+    if (!renderer || !renderer.xr) {
+      console.error('WebXR not supported or not in VR mode');
+      reject('WebXR not supported or not in VR mode');
+      return;
+    }
 
-  // 📴 Temporarily disable XR
-  const xrEnabled = renderer.xr.enabled;
-  renderer.xr.enabled = false;
+    // Get the XR camera
+    const xrCamera = renderer.xr.getCamera();
+    const eyeCamera = xrCamera.cameras[0]; // Usually the left eye camera
 
-  // 🖼️ Render scene to offscreen buffer
-  renderer.setRenderTarget(renderTarget);
-  renderer.render(scene, screenshotCamera);
-  renderer.setRenderTarget(null);
+    // Create a new camera to mirror the XR headset's view
+    const fakeCamera = new THREE.PerspectiveCamera();
+    fakeCamera.position.copy(eyeCamera.position);
+    fakeCamera.quaternion.copy(eyeCamera.quaternion);
+    fakeCamera.projectionMatrix.copy(eyeCamera.projectionMatrix);
 
-  // ✅ Restore XR
-  renderer.xr.enabled = xrEnabled;
+    // Create a render target
+    const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 
-  // 📷 Grab the screenshot from canvas
-  const canvas = renderer.domElement;
-  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-  
-  // ♻️ Restore visibility
-  virtualAgent.agent.obj!.visible = true;
-  hiddenAvatars.forEach(obj => (obj.visible = true));
-  hiddenLabels.forEach(obj => (obj.visible = true));
-  if (blob) {
+    // Render the scene manually to the target
+    renderer.setRenderTarget(renderTarget);
+    renderer.render((sceneEl as any).object3D, fakeCamera);
+    renderer.setRenderTarget(null);
 
-    saveFile(blob, "png");
- }
-
-  if (!blob) throw new Error("Failed to capture screenshot.");
-  return blob;
+    // Get the image data URL
+    const canvas = renderer.domElement;
+    canvas.toBlob((blob: Blob | null) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject('Failed to create blob');
+      }
+    }, 'image/png');
+  });
 }
-
