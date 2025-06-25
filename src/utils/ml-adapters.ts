@@ -259,8 +259,8 @@ const fakeCamera = new THREE.PerspectiveCamera();
 export async function SnapPov() {
   const renderer = APP.scene?.renderer!;
   const scene = APP.scene?.object3D!;
-  const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
-
+ // const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
+ const camera = renderer.xr.getCamera()
   const width = 1024;
   const height = 459;
 
