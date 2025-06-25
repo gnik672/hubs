@@ -123,7 +123,10 @@ export async function intentionModule(englishTranscription: string, uuid: string
     fox: "conference",
     elephant: "business",
     unicorn: "social area",
-    penguin: "tradeshows"
+    penguin: "tradeshows",
+    "trade show" : "booth number one",
+    chamber : "room",
+    section : "area"
   };
 
   const pattern = new RegExp(Object.keys(replacements).join("|"), "gi");
@@ -256,62 +259,73 @@ export async function vlModule(destination: string) {
 }
 
 const fakeCamera = new THREE.PerspectiveCamera();
-export async function SnapPov() {
+
+
+export async function SnapPov(): Promise<Blob> {
   const renderer = APP.scene?.renderer!;
   const scene = APP.scene?.object3D!;
- // const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
- const camera = renderer.xr.getCamera()
-  const width = 1024;
-  const height = 459;
+  const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
 
-  // ✅ Create an offscreen render target at desired resolution
+  const width = 1024;
+  const height = 459
+
   const renderTarget = new THREE.WebGLRenderTarget(width, height, {
     format: THREE.RGBAFormat,
-    type: THREE.UnsignedByteType,
+    type: THREE.UnsignedByteType
   });
 
-  // ✅ Hide temporary objects before rendering
+  // Hide agent & labels
   virtualAgent.agent.obj!.visible = false;
   hiddenAvatars.forEach(obj => obj.visible = false);
   // hiddenLabels.forEach(obj => obj.visible = false);
 
-  // ✅ Save previous render target
+  // Backup previous settings
   const prevRenderTarget = renderer.getRenderTarget();
+  const prevSize = renderer.getSize(new THREE.Vector2());
+  const prevXrEnabled = renderer.xr.enabled;
 
-  // ✅ Render scene to offscreen target (do NOT change size or disable XR)
+  renderer.xr.enabled = false; // Disable XR for screenshot rendering
   renderer.setRenderTarget(renderTarget);
+  renderer.setSize(width, height, false); // Render without resizing the canvas
   renderer.render(scene, camera);
 
-  // ✅ Restore previous render target
-  renderer.setRenderTarget(prevRenderTarget);
-
-  // ✅ Read pixels from offscreen buffer
+  // Read pixels
   const pixels = new Uint8Array(width * height * 4);
   renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
 
-  // ✅ Draw pixels into canvas to convert to image
+  // Create an off-screen canvas
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d")!;
   const imageData = ctx.createImageData(width, height);
   imageData.data.set(pixels);
+
+  // Flip Y-axis (WebGL vs Canvas)
   flipImageDataY(imageData);
   ctx.putImageData(imageData, 0, 0);
 
-  // ✅ Convert to PNG
-  const blob = await new Promise<Blob | null>(resolve =>
-    canvas.toBlob(resolve, "image/png")
-  );
+  // Convert to PNG
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+//   if (blob) {
+
+//     saveFile(blob, "png");
+//  }
+  
   if (!blob) throw new Error("Failed to generate screenshot blob.");
 
-  // ✅ Save the image
-  saveFile(blob, "png");
+  // Restore everything
+  renderer.setRenderTarget(prevRenderTarget);
+  renderer.setSize(prevSize.x, prevSize.y);
+ // const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
+// screenshotCamera.aspect = width / height;
+// screenshotCamera.updateProjectionMatrix();
 
-  // ✅ Restore visibility
+// renderer.render(scene, screenshotCamera);
+  renderer.xr.enabled = prevXrEnabled;
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => obj.visible = true);
   hiddenLabels.forEach(obj => obj.visible = true);
-
+//
   return blob;
 }
