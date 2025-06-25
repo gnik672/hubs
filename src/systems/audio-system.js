@@ -171,16 +171,65 @@ export class AudioSystem {
     this.updatePrefs();
   }
 
+  // addStreamToOutboundAudio(id, mediaStream) {
+  //   if (this.audioNodes.has(id)) {
+  //     this.removeStreamFromOutboundAudio(id);
+  //   }
+
+  //   const sourceNode = this.audioContext.createMediaStreamSource(mediaStream);
+  //   const gainNode = this.audioContext.createGain();
+  //   sourceNode.connect(gainNode);
+  //   gainNode.connect(this.outboundGainNode);
+  //   this.audioNodes.set(id, { sourceNode, gainNode });
+  // }
+
+  _downsampleBuffer(buffer, inputRate, outputRate) {
+    if (outputRate >= inputRate) throw new Error("Output rate must be lower than input rate");
+  
+    const ratio = inputRate / outputRate;
+    const newLength = Math.round(buffer.length / ratio);
+    const result = new Int16Array(newLength);
+  
+    let offset = 0;
+    for (let i = 0; i < newLength; i++) {
+      const start = Math.floor(i * ratio);
+      const end = Math.floor((i + 1) * ratio);
+      let sum = 0;
+      for (let j = start; j < end && j < buffer.length; j++) {
+        sum += buffer[j];
+      }
+      result[i] = Math.max(-1, Math.min(1, sum / (end - start))) * 0x7FFF;
+    }
+  
+    return result;
+  }
+
   addStreamToOutboundAudio(id, mediaStream) {
     if (this.audioNodes.has(id)) {
       this.removeStreamFromOutboundAudio(id);
     }
-
+  
     const sourceNode = this.audioContext.createMediaStreamSource(mediaStream);
+    const processor = this.audioContext.createScriptProcessor(4096, 1, 1);
+  
+    processor.onaudioprocess = e => {
+      const input = e.inputBuffer.getChannelData(0);
+      const downsampled = this._downsampleBuffer(input, this.audioContext.sampleRate, 16000);
+  
+      // 👇 Do something with the 16kHz audio
+      // For example, send it to your server
+      // sendToServer(downsampled);
+    };
+  
+    sourceNode.connect(processor);
+    processor.connect(this.audioContext.destination); // Prevent GC
+  
+    // 🔁 Still pass the original full-quality audio to Hubs
     const gainNode = this.audioContext.createGain();
     sourceNode.connect(gainNode);
     gainNode.connect(this.outboundGainNode);
-    this.audioNodes.set(id, { sourceNode, gainNode });
+  
+    this.audioNodes.set(id, { sourceNode, gainNode, processor });
   }
 
   removeStreamFromOutboundAudio(id) {
