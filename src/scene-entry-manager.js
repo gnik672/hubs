@@ -94,8 +94,8 @@ export default class SceneEntryManager {
     VisitRoom();
 
     if (!reset) {
-       logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
-      logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
+      // logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
+      // logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
     }
   };
 
