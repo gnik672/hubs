@@ -20,6 +20,8 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { UpdatePanelSize, GetTextSize, GetObjSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
+import { logger } from "./logging-system";
+ 
 import { Quaternion, Vector3 } from "three";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 import { GetObjectives, GetResolved, GetValids, MakeObjectiveResolved } from "./progress-tracker";
@@ -352,10 +354,10 @@ export default class VirtualAgent {
     if (!APP.scene.is("agent")) {
       APP.scene.emit("clear-scene");
       this.Enable();
-      // logger.AddUiInteraction("agent_toggle", "activate_agent");
+       logger.AddUiInteraction("agent_toggle", "activate_agent");
     } else {
       this.Disable();
-      // logger.AddUiInteraction("agent_toggle", "deactivate_agent");
+       logger.AddUiInteraction("agent_toggle", "deactivate_agent");
     }
   }
 

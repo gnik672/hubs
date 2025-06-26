@@ -65,7 +65,7 @@ AFRAME.registerComponent("open-media-button", {
       // hubId = await isHubsRoomUrl(this.src)
       // console.log(hubId)
       // if (this.label.getAttribute("text") === oldTranslationSystem.VisitButtonText)
-      //   logger.AddUiInteraction("visit_room", tutorialManager.changeRoomID);
+        logger.AddUiInteraction("visit_room", tutorialManager.changeRoomID);
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
       const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);

@@ -37,8 +37,10 @@ import { roomPropertiesReader } from "./utils/rooms-properties";
 import { helpButton } from "./bit-systems/help-system";
 import { logger } from "./bit-systems/logging-system";
 import { labelOrganizer } from "./bit-systems/room-labels-system";
+// import { posterOrganizer } from "./bit-systems/room-poster-system";
 import { presentationSystem } from "./bit-systems/presentation-system";
 import { translationSystem } from "./bit-systems/translation-system";
+import { presentationTranslationSystem } from "./bit-systems/presentation-translation-system";
 import { VisitRoom } from "./bit-systems/progress-tracker";
 import { ResizeHudPanel } from "./bit-systems/hub-panel-manager";
 const useNewLoader = qsTruthy("newLoader");
@@ -78,7 +80,7 @@ export default class SceneEntryManager {
     if (reset) this.scene.emit("clear-scene");
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
-    // logger.RegisterUser();
+    logger.RegisterUser();
     // oldTranslationSystem.Init(reset);
     translationSystem.Init();
     virtualAgent.Init(reset);
@@ -92,8 +94,8 @@ export default class SceneEntryManager {
     VisitRoom();
 
     if (!reset) {
-      // logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
-      // logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
+       logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
+      logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
     }
   };
 

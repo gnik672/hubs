@@ -154,9 +154,10 @@ class Logger {
 
   async AddAgentInteraction(audioData: Blob, interactionData: Blob) {
     try {
+      console.log("eeeee")
       await this.WaitUserRegistration();
-      // saveFile(audioData, "wav");
-      // saveFile(interactionData, "json");
+      saveFile(audioData, "wav");
+     saveFile(interactionData, "json");
       // if (!this.userId) await this.RegisterUser();
       const formData = new FormData();
       formData.append("audio_data", audioData, "audio_data.wav");
