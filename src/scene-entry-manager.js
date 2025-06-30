@@ -80,7 +80,7 @@ export default class SceneEntryManager {
     if (reset) this.scene.emit("clear-scene");
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
-    logger.RegisterUser();
+    // logger.RegisterUser();
     // oldTranslationSystem.Init(reset);
     translationSystem.Init();
     virtualAgent.Init(reset);
