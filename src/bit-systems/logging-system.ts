@@ -4,8 +4,8 @@ import { roomPropertiesReader } from "../utils/rooms-properties";
 import { tutorialManager } from "./tutorial-system";
 import { saveFile } from "../utils/ml-adapters";
 
-const loggerDomain = "https://vox-logger.dev.vr-conference.lab.synelixis.com";
-// const loggerDomain = "http://localhost:3000";
+// const loggerDomain = "https://vox-logger.dev.vr-conference.lab.synelixis.com";
+ const loggerDomain = "http://localhost:3000";
 type trackArray = [number, number, number];
 
 interface SpatialData {
