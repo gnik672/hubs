@@ -242,8 +242,8 @@
   "invite-link-input-field.revoke-confirm-yes": "yes",
   "invite-popover.embed-code": "Embed Code",
   "invite-popover.room-link": "Room Link",
-  "invite-popover.title": "Προσκαλέστε",
-  "invite-tooltip.description": "Αντιγράψτε τον σύνδεσμο του δωματίου για να προσκαλέσετε άλλους στο δωμάτιο",
+  "invite-popover.title": "Uitnodigen",
+  "invite-tooltip.description": "Kopieer de link van de kamer om anderen uit te nodigen",
 
   "leave-roleave-roomom-modal.create-room.message": "Creating a new room will leave this one. Are you sure?",
 
