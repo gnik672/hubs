@@ -1,5 +1,5 @@
 import { Object3D } from "three";
-import { generateRandomSentence } from "./presentation-system";
+// import { generateRandomSentence } from "./presentation-system";
 import { roomPropertiesReader, Translation } from "../utils/rooms-properties";
 import { AElement } from "aframe";
 import { audioModules, stopRecording, textModule } from "../utils/ml-adapters";
@@ -210,12 +210,8 @@ export class TranslationSystem {
   }
   AudienceListenSocket(presenterId:any) {
     this.OpenAudienceWsListen(presenterId)
-    console.log("Presentation transcription")
-    
-  }
-
-
-
+    console.log("Presentation transcription") 
+  } 
   AudienceTranscription(start: boolean) {
     console.log("audience transcriptio")
     let flagMessage;
@@ -239,11 +235,11 @@ export class TranslationSystem {
   SentTestTranscription() {
     const currentTime = Date.now();
 
-    if (currentTime - lastLoggedTime >= 3000) {
-      const randomEnglishPhrase = generateRandomSentence();
-      lastLoggedTime = currentTime;
-      APP.dialog.SendTranscription(randomEnglishPhrase, this.mylanguage);
-    }
+    // if (currentTime - lastLoggedTime >= 3000) {
+    //   const randomEnglishPhrase = generateRandomSentence();
+    //   lastLoggedTime = currentTime;
+    //   APP.dialog.SendTranscription(randomEnglishPhrase, this.mylanguage);
+    // }
   }
 
   async StartTranscription() {
@@ -429,8 +425,17 @@ this.OpenWsListen(targetId)
       console.log({ event: "onerror", error });
     }; 
   }
+
+  getMappedLocale(locale: string): string {
+    const localeMap: Record<string, string> = {
+      es: "sp", // Spanish -> sp (your custom code) 
+    };
+  
+    return localeMap[locale] || locale;
+  }
+
   OpenWsListen(targetId: string) {
-   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/"  +APP.store.state.preferences.locale
+   setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/"  + APP.store.state.preferences.locale
    console.log("Opening listener WebSocket for", targetId, "URL:", url);
  
    const ws = new WebSocket(url);
