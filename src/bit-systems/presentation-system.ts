@@ -1,26 +1,21 @@
+import * as THREE from "three"; 
 import { AxesHelper, Color, Object3D, Vector3 } from "three";
 import { roomPropertiesReader, Translation } from "../utils/rooms-properties";
 import { AElement } from "aframe";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { FixedText } from "../prefabs/fixed-panel";
 import { degToRad } from "three/src/math/MathUtils";
-import { removeEntity } from "bitecs";
-import { audioModules, textModule } from "../utils/ml-adapters";
-import { COMPONENT_ENDPOINTS, getAIUrls } from "../utils/component-types";
+import { removeEntity } from "bitecs"; 
 import { UpdateFixedPanelText, UpdatePanelColor } from "./fixed-panel-system";
 import { languageCodes, voxLanugages } from "./localization-system";
 import HubChannel from "../utils/hub-channel";
 import { presentationTranslationSystem } from "./presentation-translation-system";
-// import slide1 from "../assets/images/Screenshot.png";
-
-
-import * as THREE from "three";
-import { addEntity } from "bitecs";
-import { addObject3DComponent } from "../utils/jsx-entity";
-
-
-
-
+import {
+  addBlackSquareToCamera,
+  removeBlackSquareFromCamera,
+  clearBlackSquareText,
+} from "./black-square-system";
+// import slide1 from "../assets/images/Screenshot.png"; 
 
 export class PresentationSystem {
   presenterState: boolean;
@@ -87,7 +82,7 @@ maxWords: number = 10;
     presentationTranslationSystem.onFixedPanelTextUpdate = (text, from) => {
       console.log("Translation received for panel:", text, from);
       this.UpdateTranslation(text, from);
-    };
+    }; 
 
     if (reset) {
       APP.scene!.removeEventListener("toggle_translation", this.ToggleSubtitles);
@@ -121,8 +116,8 @@ maxWords: number = 10;
    
     const povNode = document.querySelector("#avatar-pov-node");
     console.log("POV node:", povNode);
-    // this.showTutorialSlide()
-    // this.addBlackSquareToCamera()
+  
+    // addBlackSquareToCamera(this)
   }
 
   Tick() {
@@ -130,77 +125,11 @@ maxWords: number = 10;
 
     this.CheckPresenterState();
     // if (this.presenterState) this.PresenterActions(); // TODO: remove this after integrating trans model
+ 
+ 
   } 
 
-  addBlackSquareToCamera() {
-    const cameraRig = document.querySelector("#avatar-pov-node");
-  
-    if (!cameraRig) {
-      console.warn("❌ avatar-pov-node not found.");
-      return;
-    }
-  
-    const rig = (cameraRig as any).object3D;
-  
-    // 1. Black background bar
-    // const geometry = new THREE.PlaneGeometry(4, 0.3);
-    const geometry = new THREE.PlaneGeometry(8, 0.3);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0x000000,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 1.0,
-      depthTest: false,
-    });
-  
-    const square = new THREE.Mesh(geometry, material);
-    square.position.set(0, -1.4, -2);
-    square.renderOrder = 9999;
-    rig.add(square);
-
-    this.blackSquareMesh = square;
-  
-    // 2. Shared canvas for text
-    this.blackSquareCanvas = document.createElement("canvas");
-    // Double canvas dimensions
-this.blackSquareCanvas.width = 1024;
-this.blackSquareCanvas.height = 128;
-    // this.blackSquareCanvas.width = 512;
-    // this.blackSquareCanvas.height = 128;
-  
-    this.blackSquareCtx = this.blackSquareCanvas.getContext("2d")!;
-    // this.blackSquareCtx.font = "bold 64px Arial";
-    // Reduce font size to half
-this.blackSquareCtx.font = "bold 32px Arial";
-    this.blackSquareCtx.fillStyle = "white";
-    this.blackSquareCtx.textAlign = "center";
-    this.blackSquareCtx.textBaseline = "middle";
-    this.blackSquareCtx.clearRect(0, 0, 1024, 256);
-this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
-    // this.blackSquareCtx.clearRect(0, 0, 512, 128);
-    // this.blackSquareCtx.fillText("Waiting...", 256, 64);
-  
-    this.blackSquareTexture = new THREE.CanvasTexture(this.blackSquareCanvas);
-    this.blackSquareTexture.encoding = THREE.sRGBEncoding;
-  
-    const spriteMaterial = new THREE.SpriteMaterial({
-      map: this.blackSquareTexture,
-      transparent: true,
-      depthTest: false,
-    });
-  
-    const textSprite = new THREE.Sprite(spriteMaterial);
-    // textSprite.scale.set(2, 0.3, 1);
-    textSprite.scale.set(4, 0.3, 1); // was 2, 0.3
-    textSprite.position.set(0, -1.4, -1.99);
-    textSprite.renderOrder = 10000;
-    rig.add(textSprite);
-
-    this.blackTextSprite = textSprite;
-  
-    console.log("✅ Black square and dynamic text added.");
-  }
-    
+   
 
   ToggleSubtitles() {
     const turningOn = !this.active;
@@ -208,61 +137,29 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
     
     if (turningOn) {
       APP.scene!.addState("translation");
-  
+
       // Enable either presenter or audience view
       if (this.presenter === this.peerId) {
-        if (!this.blackSquareCanvas) this.addBlackSquareToCamera();
-        presentationTranslationSystem.AudienceListenSocket("presentation");
+        if (!this.blackSquareCanvas) addBlackSquareToCamera(this); 
+        presentationTranslationSystem.AudienceListenSocket(localStorage.getItem("presentation_session_id"))
       } else {
-         this.ShowPresenterPanel();
-        presentationTranslationSystem.AudienceListenSocket("presentation");
+         this.ShowPresenterPanel(); 
+         presentationTranslationSystem.AudienceListenSocket(localStorage.getItem("presentation_session_id"))
+ 
+        //  presentationTranslationSystem.AudienceListenSocket(this.peerId);
       }
     } else {
       APP.scene!.removeState("translation");
   
       // Hide UI
       if (this.presenter === this.peerId) {
-        this.removeBlackSquareFromCamera(); // Optional: or remove object3D if needed
+        removeBlackSquareFromCamera(this); // Optional: or remove object3D if needed
       } else {
         this.HidePresenterPanel();
       }
   
       // ❗️Properly stop socket
       // presentationTranslationSystem.StopSocket();
-    }
-  }
-
-  removeBlackSquareFromCamera() {
-    const cameraRig = document.querySelector("#avatar-pov-node");
-    if (!cameraRig) return;
-  
-    const rig = (cameraRig as any).object3D;
-  
-    if (this.blackSquareMesh) {
-      rig.remove(this.blackSquareMesh);
-      this.blackSquareMesh.geometry.dispose();
-      (this.blackSquareMesh.material as THREE.Material).dispose();
-      this.blackSquareMesh = null;
-    }
-  
-    if (this.blackTextSprite) {
-      rig.remove(this.blackTextSprite);
-      (this.blackTextSprite.material as THREE.Material).dispose();
-      this.blackTextSprite = null;
-    }
-  
-    this.blackSquareCanvas = null;
-    this.blackSquareCtx = null;
-    this.blackSquareTexture = null;
-  
-    console.log("🗑️ Black square and text removed.");
-  }
-
-  ClearBlackSquareText() {
-    if (this.blackSquareCtx && this.blackSquareTexture) {
-      this.blackSquareCtx.clearRect(0, 0, 512, 128);
-      this.blackSquareTexture.needsUpdate = true;
-      console.log("🧼 Cleared black square text.");
     }
   } 
 
@@ -279,23 +176,17 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
   }
 
   RespondToHandRequest(result: boolean, peer: string) {
-    // if (Date.now() - respondTime > 3000) {
-
-    console.log(peer, this.questionQueue);
-
+    // if (Date.now() - respondTime > 3000) { 
+    console.log(peer, this.questionQueue); 
     if (this.questionQueue.includes(peer)) {
       APP.dialog.RespondToHandRequest(true, peer);
       this.questionQueue.splice(this.questionQueue.indexOf(peer), 1);
-    }
-
-    // }
+    } 
   }
 
   OnToggleHand() {
-    this.ToggleHand();
-   
-  }
-
+    this.ToggleHand(); 
+  } 
   CountMuteSec() {
     if (this.handTimeout !== null) {
       clearTimeout(this.handTimeout);
@@ -344,15 +235,17 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
 
     if (isPresenter != this.presenterState) {
       APP.dialog.sendPresenterInfo(isPresenter);
+      const sessionId = "crypto.randomUUID()"; // Or some scoped ID
+ 
       this.UpdatePresenterInfo(isPresenter ? this.peerId : "");
       this.questionQueue = [];
       if (this.presenterState) lastLoggedTime = Date.now();
       this.presenterState = isPresenter;
       this.canUnmute = isPresenter;
-      presentationTranslationSystem.PresentationTranscription(isPresenter);
-      this.RegisterAudienceEvents(!isPresenter);
+      // presentationTranslationSystem.PresentationTranscription(isPresenter);
+      // this.RegisterAudienceEvents(!isPresenter);
       console.log(9)
-      // this.addBlackSquareToCamera()
+      // addBlackSquareToCamera(this)
       // APP.scene!.addEventListener("toggle_translation", this.ToggleHand);
     }
   }
@@ -360,12 +253,10 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
   UpdatePresenterInfo(newPresenter: string) {
     if (this.presenter === newPresenter) return;
     this.presenter = newPresenter;
+    sessionStorage.setItem("presentation_session_id", newPresenter);
     console.log(`New presenter: ${newPresenter ? newPresenter : "None"} `);
-    if (this.presenter && this.presenter !== this.peerId && !this.panelObj){
-      
-      this.ShowPresenterPanel()
-
-      
+    if (this.presenter && this.presenter !== this.peerId && !this.panelObj){ 
+      this.ShowPresenterPanel() 
       } 
     else if (!this.presenter && this.panelObj) this.HidePresenterPanel();
   }
@@ -379,22 +270,7 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
       this.subtitleEl.remove();
       this.subtitleEl = null;
     }
-  }
-  
-
-  // UpdatePresenterInfo(presenterId: string) {
-  //   this.presenter = presenterId;
-  
-  //   if (presenterId === APP.dialog._clientId) {
-  //     this.StartDynamicSentences(); // 👈 ADD THIS
-  //   } else {
-  //     this.StopDynamicSentences(); // 👈 ADD THIS
-  //   }
-  // }
-
-  UpdateLanguage(newLanguage: voxLanugages) {
-    this.mylanguage = newLanguage;
-  }
+  }  
 
   ShowPresenterPanel() {
     this.panelShown = true
@@ -417,39 +293,8 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
     this.panelObj = null;
     this.panelRef = null;
     APP.scene!.removeState("presenter_panel");
-  }
-
-  async ProccessAvailableTranscription(transcription: string, language: voxLanugages, producer: string) {
-    if (!this.allowed || !this.active) return;
-    console.log(
-      `available transcription: "${transcription}" with language code: "${language}" from producer: "${producer}"`
-    );
-    console.log(`my language: ${this.mylanguage}`);
-
-    if(this.mylanguage === language)this.UpdateTranslation(transcription, producer);
-    else {
-    const translation = await this.InferenceTranscription(transcription, language);
-    console.log("translation:", translation);
-    this.UpdateTranslation(translation, producer);}
-
-    console.log(19)
-  }
-
-  async InferenceTranscription(transcription: string, senderLanugage: voxLanugages) {
-    try {
-      const inferenceParams = {
-        source_language: languageCodes[senderLanugage],
-        target_language: languageCodes[this.mylanguage!],
-        return_transcription: "false"
-      };
-
-      const translateRespone = await textModule(transcription, inferenceParams);
-      return translateRespone
-    } catch (error) {
-      console.log(`fetch aborted`);
-      return transcription;
-    }
-  }
+  } 
+ 
 
   UpdateTranslation(data: string, producer: string) {
     console.log("p1")
@@ -465,20 +310,7 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
     } else {
       console.log("p3")
       UpdateFixedPanelText("");
-    }
-    
-    // if (this.blackSquareCtx && this.blackSquareTexture) {
-  //  if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
-  //     this.blackSquareCtx.clearRect(0, 0, 512, 128);
-  //     this.blackSquareCtx.font = "bold 64px Arial";
-  //     this.blackSquareCtx.fillStyle = "white";
-  //     this.blackSquareCtx.textAlign = "center";
-  //     this.blackSquareCtx.textBaseline = "middle";
-  //     this.blackSquareCtx.fillText(data, 256, 64);
-    
-  //     this.blackSquareTexture.needsUpdate = true;
-  //   } 
-
+    }  
     if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
       console.log("p3")
       const newWords = data.split(/\s+/).filter((w: string) => w.length > 0);
@@ -488,46 +320,10 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
         console.log("p4")
         this.bufferUpdateInterval = setInterval(() => this.updateBlackSquareText(), 300);
       }
-    }
-
-
-
-
+    } 
     console.log(33)
-  }
-
-  PresenterActions() {
-    const currentTime = Date.now();
-    console.log(this.devCounter, lastLoggedTime);
-
-    if (currentTime - lastLoggedTime >= 3000) {
-      this.devCounter++;
-      const randomEnglishPhrase = generateRandomSentence();
-      console.log(`sending phrase: ${randomEnglishPhrase}`);
-      lastLoggedTime = currentTime;
-      APP.dialog.SendTranscription(randomEnglishPhrase, this.mylanguage);
-    }
-  }
-
-  AudienceActions() {
-    const currentTime = Date.now();
-
-    // if (currentTime - lastLoggedTime >= 3000) {
-    //   const randomEnglishPhrase = generateRandomSentence();
-    //   lastLoggedTime = currentTime;
-    //   APP.dialog.SendTranscription(randomEnglishPhrase, this.mylanguage);
-    // }
-
-    if (currentTime - raiseTime >= 10000 && raiseFlag) {
-      this.ToggleHand(true);
-      raiseFlag = false;
-    }
-    // if (currentTime - lowerTime >= 20000 && lowerFlag) {
-    //   APP.dialog.sendHandRequest(false);
-    //   lowerFlag = false;
-    // }
-  }
-
+  } 
+// for the aditors we have these event if  mic on or off
   RegisterAudienceEvents(register: boolean) {
     if (register) {
       console.log("registering audience event"); 
@@ -558,50 +354,29 @@ this.blackSquareCtx.fillText("Waiting...", 512, 64); // Center of new canvas
     this.blackSquareCtx.fillText(textToShow, 256, 64);
     this.blackSquareTexture.needsUpdate = true;
     this.blackSquareCtx.clearRect(0, 0, 1024, 128);
-this.blackSquareCtx.font = "bold 32px Arial";
-// this.blackSquareCtx.fillText(textToShow, 512, 128); // new center
-this.blackSquareCtx.fillText(textToShow, 512, 64); 
+    this.blackSquareCtx.font = "bold 32px Arial";
+    // this.blackSquareCtx.fillText(textToShow, 512, 128); // new center
+    this.blackSquareCtx.fillText(textToShow, 512, 64); 
     // Remove shown words
     this.wordBuffer.splice(0, currentWords.length);
   }
 
-  AudienceEvent(e: any) {
-    console.log("audience event", e);
-    presentationTranslationSystem.AudienceTranscription(e.enabled);
-  }
+  // AudienceEvent(e: any) {
+  //   console.log("audience event", e);
+  //   //start auditors transcription
+  //   presentationTranslationSystem.AudienceTranscription(e.enabled);
+  // }  
 
-
-
-  showTutorialSlide() {
-    const cameraRig = document.querySelector("#avatar-pov-node") as AElement;
-  
-    if (!cameraRig) {
-      console.warn("No camera rig found");
-      return;
+  AudienceEvent = (e: { enabled: boolean }) => {
+    console.log("Mic state changed:", e);
+    if (e.enabled) {
+     
+      presentationTranslationSystem.PresentationTranscription(true);
+    } else {
+     
+      presentationTranslationSystem.PresentationTranscription(false);
     }
-  
-    const rig = cameraRig.object3D;
-  
-    // // ✅ Create the A-Frame image entity
-    // const image = document.createElement("a-image");
-    // image.setAttribute("src", slide1); // 👈 use imported image
-    // image.setAttribute("width", "1.5");
-    // image.setAttribute("height", "1");
-    // image.setAttribute("position", "0 0 -1"); // 👈 1m in front of user
-    // image.setAttribute("transparent", "true");
-    // image.setAttribute("look-at", "[camera]");
-  
-    // // Add to scene
-    // cameraRig.appendChild(image);
-    // console.log("✅ Tutorial slide shown.");
-  }
-
-
-
-
-
-
-
+  };
 
 }
 
@@ -613,14 +388,4 @@ let lowerTime = 0;
 let respondTime = 0;
 let raiseFlag = true;
 let lowerFlag = true;
-export function generateRandomSentence() {
-  const subjects = ["The cat", "A dog", "The teacher", "A student", "The scientist", "The musician"];
-  const verbs = ["runs", "jumps", "plays", "studies", "teaches", "sings"];
-  const objects = ["in the park", "on the stage", "at school", "in the lab", "with a guitar", "under the tree"];
-
-  const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
-  const randomVerb = verbs[Math.floor(Math.random() * verbs.length)];
-  const randomObject = objects[Math.floor(Math.random() * objects.length)];
-
-  return `${randomSubject} ${randomVerb} ${randomObject}.`;
-}
+ 

@@ -1,11 +1,11 @@
-import { Object3D } from "three";
-import { generateRandomSentence } from "./presentation-system";
+import { Object3D } from "three"; 
 import { roomPropertiesReader, Translation } from "../utils/rooms-properties";
 import { AElement } from "aframe";
 import { audioModules, stopRecording, textModule } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS, getAIUrls } from "../utils/component-types";
 import { setLocale } from "../utils/i18n";
 import { languageCodes, voxLanugages } from "./localization-system";
+import { DownsampleBuffer, ConvertFloat32ToInt16 } from "../utils/audio-utils";
 
 interface WsData {
   text: string;
@@ -55,8 +55,7 @@ export class TranslationSystem {
   gainNode: GainNode;
   mediaRecorder: MediaRecorder | null;
   wsActive: boolean;
-  wsUrl: string;
-  translateTextUrl: string;
+  wsUrl: string; 
 
   constructor() {}
 
@@ -69,8 +68,7 @@ export class TranslationSystem {
 
     const transProps = roomPropertiesReader.roomProps.translations[0];
     console.log(transProps);
-    this.wsUrl = transProps.url;
-    this.translateTextUrl = roomPropertiesReader.roomProps.urls.file_translation_url;
+    this.wsUrl = transProps.url; 
 
     this.properties = transProps;
     this.avatarObj = (document.querySelector("#avatar-pov-node") as AElement).object3D;
@@ -80,53 +78,7 @@ export class TranslationSystem {
     this.websocket_listeners = {};
   }
 
-  onFixedPanelTextUpdate?: (text: string, from: string) => void;
-
-
-  AddSubscriber(consumerId: string) {
-    let message = "";
-    const prevSubscibers = this.consumers.length;
-
-    if (this.consumers.includes(consumerId)) {
-      message = "consumer already included";
-    } else {
-      this.consumers.push(consumerId);
-      message = `Adding peer: "${consumerId}" to susbcribers`;
-    }
-
-    console.log(message);
-    this.UpdateTranscriptionStatus(prevSubscibers);
-  } 
-
-  IsPeerSubscribed(peerId: string) {
-    return this.consumers.indexOf(peerId) >= 0;
-  }
-
-  IsPeerTarget(peerId: string) {
-    return !!this.targets[peerId];
-  }
-
-  UpdateTranscriptionStatus(prevStatus: number) {
-    const prevSubscibers = prevStatus;
-    let flag = false;
-    let flagMessage = "";
-
-    if (prevSubscibers === 0 && this.consumers.length > 0) {
-      flagMessage = "Starting to transcribe text";
-      this.OpenWs();
-    } else if (prevSubscibers > 0 && this.consumers.length === 0) {
-      this.StopTranscription();
-      flagMessage = "Stop transcribing text";
-    }
-
-    console.log(
-      `Transcription request: new subscribers amount: ${this.consumers.length} ${
-        flag ? ": " + flagMessage : flagMessage
-      }`
-    );
-
-    //logic to start transcribing
-  }
+  onFixedPanelTextUpdate?: (text: string, from: string) => void; 
 
   PresentationTranscription(start: boolean) {
     console.log("Presentation transcription")
@@ -143,58 +95,18 @@ export class TranslationSystem {
   AudienceListenSocket(presenterId:any) {
     this.OpenAudienceWsListen(presenterId)
     console.log("Presentation transcription")
-    // let flagMessage;
-    // if (start) {
-    //   flagMessage = "Presenter: Starting to transcribe text";
-    //   this.OpenWs();
-    // } else {
-    //   this.StopTranscription();
-    //   flagMessage = "Presenter: Stop transcribing text";
-    // }
 
-    // console.log(`Presentation Presenter: ${flagMessage}`);
   }
   StopSocket() {
     this.StopTranscription()
     console.log("close socket")
    
-  }
-  AudienceTranscription(start: boolean) {
-    console.log("audience transcriptio")
-    let flagMessage;
-
-    if (start) {
-      flagMessage = "Audience: Starting to transcribe text";
-      this.OpenWs();
-    } else {
-      this.StopTranscription();
-      flagMessage = "Audience: Stop transcribing text";
-    }
-
-    console.log(`Presentation Audience: ${flagMessage}`);
-  }
-
-
- 
-
-  SendTranscription(message: string) {
-    console.log(`sending transcribed message: ${message}`);
-    APP.dialog.SendTranscription(message, this.mylanguage);
-  }
-
-  SentTestTranscription() {
-    const currentTime = Date.now();
-
-    if (currentTime - lastLoggedTime >= 3000) {
-      const randomEnglishPhrase = generateRandomSentence();
-      lastLoggedTime = currentTime;
-      APP.dialog.SendTranscription(randomEnglishPhrase, this.mylanguage);
-    }
-  }
-
+  }  
   async StartTranscription() {
+    // APP.dialog.enableMicrophone(true)
     console.log(this.peerId, APP.dialog._clientId);
-    const mediaStream: MediaStream = await APP.dialog.getMediaStream(this.peerId);
+    // const mediaStream: MediaStream = await APP.dialog.getMediaStream(APP.dialog._clientId);
+    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     console.log(mediaStream);
 
     this.context = new window.AudioContext();
@@ -216,58 +128,53 @@ export class TranslationSystem {
   }
 
   StopTranscription() {
-    this.websocket?.close();
-
+    if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+      this.websocket.close(1000, "Closing connection");
+      console.log("WebSocket connection closed");
+    }
+  
     if (this.processor) {
       this.processor.disconnect();
-      this.processor.onaudioprocess = null; // Remove event listener
+      this.processor.onaudioprocess = null;
       this.processor = null;
     }
-
+  
     if (this.context) {
       this.context.close().then(() => (this.context = null));
     }
-    if (this.websocket) {
-      if (this.websocket.readyState === WebSocket.OPEN) {
-        this.websocket.close(1000, "Closing connection"); // Normal closure
-        console.log("WebSocket connection closed");
-      }
-    }
-
+  
     this.wsActive = false;
-
-    this.processor = null;
-    this.context = null;
     this.websocket = null;
-
+  
     console.log("Cleanup completed");
-  } 
+  }
 
+  // ProcessAudio(event: AudioProcessingEvent) {
+  //   const inputSampleRate = this.context!.sampleRate;
+  //   const outputSampleRate = 16000; // Target sample rate
+
+  //   const left = event.inputBuffer.getChannelData(0);
+  //   const downsampledBuffer = DownsampleBuffer(left, inputSampleRate, outputSampleRate);
+  //   const audioData = ConvertFloat32ToInt16(downsampledBuffer);
+
+  //   // console.log(">>>>>>>>> " + audioData);
+  //   if (this.websocket && this.websocket.readyState == 1) {
+  //     this.websocket.send(audioData);
+  //   }
+  // }  
+  
   ProcessAudio(event: AudioProcessingEvent) {
-    const inputSampleRate = this.context!.sampleRate;
-    const outputSampleRate = 16000; // Target sample rate
-
+    if (!this.context || !this.websocket) return;
+  
+    const inputSampleRate = this.context.sampleRate;
+    const outputSampleRate = 16000;
+  
     const left = event.inputBuffer.getChannelData(0);
     const downsampledBuffer = DownsampleBuffer(left, inputSampleRate, outputSampleRate);
     const audioData = ConvertFloat32ToInt16(downsampledBuffer);
-
-    // console.log(">>>>>>>>> " + audioData);
-    if (this.websocket && this.websocket.readyState == 1) {
+  
+    if (this.websocket.readyState === WebSocket.OPEN) {
       this.websocket.send(audioData);
-    }
-  } 
-
-
-
-  async TranslateText(message: string, language: voxLanugages) {
-    if (language === this.mylanguage) return message;
-    else {
-      const nmtTextParams = {
-        source_language: languageCodes[language],
-        target_language: languageCodes[this.mylanguage],
-        return_transcription: "false"
-      };
-      return await textModule(message, nmtTextParams);
     }
   }
 
@@ -275,9 +182,10 @@ export class TranslationSystem {
     console.log(`openinig websocket`, getAIUrls().transcribe_audio);
     console.log(this.peerId, APP.dialog._clientId);
     console.log('this.peerId, APP.dialog._clientId');
-    this.websocket = new WebSocket(getAIUrls().transcribe_audio  + "presentation");
+    this.websocket = new WebSocket(getAIUrls().transcribe_audio  + sessionStorage.getItem("presentation_session_id"));
  
-  
+   // this.websocket = new WebSocket(getAIUrls().transcribe_audio  + "presentation");
+ 
     // new WebSocket(getAIUrls().transcribe_audio  + APP.dialog._clientId+ "/en");
     
     if (!this.peerId) this.peerId = APP.dialog._clientId;
@@ -305,6 +213,9 @@ export class TranslationSystem {
       console.log({ event: "onerror", error });
     }; 
   }
+
+
+  
   OpenWsListen(targetId: string) {
    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/" +APP.store.state.preferences.locale
    console.log("Opening listener WebSocket for", targetId, "URL:", url);
@@ -347,7 +258,11 @@ export class TranslationSystem {
 
   }
   OpenAudienceWsListen(targetId: string) {
-    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  "presentation" + "/"   +APP.store.state.preferences.locale
+    // setTimeout(()=>{  
+      
+        const url = getAIUrls().transcribe_audio_listen  +  sessionStorage.getItem("presentation_session_id") + "/"   +APP.store.state.preferences.locale
+  
+    //  const url = getAIUrls().transcribe_audio_listen  +  "3432-34320-3322-336" + "/"   +APP.store.state.preferences.locale
     console.log("Opening listener WebSocket for", targetId, "URL:", url);
   
     const ws = new WebSocket(url);
@@ -361,11 +276,7 @@ export class TranslationSystem {
      console.log(`[WS LISTENER RAW] ${event.data}`);
      try {
        const eventData = JSON.parse(event.data) as WsData;
-       const eventDataNew = JSON.parse(event.data) 
-       console.log(eventData)
-       console.log(eventDataNew)
-       console.log(`Message from ${targetId}:`, eventData.text);
-       console.log(`Message from ${targetId}:`, eventData );
+       const eventDataNew = JSON.parse(event.data)  
        
       //  this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
    
@@ -391,7 +302,7 @@ export class TranslationSystem {
     };
   
     // this.websocket_listeners[targetId] = ws;
-  } , 1000)
+  // } , 1000)
  
    } 
 
@@ -405,37 +316,3 @@ let lastLoggedTime = 0;
 
 export const presentationTranslationSystem = new TranslationSystem();
 
-// helping functions
-
-function DownsampleBuffer(buffer: Float32Array, inputSampleRate: number, outputSampleRate: number): Float32Array {
-  if (inputSampleRate === outputSampleRate) {
-    return buffer;
-  }
-  var sampleRateRatio = inputSampleRate / outputSampleRate;
-  var newLength = Math.round(buffer.length / sampleRateRatio);
-  var result = new Float32Array(newLength);
-  var offsetResult = 0;
-  var offsetBuffer = 0;
-  while (offsetResult < result.length) {
-    var nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
-    var accum = 0,
-      count = 0;
-    for (var i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
-      accum += buffer[i];
-      count++;
-    }
-    result[offsetResult] = accum / count;
-    offsetResult++;
-    offsetBuffer = nextOffsetBuffer;
-  }
-  return result;
-}
-
-function ConvertFloat32ToInt16(buffer: Float32Array) {
-  let l = buffer.length;
-  const buf = new Int16Array(l);
-  while (l--) {
-    buf[l] = Math.min(1, buffer[l]) * 0x7fff;
-  }
-  return buf.buffer;
-}
