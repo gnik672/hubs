@@ -5,6 +5,7 @@ import EventEmitter from "eventemitter3";
 import { MediaDevices } from "./utils/media-devices-utils";
 import { presentationSystem } from "./bit-systems/presentation-system";
 import { translationSystem } from "./bit-systems/translation-system";
+import { presentationTranslationSystem } from "./bit-systems/presentation-translation-system";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -71,7 +72,7 @@ export class DialogAdapter extends EventEmitter {
 
   get downlinkBwe() {
     return this._downlinkBwe;
-  }
+  } 
 
   getIceServers(host, port, turn) {
     const iceServers = [];
@@ -335,12 +336,24 @@ export class DialogAdapter extends EventEmitter {
           break;
         }
       }
-    });
+    }); 
 
     this._protoo.on("notification", notification => {
       debug('proto "notification" event [method:%s, data:%o]', notification.method, notification.data);
 
-      switch (notification.method) {
+      switch (notification.method) { 
+
+        case "speakerInfo": {
+          const { speaker } = notification.data;
+          console.log("👂 New active speaker is:", speaker);
+          
+          this.enableMicrophone(false)
+          // APP.scene.emit("new_speaker", { id: speaker }); // optional
+          // console.log(presenter);
+          presentationSystem.UpdateSpeakerInfo(speaker);
+          break;
+        }
+        
         case "newPeer": {
           if (presentationSystem.presenterState) APP.dialog.sendPresenterInfo(true);
           break;
@@ -458,6 +471,8 @@ export class DialogAdapter extends EventEmitter {
 
         case "transcAvailable": {
           const { message, language, from } = notification.data;
+          console.log(notification)
+          console.log(notification.data)
           presentationSystem.ProccessAvailableTranscription(message, language, from);
           translationSystem.ProccessIncomingTranscription(message, language, from);
           break;
@@ -482,6 +497,11 @@ export class DialogAdapter extends EventEmitter {
 
         try {
           await this._joinRoom();
+             // Start George new code
+  // if (this._clientId === "1039c6d4-cc44-47ff-a89f-fc63b0f347c9") {
+    // this.sendPresenterInfo(true);
+  // }
+   // End George new code
           resolve();
           this.emit(DIALOG_CONNECTION_CONNECTED);
         } catch (err) {
@@ -493,6 +513,7 @@ export class DialogAdapter extends EventEmitter {
     });
   }
 
+ 
   async _retryConnectWithNewHost() {
     this.cleanUpLocalState();
     this._protoo.removeAllListeners();
@@ -515,6 +536,8 @@ export class DialogAdapter extends EventEmitter {
       forceTurn: this._forceTurn,
       iceTransportPolicy: this._iceTransportPolicy
     });
+
+  
   }
 
   closePeer(peerId) {
@@ -957,7 +980,7 @@ export class DialogAdapter extends EventEmitter {
     }
   }
 
-  enableMicrophone(enabled) {
+  enableMicrophoneOld(enabled) {
     if (!this._micProducer) {
       console.error("Tried to toggle mic but there's no producer.");
       return;
@@ -981,11 +1004,56 @@ export class DialogAdapter extends EventEmitter {
       this._micProducer.pause();
       this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
     }
+
+
+    // ✅ New logic to control transcription based on mic state
+  // if (presentationSystem.allowed && enabled) {
+  //   presentationTranslationSystem.PresentationTranscription(enabled);
+  // }
+  // if (presentationSystem.allowed && !enabled) {
+  //   presentationTranslationSystem.StopSocket?.()
+  // }
+
     console.log(`enableMicrophone call with isMicEnabled: ${this.isMicEnabled} and enabled: ${enabled}`);
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
   }
+  enableMicrophone(enabled) {
+    if (!this._micProducer) {
+      console.error("Tried to toggle mic but there's no producer.");
+      return;
+    }
+  
+    const isAudience = presentationSystem.allowed && !presentationSystem.presenterState;
+  
+    if (isAudience && enabled && !presentationSystem.canUnmute) {
+      console.log(`returning without enabling microphone cause in presenter mode and not the presenter`);
+      return;
+    }
+  
+    if (isAudience && presentationSystem.canUnmute && !enabled) {
+      presentationSystem.CountMuteSec();
+    }
+  
+    if (enabled && !this.isMicEnabled) {
+      this._micProducer.resume();
+      this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
+      // this.isMicEnabled = true; // ✅ Manually update it before emit
+    } else if (!enabled && this.isMicEnabled) {
+      this._micProducer.pause();
+      this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+      // this.isMicEnabled = false; // ✅ Update again here
+    }
+  
+    this._micShouldBeEnabled = enabled;
+  
+    // ✅ Now emit with the actual updated state
+    this.emit("mic-state-changed", { enabled: this.isMicEnabled });
+  
+    console.log(`enableMicrophone call with isMicEnabled: ${this.isMicEnabled} and enabled: ${enabled}`);
+  }
 
+ 
   get isMicEnabled() {
     return this._micProducer && !this._micProducer.paused;
   }
@@ -1096,10 +1164,21 @@ export class DialogAdapter extends EventEmitter {
 
   async SendTranscription(message, language) {
     try {
+      // console.log("[DEBUG] Sending transcription to server:", { message, language, from: this._clientId });
+
       await this._protoo.request("sendTranscription", { message: message, language: language });
       console.log("transcription sent");
     } catch (error) {
       console.error("transcription sending failed");
+    }
+  }
+
+  async sendSpeakerInfo(peerId ) {
+    try {
+      await this._protoo.request("sendSpeakerInfo", { speakerId: peerId });
+      console.log("Speaker info sent");
+    } catch (err) {
+      console.error("Failed to send speaker info", err);
     }
   }
 }

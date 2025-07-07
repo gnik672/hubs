@@ -75,6 +75,28 @@ maxWords: number = 10;
     this.ToggleSubtitles = this.ToggleSubtitles.bind(this);
     this.OnToggleHand = this.OnToggleHand.bind(this);
   }
+  private lastSessionId: string | null = null;
+private sessionIdWatcher: NodeJS.Timeout | null = null;
+
+WatchSessionId() {
+  this.lastSessionId = sessionStorage.getItem("presentation_session_id");
+
+  if (this.sessionIdWatcher) clearInterval(this.sessionIdWatcher);
+
+  this.sessionIdWatcher = setInterval(() => {
+    const currentId = sessionStorage.getItem("presentation_session_id");
+
+    if (this.active && currentId && currentId !== this.lastSessionId) {
+      console.log("Session ID changed, restarting translation socket...");
+
+      // Restart translation socket with new ID
+      presentationTranslationSystem.StopSocket();
+      presentationTranslationSystem.AudienceListenSocket(currentId);
+
+      this.lastSessionId = currentId;
+    }
+  }, 2000); // every 2 seconds
+}
 
   Init(reset: boolean) {
     this.allowed = roomPropertiesReader.AllowPresentation;
@@ -83,6 +105,11 @@ maxWords: number = 10;
       console.log("Translation received for panel:", text, from);
       this.UpdateTranslation(text, from);
     }; 
+
+    APP.dialog.on("speakerInfo", (data: { speakerId: string }) => {
+      console.log("444444i")
+     
+    });
 
     if (reset) {
       APP.scene!.removeEventListener("toggle_translation", this.ToggleSubtitles);
@@ -118,6 +145,7 @@ maxWords: number = 10;
     console.log("POV node:", povNode);
   
     // addBlackSquareToCamera(this)
+    
   }
 
   Tick() {
@@ -141,10 +169,10 @@ maxWords: number = 10;
       // Enable either presenter or audience view
       if (this.presenter === this.peerId) {
         if (!this.blackSquareCanvas) addBlackSquareToCamera(this); 
-        presentationTranslationSystem.AudienceListenSocket(localStorage.getItem("presentation_session_id"))
+        presentationTranslationSystem.AudienceListenSocket(sessionStorage.getItem("presentation_session_id"))
       } else {
          this.ShowPresenterPanel(); 
-         presentationTranslationSystem.AudienceListenSocket(localStorage.getItem("presentation_session_id"))
+         presentationTranslationSystem.AudienceListenSocket(sessionStorage.getItem("presentation_session_id"))
  
         //  presentationTranslationSystem.AudienceListenSocket(this.peerId);
       }
@@ -225,6 +253,8 @@ maxWords: number = 10;
   }
 
   CheckPresenterState() {
+
+ 
     // console.log(7)
     const avatarPos = this.avatarObj.getWorldPosition(new Vector3());
     const isPresenter =
@@ -253,13 +283,21 @@ maxWords: number = 10;
   UpdatePresenterInfo(newPresenter: string) {
     if (this.presenter === newPresenter) return;
     this.presenter = newPresenter;
-    sessionStorage.setItem("presentation_session_id", newPresenter);
+ 
     console.log(`New presenter: ${newPresenter ? newPresenter : "None"} `);
     if (this.presenter && this.presenter !== this.peerId && !this.panelObj){ 
       this.ShowPresenterPanel() 
       } 
     else if (!this.presenter && this.panelObj) this.HidePresenterPanel();
   }
+  UpdateSpeakerInfo(newSpeaker: string) {
+    // if (this.presenter === newPresenter) return;
+    // this.presenter = newPresenter;
+    console.log(newSpeaker)
+    // sessionStorage.setItem("new_speaker_id", newSpeaker);
+    sessionStorage.setItem("presentation_session_id",newSpeaker);
+    console.log(`New speaker: ${newSpeaker} `);
+     }
   
 
    
@@ -367,13 +405,29 @@ maxWords: number = 10;
   //   presentationTranslationSystem.AudienceTranscription(e.enabled);
   // }  
 
-  AudienceEvent = (e: { enabled: boolean }) => {
+//   AudienceEvent = (e: { enabled: boolean }) => {
+//     console.log("Mic state changed:", e);
+//     if (e.enabled) {
+//       // APP.dialog.sendSpeakerInfo(this.peerId);
+//       // presentationTranslationSystem.PresentationTranscription(true);
+
+//       await presentationTranslationSystem.PresentationTranscription(true);
+// APP.dialog.sendSpeakerInfo(this.peerId);
+//     } else {
+     
+//       presentationTranslationSystem.PresentationTranscription(false);
+//     }
+//   };
+
+  AudienceEvent = async (e: { enabled: boolean }) => {
     console.log("Mic state changed:", e);
+  
     if (e.enabled) {
-     
-      presentationTranslationSystem.PresentationTranscription(true);
+      sessionStorage.setItem("presentation_session_id",this.peerId);
+      await presentationTranslationSystem.PresentationTranscription(true);
+   console.log("async")
+      APP.dialog.sendSpeakerInfo(this.peerId);
     } else {
-     
       presentationTranslationSystem.PresentationTranscription(false);
     }
   };

@@ -80,12 +80,40 @@ export class TranslationSystem {
 
   onFixedPanelTextUpdate?: (text: string, from: string) => void; 
 
-  PresentationTranscription(start: boolean) {
+  // PresentationTranscription(start: boolean) {
+  //   console.log("Presentation transcription")
+  //   let flagMessage;
+  //   if (start) {
+  //     flagMessage = " Starting to transcribe text";
+  //     this.OpenWs();
+  //   } else {
+  //     this.StopTranscription();
+  //     flagMessage = " Stop transcribing text";
+  //   } 
+  //   console.log(`Presentation Presenter: ${flagMessage}`);
+  // }
+
+  async PresentationTranscription(start: boolean) {
+    console.log("Presentation transcription");
+  
+    if (start) {
+      console.log(" Starting to transcribe text");
+      await this.OpenWs(start); // 🔁 Await here too
+    } else {
+      this.StopTranscription();
+      console.log(" Stop transcribing text");
+    }
+  
+    console.log(`Presentation Presenter: ${start ? "Started" : "Stopped"}`);
+  }
+
+
+  PresentationTranscriptionNotAsyn(start: boolean) {
     console.log("Presentation transcription")
     let flagMessage;
     if (start) {
       flagMessage = " Starting to transcribe text";
-      this.OpenWs();
+      this.OpenWs(start);
     } else {
       this.StopTranscription();
       flagMessage = " Stop transcribing text";
@@ -100,7 +128,6 @@ export class TranslationSystem {
   StopSocket() {
     this.StopTranscription()
     console.log("close socket")
-   
   }  
   async StartTranscription() {
     // APP.dialog.enableMicrophone(true)
@@ -178,14 +205,36 @@ export class TranslationSystem {
     }
   }
 
-  OpenWs() {
+  OpenWs(id: any): Promise<void> {
+    return new Promise(resolve => {
+      this.wsActive = true;
+      this.websocket = new WebSocket(getAIUrls().transcribe_audio + APP.dialog._clientId);
+  
+      this.websocket.onopen = () => {
+        console.log("connected to websocket");
+        this.StartTranscription().then(resolve); // only resolve after StartTranscription
+      };
+  
+      this.websocket.onerror = error => {
+        console.log({ event: "onerror", error });
+        resolve(); // resolve anyway to not block
+      };
+  
+      this.websocket.onclose = () => {
+        if (this.wsActive) this.OpenWs(id);
+        console.log({ event: "onclose" });
+      };
+    });
+  }
+
+
+  OpenWsOld(id:any) {
     console.log(`openinig websocket`, getAIUrls().transcribe_audio);
     console.log(this.peerId, APP.dialog._clientId);
     console.log('this.peerId, APP.dialog._clientId');
-    this.websocket = new WebSocket(getAIUrls().transcribe_audio  + sessionStorage.getItem("presentation_session_id"));
+    this.websocket = new WebSocket(getAIUrls().transcribe_audio  +   APP.dialog._clientId);
  
    // this.websocket = new WebSocket(getAIUrls().transcribe_audio  + "presentation");
- 
     // new WebSocket(getAIUrls().transcribe_audio  + APP.dialog._clientId+ "/en");
     
     if (!this.peerId) this.peerId = APP.dialog._clientId;
@@ -205,7 +254,7 @@ export class TranslationSystem {
     // };
 
     this.websocket.onclose = () => {
-      if (this.wsActive) this.OpenWs();
+      if (this.wsActive) this.OpenWs(id);
       console.log({ event: "onclose" });
     };
 
@@ -295,6 +344,15 @@ export class TranslationSystem {
       //   this.onFixedPanelTextUpdate("eventDataNew.translation", targetId);
       // }
       // delete this.websocket_listeners[targetId];
+
+      // console.warn(`WebSocket closed for ${targetId}`, e);
+      const sessionId = sessionStorage.getItem("presentation_session_id");
+      // const stillActive = APP.scene?.hasState("translation");
+  
+      if (  sessionId === targetId) {
+        console.log(`Reconnecting listener for ${targetId}...`);
+        setTimeout(() => this.OpenAudienceWsListen(targetId), 2000); // retry after delay
+      }
     };
   
     ws.onerror = (err) => {
@@ -304,7 +362,9 @@ export class TranslationSystem {
     // this.websocket_listeners[targetId] = ws;
   // } , 1000)
  
-   } 
+   }
+   
+  
 
   Tick() {
     if (!this.allowed || !APP.scene!.is("entered")) return;
