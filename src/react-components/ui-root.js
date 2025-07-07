@@ -103,6 +103,7 @@ import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
 import { AgenSpawnButton } from "./room/AgentSpawnButton.js";
 import { MapSpawnButton } from "./room/MapSpawnButton";
+// import { ProgramSpawnButton } from "./room/ProgramSpawnButton";
 import { LanguagePopoverContainer } from "./room/LanguagePopoverContainer";
 import { TranslateButton } from "./room/TranslateButton";
 import { LanguageSetupModalContainer } from "./room/LanguageSetupModalContainer";
@@ -1634,9 +1635,11 @@ class UIRoot extends Component {
                             />
                             <AgenSpawnButton scene={this.props.scene} />
                             <HandButton />
-                            <TranslateButton scene={this.props.scene} />
+
+                            {/* <TranslateButton    scene={this.props.scene} /> */}
                             {/* <LanguagePopoverContainer scene={this.props.scene} /> */}
                             <MapSpawnButton scene={this.props.scene} />
+                            {/* <ProgramSpawnButton scene={this.props.scene} /> */}
                             <HelpSpawnButton scene={this.props.scene} />
                           </>
                         )}

@@ -40,6 +40,7 @@ export class PresentationSystem {
   devCounter: number;
   handTimeout: NodeJS.Timeout;
   webSocket: WebSocket;
+  presentationSessionId: string;
 
 
   blackSquareCanvas: HTMLCanvasElement | null = null;
@@ -70,6 +71,7 @@ maxWords: number = 10;
     this.canUnmute = false;
     this.questionQueue = [];
     this.panelShown = false
+    this.presentationSessionId= ""
 
     this.ToggleHand = this.ToggleHand.bind(this);
     this.ToggleSubtitles = this.ToggleSubtitles.bind(this);
@@ -145,6 +147,8 @@ WatchSessionId() {
     console.log("POV node:", povNode);
   
     // addBlackSquareToCamera(this)
+
+    this.checkSpeakerOnJoin()
     
   }
 
@@ -156,7 +160,27 @@ WatchSessionId() {
  
  
   } 
-
+  
+  checkSpeakerOnJoin() {
+    console.log("🔍 Checking for any speaking peer on join...");
+  
+    const consumers = APP.dialog._consumers;
+    if (!consumers || consumers.size === 0) {
+      console.log("No active consumers yet.");
+      return;
+    }
+  
+    for (const consumer of consumers.values()) {
+      if (consumer.kind === "audio" && !consumer.paused) {
+        const peerId = consumer.appData?.peerId;
+        if (peerId) {
+          console.log("🎤 Found peer with mic on:", peerId);
+          this.UpdateSpeakerInfo(peerId);
+          break; // Stop at the first speaking peer
+        }
+      }
+    }
+  }
    
 
   ToggleSubtitles() {
@@ -169,10 +193,10 @@ WatchSessionId() {
       // Enable either presenter or audience view
       if (this.presenter === this.peerId) {
         if (!this.blackSquareCanvas) addBlackSquareToCamera(this); 
-        presentationTranslationSystem.AudienceListenSocket(sessionStorage.getItem("presentation_session_id"))
+        presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId)
       } else {
          this.ShowPresenterPanel(); 
-         presentationTranslationSystem.AudienceListenSocket(sessionStorage.getItem("presentation_session_id"))
+         presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId)
  
         //  presentationTranslationSystem.AudienceListenSocket(this.peerId);
       }
@@ -295,7 +319,14 @@ WatchSessionId() {
     // this.presenter = newPresenter;
     console.log(newSpeaker)
     // sessionStorage.setItem("new_speaker_id", newSpeaker);
-    sessionStorage.setItem("presentation_session_id",newSpeaker);
+
+    this.presentationSessionId = newSpeaker;
+    // sessionStorage.setItem("presentation_session_id",newSpeaker);
+    this.ShowPresenterPanel(); 
+    presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId)
+
+ 
+
     console.log(`New speaker: ${newSpeaker} `);
      }
   
@@ -423,11 +454,16 @@ WatchSessionId() {
     console.log("Mic state changed:", e);
   
     if (e.enabled) {
-      sessionStorage.setItem("presentation_session_id",this.peerId);
+      // sessionStorage.setItem("presentation_session_id",this.peerId);
+      this.presentationSessionId = this.peerId
       await presentationTranslationSystem.PresentationTranscription(true);
+      if (!this.blackSquareCanvas) addBlackSquareToCamera(this); 
+      presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId)
+ 
    console.log("async")
       APP.dialog.sendSpeakerInfo(this.peerId);
     } else {
+      console.log("closing...")
       presentationTranslationSystem.PresentationTranscription(false);
     }
   };
