@@ -450,7 +450,7 @@ WatchSessionId() {
 //     }
 //   };
 
-  AudienceEvent = async (e: { enabled: boolean }) => {
+  AudienceEventOld = async (e: { enabled: boolean }) => {
     console.log("Mic state changed:", e);
   
     if (e.enabled) {
@@ -465,6 +465,38 @@ WatchSessionId() {
     } else {
       console.log("closing...")
       presentationTranslationSystem.PresentationTranscription(false);
+    }
+  };
+
+
+  AudienceEvent = async (e: { enabled: boolean }) => {
+    console.log("Mic state changed:", e);
+  
+    if (e.enabled) {
+      if (!this.peerId) {
+        console.warn("❗️ peerId not set yet.");
+        return;
+      }
+  
+      this.presentationSessionId = this.peerId;
+  
+      if (!this.presentationSessionId) {
+        console.error("❗️ Cannot start socket: presentationSessionId is empty.");
+        return;
+      }
+  
+      await presentationTranslationSystem.PresentationTranscription(true);
+  
+      if (!this.blackSquareCanvas) addBlackSquareToCamera(this);
+  
+      console.log("🎤 Starting translation socket with session ID:", this.presentationSessionId);
+      presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId);
+  
+      APP.dialog.sendSpeakerInfo(this.peerId);
+    } else {
+      console.log("🎤 Stopping translation (mic off)");
+      presentationTranslationSystem.PresentationTranscription(false);
+      presentationTranslationSystem.StopSocket?.(); // Just in case
     }
   };
 

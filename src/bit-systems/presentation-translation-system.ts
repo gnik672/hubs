@@ -166,8 +166,21 @@ export class TranslationSystem {
       this.processor = null;
     }
   
-    if (this.context) {
-      this.context.close().then(() => (this.context = null));
+    // if (this.context) {
+    //   this.context.close().then(() => (this.context = null));
+    // }
+    if (this.context && this.context.state !== "closed") {
+      this.context.close()
+        .then(() => {
+          console.log("AudioContext closed safely.");
+          this.context = null;
+        })
+        .catch((err) => {
+          console.warn("Error closing AudioContext:", err);
+        });
+    } else {
+      console.log("AudioContext already closed or not initialized.");
+      this.context = null; // clean up anyway
     }
   
     this.wsActive = false;
@@ -309,7 +322,7 @@ export class TranslationSystem {
   OpenAudienceWsListen(targetId: string) {
     // setTimeout(()=>{  
       
-        const url = getAIUrls().transcribe_audio_listen  +  sessionStorage.getItem("presentation_session_id") + "/"   +APP.store.state.preferences.locale
+        const url = getAIUrls().transcribe_audio_listen  +  targetId + "/"   +APP.store.state.preferences.locale
   
     //  const url = getAIUrls().transcribe_audio_listen  +  "3432-34320-3322-336" + "/"   +APP.store.state.preferences.locale
     console.log("Opening listener WebSocket for", targetId, "URL:", url);
