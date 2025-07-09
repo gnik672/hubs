@@ -6,7 +6,7 @@ import { COMPONENT_ENDPOINTS, getAIUrls } from "../utils/component-types";
 import { setLocale } from "../utils/i18n";
 import { languageCodes, voxLanugages } from "./localization-system";
 import { DownsampleBuffer, ConvertFloat32ToInt16 } from "../utils/audio-utils";
-
+import { SubtitleBuffer } from "../utils/subtitle-buffer";
 interface WsData {
   text: string;
   processing_time: number;
@@ -56,8 +56,20 @@ export class TranslationSystem {
   mediaRecorder: MediaRecorder | null;
   wsActive: boolean;
   wsUrl: string; 
+  listenerSocket: WebSocket | null;
+  subtitleBuffer: SubtitleBuffer;
+   subtitleQueueTimer: number | null = null;
+ lastFlushTime: number = 0;
 
-  constructor() {}
+
+ pingInterval: number | null 
+ constructor() {
+  // this.subtitleBuffer = new SubtitleBuffer((line1, line2) => {
+  //   if (this.onFixedPanelTextUpdate) {
+  //     this.onFixedPanelTextUpdate(`${line1}\n${line2}`, "presentation");
+  //   }
+  // });
+}
 
   Init() {
     this.targets = {};
@@ -76,7 +88,26 @@ export class TranslationSystem {
     this.wsActive = false;
 
     this.websocket_listeners = {};
+    // this.subtitleBuffer = new SubtitleBuffer(2, 2)
   }
+
+
+  startPing(ws: WebSocket) {
+    this.stopPing(); // Clear any existing interval
+    this.pingInterval = window.setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "ping" }));
+      }
+    }, 15000); // every 15 seconds
+  }
+  
+  stopPing() {
+    if (this.pingInterval !== null) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+  }
+  
 
   onFixedPanelTextUpdate?: (text: string, from: string) => void; 
 
@@ -159,7 +190,12 @@ export class TranslationSystem {
       this.websocket.close(1000, "Closing connection");
       console.log("WebSocket connection closed");
     }
-  
+
+    if (this.listenerSocket && this.listenerSocket.readyState === WebSocket.OPEN) {
+      this.listenerSocket.close(1000, "Closing listener socket");
+      this.listenerSocket = null;
+    }
+    this.stopPing();
     if (this.processor) {
       this.processor.disconnect();
       this.processor.onaudioprocess = null;
@@ -224,6 +260,7 @@ export class TranslationSystem {
       this.websocket = new WebSocket(getAIUrls().transcribe_audio + APP.dialog._clientId);
   
       this.websocket.onopen = () => {
+        
         console.log("connected to websocket");
         this.StartTranscription().then(resolve); // only resolve after StartTranscription
       };
@@ -233,10 +270,10 @@ export class TranslationSystem {
         resolve(); // resolve anyway to not block
       };
   
-      this.websocket.onclose = () => {
-        if (this.wsActive) this.OpenWs(id);
-        console.log({ event: "onclose" });
-      };
+      // this.websocket.onclose = () => {
+      //   if (this.wsActive) this.OpenWs(id);
+      //   console.log({ event: "onclose" });
+      // };
     });
   }
 
@@ -316,9 +353,24 @@ export class TranslationSystem {
    };
  
   //  this.websocket_listeners[targetId] = ws
-   ;} , 3000)
+   ;} , 1000)
 
   }
+
+  flushSubtitleLines(targetId: string, lines: string[]) {
+    const now = Date.now();
+    const timeSinceLast = now - this.lastFlushTime;
+  
+    const delay = Math.max(0, 1400 - timeSinceLast); // ensure 2s visibility
+  
+    setTimeout(() => {
+      if (this.onFixedPanelTextUpdate) {
+        this.onFixedPanelTextUpdate(lines.join("\n"), targetId);
+      }
+      this.lastFlushTime = Date.now();
+    }, delay);
+  }
+  
   OpenAudienceWsListen(targetId: string) {
     // setTimeout(()=>{  
       
@@ -327,44 +379,105 @@ export class TranslationSystem {
     //  const url = getAIUrls().transcribe_audio_listen  +  "3432-34320-3322-336" + "/"   +APP.store.state.preferences.locale
     console.log("Opening listener WebSocket for", targetId, "URL:", url);
   
-    const ws = new WebSocket(url);
+    this.listenerSocket = new WebSocket(url);
+    const ws = this.listenerSocket;
+    
+    this.subtitleBuffer = new SubtitleBuffer((line1, line2) => {
+      if (this.onFixedPanelTextUpdate) {
+        this.onFixedPanelTextUpdate(`${line1}\n${line2}`, targetId);
+      }
+    });
+
   
     ws.onopen = () => {
       console.log(`WebSocket opened for target ${targetId}`);
+      // this.startPing(ws);
     };
-  
-  
+
     ws.onmessage = (event: MessageEvent) => {
-     console.log(`[WS LISTENER RAW] ${event.data}`);
-     try {
-       const eventData = JSON.parse(event.data) as WsData;
-       const eventDataNew = JSON.parse(event.data)  
-       
-      //  this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
-   
-      if (this.onFixedPanelTextUpdate) {
-        this.onFixedPanelTextUpdate(eventDataNew.translation, targetId);
+      try {
+        const eventData = JSON.parse(event.data);
+        const text = eventData.translation;
+        const eventDataNew = JSON.parse(event.data)  
+        this.subtitleBuffer.addText(eventDataNew.translation);
+        // const maybeLines = this.subtitleBuffer.addText(text);
+        // const now = Date.now();
+    
+        // Flush due to word limit
+        // if (maybeLines) {
+        //   this.flushSubtitleLines(targetId, maybeLines);
+        // } else {
+        //   // Set up a timeout to flush what we have after 2s if nothing else triggers it
+        //   if (!this.subtitleQueueTimer) {
+        //     this.subtitleQueueTimer = window.setTimeout(() => {
+        //       const lines = this.subtitleBuffer.flushLine(true); // force flush
+        //       this.flushSubtitleLines(targetId, lines);
+        //       this.subtitleQueueTimer = null;
+        //     }, 1200);
+        //   }
+        // }
+      } catch (e) {
+        console.warn(`Invalid message from ${targetId}:`, event.data);
       }
-      console.log(this.targets)
-     } catch (e) {
-       console.warn(`Invalid message from ${targetId}:`, event.data);
-     }
-   };
+    };
+    
   
-    ws.onclose = () => {
-      console.log(`WebSocket closed for target ${targetId}`);
+  
+//     ws.onmessage = (event: MessageEvent) => {
+//      console.log(`[WS LISTENER RAW] ${event.data}`);
+//      try {
+//        const eventData = JSON.parse(event.data) as WsData;
+//        const eventDataNew = JSON.parse(event.data)  
+       
+//       //  this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
+//    console.log(eventDataNew)
+//    console.log(this.subtitleBuffer)
+//       const visibleLines = this.subtitleBuffer.addText(eventDataNew.translation);
+//       console.log(this.subtitleBuffer)
+//       console.log(eventDataNew.translation)
+//       console.log(visibleLines)
+// if (this.onFixedPanelTextUpdate) {
+//   this.onFixedPanelTextUpdate(visibleLines.join("\n"), targetId);
+// }
+
+
+//       // if (this.onFixedPanelTextUpdate) {
+//       //   this.onFixedPanelTextUpdate(eventDataNew.translation, targetId);
+//       // }
+//       console.log(this.targets)
+//      } catch (e) {
+//        console.warn(`Invalid message from ${targetId}:`, event.data);
+//      }
+//    };
+  
+    // ws.onclose = () => {
+      // console.log(`WebSocket closed for target ${targetId}`);
       // if (this.onFixedPanelTextUpdate) {
       //   this.onFixedPanelTextUpdate("eventDataNew.translation", targetId);
       // }
       // delete this.websocket_listeners[targetId];
 
       // console.warn(`WebSocket closed for ${targetId}`, e);
-      const sessionId = sessionStorage.getItem("presentation_session_id");
-      // const stillActive = APP.scene?.hasState("translation");
+      // const sessionId = sessionStorage.getItem("presentation_session_id");
+      // // const stillActive = APP.scene?.hasState("translation");
   
-      if (  sessionId === targetId) {
-        console.log(`Reconnecting listener for ${targetId}...`);
-        setTimeout(() => this.OpenAudienceWsListen(targetId), 2000); // retry after delay
+      // if (  sessionId === targetId) {
+      //   console.log(`Reconnecting listener for ${targetId}...`);
+      //   setTimeout(() => this.OpenAudienceWsListen(targetId), 2000); // retry after delay
+      // }
+    // };
+
+    ws.onclose = (event) => {
+      console.log(`WebSocket closed for target ${targetId}`, event);
+      // this.stopPing();
+
+      // Always clear
+      this.listenerSocket = null;
+    
+      // Reconnect only if it closed abnormally
+      if (event.code !== 1000 && event.code !== 1001) {
+        console.warn(`Abnormal close (${event.code}). Reconnecting in 1s...`);
+        setTimeout(() => this.OpenAudienceWsListen(targetId), 1000);
       }
     };
   
