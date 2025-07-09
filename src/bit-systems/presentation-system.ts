@@ -487,7 +487,7 @@ WatchSessionId() {
   
       await presentationTranslationSystem.PresentationTranscription(true);
   
-      if (!this.blackSquareCanvas) addBlackSquareToCamera(this);
+      if (this.presenter === this.peerId && !this.blackSquareCanvas) addBlackSquareToCamera(this);
   
       console.log("🎤 Starting translation socket with session ID:", this.presentationSessionId);
       presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId);
