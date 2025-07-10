@@ -145,6 +145,7 @@ import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
 import "./components/mirror";
 import "./components/live-clock";
+import "./components/disable-hover-if-not-presenter";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
