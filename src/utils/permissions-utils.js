@@ -26,6 +26,22 @@ export function canMove(entity) {
     entity && entity.components["super-spawner"] && entity.components["super-spawner"].data.template;
   const isEmojiSpawner = spawnerTemplate === "#interactable-emoji";
   const isEmoji = !!entity.components.emoji;
+  
+
+
+  const allowed = ["presenter-1", "presenter-2", "presenter-3", "presenter-4"];
+  const userName = window.APP?.store?.state?.profile?.displayName;
+
+  if (!allowed.includes(userName)) {
+    console.warn(`[Permission Denied] ${userName} tried to move object`);
+    return false; // 🔒 non-presenters cannot move anything
+  }
+
+
+
+
+
+  
   return (
     hasComponent(APP.world, HoldableButton, entity.eid) ||
     ((isEmoji || isEmojiSpawner
