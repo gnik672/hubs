@@ -80,6 +80,14 @@ AFRAME.registerComponent("hud-controller", {
       (!hudOutOfView || forceHudVisible) &&
       this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_FIRST_PERSON &&
       !isLockedDownDemoRoom();
+
+
+      const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+      if (!isMobile) {
+        hud.visible = false;
+        return
+       
+      }
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.MathUtils.DEG2RAD * 90;
     hud.matrixNeedsUpdate = true;
