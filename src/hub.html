@@ -65,7 +65,7 @@
 <body>
     <div id="support-root"></div>
 
-    <a-scene disable-hover-if-not-presenter hubs-systems capture-system listed-media local-audio-analyser
+    <a-scene disable-interaction-if-not-presenter hubs-systems capture-system listed-media local-audio-analyser
         class="grab-cursor" networked-scene="audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute; muteEvents: action_disable_mic; unmuteEvents: action_enable_mic; "
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
