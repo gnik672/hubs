@@ -41,7 +41,11 @@ export class PresentationSystem {
   handTimeout: NodeJS.Timeout;
   webSocket: WebSocket;
   presentationSessionId: string;
+  waitingDotsInterval: NodeJS.Timeout | null = null;
+  dotStage: number = 0;
 
+  fixedPanelWaitingDotsInterval: NodeJS.Timeout | null = null;
+fixedPanelDotStage: number = 0;
 
   blackSquareCanvas: HTMLCanvasElement | null = null;
 blackSquareCtx: CanvasRenderingContext2D | null = null;
@@ -227,13 +231,25 @@ WatchSessionId() {
     }
   }
 
+  // RespondToHandRequest(result: boolean, peer: string) {
+  //   // if (Date.now() - respondTime > 3000) { 
+  //   console.log(peer, this.questionQueue); 
+  //   if (this.questionQueue.includes(peer)) {
+  //     APP.dialog.RespondToHandRequest(true, peer);
+  //     this.questionQueue.splice(this.questionQueue.indexOf(peer), 1);
+  //   } 
+  // }
+
   RespondToHandRequest(result: boolean, peer: string) {
-    // if (Date.now() - respondTime > 3000) { 
-    console.log(peer, this.questionQueue); 
+    if (!peer || typeof peer !== "string") {
+      console.warn("❌ Invalid peer ID when calling RespondToHandRequest:", peer);
+      return;
+    }
+  
     if (this.questionQueue.includes(peer)) {
-      APP.dialog.RespondToHandRequest(true, peer);
+      APP.dialog.RespondToHandRequest(result, peer);
       this.questionQueue.splice(this.questionQueue.indexOf(peer), 1);
-    } 
+    }
   }
 
   OnToggleHand() {
@@ -367,6 +383,8 @@ WatchSessionId() {
 
   UpdateTranslation(data: string, producer: string) {
     console.log("p1")
+    this.StopWaitingDots();
+    this.StopFixedPanelWaitingDots()
     if (!this.panelShown && !this.presenterState) {
       return; // Skip only if no fixed panel AND not the presenter
     }
@@ -488,17 +506,63 @@ WatchSessionId() {
       await presentationTranslationSystem.PresentationTranscription(true);
   
       if (this.presenter === this.peerId && !this.blackSquareCanvas) addBlackSquareToCamera(this);
-  
+      this.StartWaitingDots();
       console.log("🎤 Starting translation socket with session ID:", this.presentationSessionId);
       presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId);
   
       APP.dialog.sendSpeakerInfo(this.peerId);
     } else {
+      this.StartFixedPanelWaitingDots()
       console.log("🎤 Stopping translation (mic off)");
       presentationTranslationSystem.PresentationTranscription(false);
       presentationTranslationSystem.StopSocket?.(); // Just in case
     }
   };
+
+  StartWaitingDots() {
+    if (!this.blackSquareCtx || !this.blackSquareTexture) return;
+  
+    this.StopWaitingDots(); // Ensure no double interval
+    this.dotStage = 0;
+  
+    this.waitingDotsInterval = setInterval(() => {
+      const dots = ".".repeat((this.dotStage % 4) + 1);
+      this.dotStage++;
+  
+      this.blackSquareCtx!.clearRect(0, 0, 1024, 128);
+      this.blackSquareCtx!.font = "bold 48px Arial";
+      this.blackSquareCtx!.fillStyle = "white";
+      this.blackSquareCtx!.textAlign = "center";
+      this.blackSquareCtx!.textBaseline = "middle";
+      this.blackSquareCtx!.fillText(`${dots}`, 512, 64);
+      this.blackSquareTexture!.needsUpdate = true;
+    }, 500); // every half second
+  }
+  
+  StopWaitingDots() {
+    if (this.waitingDotsInterval) {
+      clearInterval(this.waitingDotsInterval);
+      this.waitingDotsInterval = null;
+    }
+  }
+
+  StartFixedPanelWaitingDots() {
+    this.StopFixedPanelWaitingDots(); // Prevent double intervals
+    this.fixedPanelDotStage = 0;
+  
+    this.fixedPanelWaitingDotsInterval = setInterval(() => {
+      const dots = ".".repeat((this.fixedPanelDotStage % 4) + 1);
+      this.fixedPanelDotStage++;
+      UpdateFixedPanelText(`${dots}`);
+    }, 500);
+  }
+  
+  StopFixedPanelWaitingDots() {
+    if (this.fixedPanelWaitingDotsInterval) {
+      clearInterval(this.fixedPanelWaitingDotsInterval);
+      this.fixedPanelWaitingDotsInterval = null;
+    }
+  }
 
 }
 
