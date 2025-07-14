@@ -1,3 +1,4 @@
+import { convertToObject } from "typescript";
 import {
   getCurrentAudioSettings,
   shouldAddSupplementaryAttenuation,
@@ -26,8 +27,11 @@ const calculateAttenuation = (() => {
   return (el, audio) => {
 
        // ✅ Skip attenuation entirely in presentation room
-       if (window.roomPropertiesReader?.AllowPresentation === true) {
+       if (roomPropertiesReader?.AllowPresentation === true) {
+         console.log("presentation mode")
         return 1.0; // full volume, no fade
+      } else {
+        console.log(" no presentation mode")
       }
 
     APP.audioListener.getWorldPosition(listenerPos);
