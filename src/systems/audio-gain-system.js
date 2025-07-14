@@ -25,7 +25,7 @@ const calculateAttenuation = (() => {
   const sourcePos = new THREE.Vector3();
  
   return (el, audio) => {
-
+    return 1.0; // full volume, no fade
        // ✅ Skip attenuation entirely in presentation room
        if (roomPropertiesReader?.AllowPresentation === true) {
          console.log("presentation mode")
