@@ -4,6 +4,7 @@ import {
   updateAudioSettings
 } from "../update-audio-settings";
 
+import { roomPropertiesReader  } from "../utils/rooms-properties";
 const distanceModels = {
   linear: function (distance, rolloffFactor, refDistance, maxDistance) {
     return 1.0 - rolloffFactor * ((distance - refDistance) / (maxDistance - refDistance));
@@ -17,9 +18,18 @@ const distanceModels = {
 };
 
 const calculateAttenuation = (() => {
+  console.log("roomPropertiesReader")
+  console.log(roomPropertiesReader)
   const listenerPos = new THREE.Vector3();
   const sourcePos = new THREE.Vector3();
+ 
   return (el, audio) => {
+
+       // ✅ Skip attenuation entirely in presentation room
+       if (window.roomPropertiesReader?.AllowPresentation === true) {
+        return 1.0; // full volume, no fade
+      }
+
     APP.audioListener.getWorldPosition(listenerPos);
     audio.getWorldPosition(sourcePos);
     const distance = sourcePos.distanceTo(listenerPos);
