@@ -25,14 +25,14 @@ const calculateAttenuation = (() => {
   const sourcePos = new THREE.Vector3();
  
   return (el, audio) => {
-    return 1.0; // full volume, no fade
+// return 1.0
        // ✅ Skip attenuation entirely in presentation room
-       if (roomPropertiesReader?.AllowPresentation === true) {
-         console.log("presentation mode")
-        return 1.0; // full volume, no fade
-      } else {
-        console.log(" no presentation mode")
-      }
+      //  if (roomPropertiesReader?.AllowPresentation === true) {
+      //    console.log("presentation mode")
+      //   return 1.0; // full volume, no fade
+      // } else {
+      //   console.log(" nopresentation mode")
+      // }
 
     APP.audioListener.getWorldPosition(listenerPos);
     audio.getWorldPosition(sourcePos);

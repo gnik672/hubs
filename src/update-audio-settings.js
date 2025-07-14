@@ -74,11 +74,14 @@ export function getCurrentAudioSettings(el) {
   );
 
   // if (roomPropertiesReader?.AllowPresentation === true) {
+  //   console.log("rrr")
   //   settings.distanceModel = "linear";      // Can also be "inverse"
   //   settings.rolloffFactor = 0;             // ❌ Disables distance fading
   //   settings.refDistance = 1000;
   //   settings.maxDistance = 1000;
   // }
+     settings.distanceModel = "linear";      // Can also be "inverse"
+    settings.rolloffFactor = 0;
 
   if (
     APP.clippingState.has(el) ||
