@@ -8,6 +8,7 @@ import {
   AvatarAudioDefaults,
   TargetAudioDefaults
 } from "./components/audio-params";
+import { roomPropertiesReader  } from "./utils/rooms-properties";
 
 const defaultSettingsForSourceType = Object.freeze(
   new Map([
@@ -71,6 +72,13 @@ export function getCurrentAudioSettings(el) {
     zoneSettings,
     preferencesOverrides
   );
+
+  if (roomPropertiesReader?.AllowPresentation === true) {
+    settings.distanceModel = "linear";      // Can also be "inverse"
+    settings.rolloffFactor = 0;             // ❌ Disables distance fading
+    settings.refDistance = 1000;
+    settings.maxDistance = 1000;
+  }
 
   if (
     APP.clippingState.has(el) ||
