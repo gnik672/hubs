@@ -1410,7 +1410,7 @@ class UIRoot extends Component {
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                     {!this.props.selectedObject && <CompactMoreMenuButton />}
                     {(!this.props.selectedObject ||
-                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && window.APP?.store?.state?.profile?.displayName.toLowerCase().includes("presenter") && (
+                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md"))  && (
                     
                       <ContentMenu>
                         {/* {showObjectList && (
