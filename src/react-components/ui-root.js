@@ -1410,14 +1410,15 @@ class UIRoot extends Component {
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                     {!this.props.selectedObject && <CompactMoreMenuButton />}
                     {(!this.props.selectedObject ||
-                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
+                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && window.APP?.store?.state?.profile?.displayName.toLowerCase().includes("presenter") && (
+                    
                       <ContentMenu>
-                        {showObjectList && (
+                        {/* {showObjectList && (
                           <ObjectsMenuButton
                             active={this.state.sidebarId === "objects"}
                             onClick={() => this.toggleSidebar("objects")}
                           />
-                        )}
+                        )} */}
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
                           disabled={isLockedDownDemo}
@@ -1591,14 +1592,14 @@ class UIRoot extends Component {
                   ) : undefined
                 }
                 modal={this.state.dialog}
-                toolbarLeft={
-                  <InvitePopoverContainer
-                    hub={this.props.hub}
-                    hubChannel={this.props.hubChannel}
-                    scene={this.props.scene}
-                    store={this.props.store}
-                  />
-                }
+                // toolbarLeft={
+                //   // <InvitePopoverContainer
+                //   //   hub={this.props.hub}
+                //   //   hubChannel={this.props.hubChannel}
+                //   //   scene={this.props.scene}
+                //   //   store={this.props.store}
+                //   // />
+                // }
                 toolbarCenter={
                   <>
                     {watching && (
@@ -1690,7 +1691,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    <MoreMenuPopoverButton menu={moreMenu} />
+                    {/* <MoreMenuPopoverButton menu={moreMenu} /> */}
                   </>
                 }
               />
