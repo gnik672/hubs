@@ -8,7 +8,7 @@ import {
   AvatarAudioDefaults,
   TargetAudioDefaults
 } from "./components/audio-params";
-import { roomPropertiesReader  } from "./utils/rooms-properties";
+ import { roomPropertiesReader  } from "./utils/rooms-properties";
 
 const defaultSettingsForSourceType = Object.freeze(
   new Map([
@@ -80,8 +80,18 @@ export function getCurrentAudioSettings(el) {
   //   settings.refDistance = 1000;
   //   settings.maxDistance = 1000;
   // }
-     settings.distanceModel = "linear";      // Can also be "inverse"
-    settings.rolloffFactor = 0;
+
+    //  settings.distanceModel = "linear";      // Can also be "inverse"
+    // settings.rolloffFactor = 0;
+
+    if (roomPropertiesReader?.AllowPresentation) {
+      console.log("kokokok")
+      settings.distanceModel = "linear";
+      settings.rolloffFactor = 0;
+    }
+
+    console.log("settings")
+    console.log(settings)
 
   if (
     APP.clippingState.has(el) ||

@@ -64,6 +64,29 @@ const calculateAttenuation = (() => {
 
 // TODO: Rename "GainSystem" because the name is suspicious
 export class GainSystem {
+  constructor() {
+    this._appliedPresentationAudioFix = false;
+
+    APP.scene.addEventListener("room-properties-ready", () => {
+      if (this._appliedPresentationAudioFix) return;
+
+      if (roomPropertiesReader?.AllowPresentation === true) {
+        console.log("🎤 Applying presentation audio overrides");
+
+        for (const [el, audio] of APP.audios.entries()) {
+          APP.audioOverrides.set(el, {
+            distanceModel: "linear",
+            rolloffFactor: 0,
+            refDistance: 1000,
+            maxDistance: 1000
+          });
+          updateAudioSettings(el, audio);
+        }
+
+        this._appliedPresentationAudioFix = true;
+      }
+    });
+  }
   tick() {
     const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
     for (const [el, audio] of APP.audios.entries()) {

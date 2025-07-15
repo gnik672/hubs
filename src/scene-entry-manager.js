@@ -3,6 +3,8 @@ import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
+import {updateAudioSettings} from "./update-audio-settings"
+
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -80,6 +82,7 @@ export default class SceneEntryManager {
     if (reset) this.scene.emit("clear-scene");
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
+    APP.scene.emit("room-properties-ready")
     // logger.RegisterUser();
     // oldTranslationSystem.Init(reset);
     translationSystem.Init();
@@ -90,13 +93,34 @@ export default class SceneEntryManager {
     helpButton.Init(reset);
     labelOrganizer.Init();
     presentationSystem.Init(reset);
+
     ResizeHudPanel();
     VisitRoom();
+
+   
+
 
     if (!reset) {
       // logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
       // logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
     }
+    console.log("eee")
+    // if (roomPropertiesReader?.AllowPresentation) {
+    //   console.log("ffff")
+    //   for (const [el, audio] of APP.audios.entries()) {
+    //     console.log("kkk")
+    //     // Override audio settings to disable distance fading
+    //     APP.audioOverrides.set(el, {
+    //       distanceModel: "linear",
+    //       rolloffFactor: 0,
+    //       refDistance: 1000,
+    //       maxDistance: 1000
+    //     });
+    
+    //     // Apply the new settings
+    //     updateAudioSettings(el, audio);
+    //   }
+    // }
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {
