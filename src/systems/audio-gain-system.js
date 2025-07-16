@@ -1,11 +1,9 @@
-import { convertToObject } from "typescript";
 import {
   getCurrentAudioSettings,
   shouldAddSupplementaryAttenuation,
   updateAudioSettings
 } from "../update-audio-settings";
 
-import { roomPropertiesReader  } from "../utils/rooms-properties";
 const distanceModels = {
   linear: function (distance, rolloffFactor, refDistance, maxDistance) {
     return 1.0 - rolloffFactor * ((distance - refDistance) / (maxDistance - refDistance));
@@ -19,21 +17,9 @@ const distanceModels = {
 };
 
 const calculateAttenuation = (() => {
-  console.log("roomPropertiesReader")
-  console.log(roomPropertiesReader)
   const listenerPos = new THREE.Vector3();
   const sourcePos = new THREE.Vector3();
- 
   return (el, audio) => {
-// return 1.0
-       // ✅ Skip attenuation entirely in presentation room
-      //  if (roomPropertiesReader?.AllowPresentation === true) {
-      //    console.log("presentation mode")
-      //   return 1.0; // full volume, no fade
-      // } else {
-      //   console.log(" nopresentation mode")
-      // }
-
     APP.audioListener.getWorldPosition(listenerPos);
     audio.getWorldPosition(sourcePos);
     const distance = sourcePos.distanceTo(listenerPos);
@@ -64,29 +50,6 @@ const calculateAttenuation = (() => {
 
 // TODO: Rename "GainSystem" because the name is suspicious
 export class GainSystem {
-  constructor() {
-    this._appliedPresentationAudioFix = false;
-
-    APP.scene.addEventListener("room-properties-ready", () => {
-      if (this._appliedPresentationAudioFix) return;
-
-      if (roomPropertiesReader?.AllowPresentation === true) {
-        console.log("🎤 Applying presentation audio overrides");
-
-        for (const [el, audio] of APP.audios.entries()) {
-          APP.audioOverrides.set(el, {
-            distanceModel: "linear",
-            rolloffFactor: 0,
-            refDistance: 1000,
-            maxDistance: 1000
-          });
-          updateAudioSettings(el, audio);
-        }
-
-        this._appliedPresentationAudioFix = true;
-      }
-    });
-  }
   tick() {
     const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
     for (const [el, audio] of APP.audios.entries()) {

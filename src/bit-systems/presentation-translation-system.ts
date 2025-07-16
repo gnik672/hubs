@@ -475,10 +475,10 @@ export class TranslationSystem {
       this.listenerSocket = null;
     
       // Reconnect only if it closed abnormally
-      if (event.code !== 1000 && event.code !== 1001) {
-        console.warn(`Abnormal close (${event.code}). Reconnecting in 1s...`);
-        setTimeout(() => this.OpenAudienceWsListen(targetId), 1000);
-      }
+      // if (event.code !== 1000 && event.code !== 1001) {
+      //   console.warn(`Abnormal close (${event.code}). Reconnecting in 1s...`);
+      //   setTimeout(() => this.OpenAudienceWsListen(targetId), 1000);
+      // }
     };
   
     ws.onerror = (err) => {
@@ -501,4 +501,3 @@ export class TranslationSystem {
 let lastLoggedTime = 0;
 
 export const presentationTranslationSystem = new TranslationSystem();
-

@@ -82,7 +82,7 @@ export default class SceneEntryManager {
     if (reset) this.scene.emit("clear-scene");
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
-    APP.scene.emit("room-properties-ready")
+    // APP.scene.emit("room-properties-ready")
     // logger.RegisterUser();
     // oldTranslationSystem.Init(reset);
     translationSystem.Init();
