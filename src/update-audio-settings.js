@@ -42,7 +42,7 @@ export function getOverriddenPanningModelType() {
   }
 }
 
-export function getCurrentAudioSettings(el) {
+export function getCurrentAudioSettings2(el) {
   const sourceType = APP.sourceType.get(el);
   const defaults = defaultSettingsForSourceType.get(sourceType);
   const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
@@ -88,6 +88,64 @@ export function getCurrentAudioSettings(el) {
 
   return settings;
 }
+export function getCurrentAudioSettings(el) {
+  const sourceType = APP.sourceType.get(el);
+  const defaults = defaultSettingsForSourceType.get(sourceType);
+  const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
+  const audioOverrides = APP.audioOverrides.get(el);
+  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
+  const zoneSettings = APP.zoneOverrides.get(el);
+  const preferencesOverrides = {};
+
+  const overriddenPanningModelType = getOverriddenPanningModelType();
+  const isNonModeratorAvatarAudio = sourceType === SourceType.AVATAR_AUDIO_SOURCE && !APP.moderatorAudioSource.has(el);
+
+  if (overriddenPanningModelType !== null) {
+    preferencesOverrides.panningModel = overriddenPanningModelType;
+  }
+
+  if (APP.store.state.preferences.disableLeftRightPanning) {
+    preferencesOverrides.audioType = AudioType.Stereo;
+  }
+
+  // 🧠 Merge settings in order of priority
+  const settings = Object.assign(
+    {},
+    defaults,
+    sceneOverrides,
+    audioOverrides,
+    audioDebugPanelOverrides,
+    zoneSettings,
+    preferencesOverrides
+  );
+
+  // 🔇 Mute or clip audio based on current state
+  if (
+    APP.clippingState.has(el) ||
+    APP.mutedState.has(el) ||
+    (isNonModeratorAvatarAudio && !APP.hub.member_permissions?.voice_chat)
+  ) {
+    settings.gain = 0;
+  } else if (APP.gainMultipliers.has(el)) {
+    settings.gain = settings.gain * APP.gainMultipliers.get(el);
+  }
+
+  if (APP.supplementaryAttenuation.has(el)) {
+    settings.gain = settings.gain * APP.supplementaryAttenuation.get(el);
+  }
+
+  // ✅ 📢 Override audio behavior for "presentationroom"
+  if (window.location.href.includes("Lf5offt")) {
+    settings.distanceModel = "linear";
+    settings.rolloffFactor = 0;
+    settings.refDistance = 1000;
+    settings.maxDistance = 1000;
+    settings.gain = 1.0;
+  }
+
+  return settings;
+}
+
 
 export function getCurrentAudioSettingsForSourceType(sourceType) {
   const defaults = defaultSettingsForSourceType.get(sourceType);
