@@ -3,7 +3,7 @@ import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
-import {updateAudioSettings} from "./update-audio-settings"
+ 
 
 
 const isBotMode = qsTruthy("bot");
