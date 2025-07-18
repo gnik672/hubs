@@ -197,7 +197,7 @@ export class TranslationSystem {
       this.listenerSocket.close(1000, "Closing listener socket");
       this.listenerSocket = null;
     }
-    this.stopPing();
+    // this.stopPing();
     if (this.processor) {
       this.processor.disconnect();
       this.processor.onaudioprocess = null;
@@ -264,7 +264,7 @@ export class TranslationSystem {
       this.websocket.onopen = () => {
         
         console.log("connected to websocket");
-        this.startPing(this.websocket!); // ⬅️ add this
+        // this.startPing(this.websocket!); // ⬅️ add this
         this.StartTranscription().then(resolve); // only resolve after StartTranscription
       };
   
@@ -274,10 +274,10 @@ export class TranslationSystem {
       };
       this.websocket.onclose = () => {
         console.log({ event: "onclose" });
-        this.stopPing();
-        if (this.wsActive){
-          console.log("reconnecting");
-        } this.OpenWs(id);
+        // this.stopPing();
+        // if (this.wsActive){
+        //   console.log("reconnecting");
+        // } this.OpenWs(id);
     
       };
   
@@ -316,7 +316,7 @@ export class TranslationSystem {
 
     this.websocket.onclose = () => {
       console.log({ event: "onclose" });
-      this.stopPing();
+      // this.stopPing();
       if (this.wsActive){
         console.log("reconnecting");
       } this.OpenWs(id);
@@ -406,7 +406,7 @@ export class TranslationSystem {
   
     ws.onopen = () => {
       console.log(`WebSocket opened for target ${targetId}`);
-      this.startPing(ws);
+      // this.startPing(ws);
     };
 
     ws.onmessage = (event: MessageEvent) => {
@@ -421,51 +421,6 @@ export class TranslationSystem {
       }
     };
     
-  
-  
-//     ws.onmessage = (event: MessageEvent) => {
-//      console.log(`[WS LISTENER RAW] ${event.data}`);
-//      try {
-//        const eventData = JSON.parse(event.data) as WsData;
-//        const eventDataNew = JSON.parse(event.data)  
-       
-//       //  this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
-//    console.log(eventDataNew)
-//    console.log(this.subtitleBuffer)
-//       const visibleLines = this.subtitleBuffer.addText(eventDataNew.translation);
-//       console.log(this.subtitleBuffer)
-//       console.log(eventDataNew.translation)
-//       console.log(visibleLines)
-// if (this.onFixedPanelTextUpdate) {
-//   this.onFixedPanelTextUpdate(visibleLines.join("\n"), targetId);
-// }
-
-
-//       // if (this.onFixedPanelTextUpdate) {
-//       //   this.onFixedPanelTextUpdate(eventDataNew.translation, targetId);
-//       // }
-//       console.log(this.targets)
-//      } catch (e) {
-//        console.warn(`Invalid message from ${targetId}:`, event.data);
-//      }
-//    };
-  
-    // ws.onclose = () => {
-      // console.log(`WebSocket closed for target ${targetId}`);
-      // if (this.onFixedPanelTextUpdate) {
-      //   this.onFixedPanelTextUpdate("eventDataNew.translation", targetId);
-      // }
-      // delete this.websocket_listeners[targetId];
-
-      // console.warn(`WebSocket closed for ${targetId}`, e);
-      // const sessionId = sessionStorage.getItem("presentation_session_id");
-      // // const stillActive = APP.scene?.hasState("translation");
-  
-      // if (  sessionId === targetId) {
-      //   console.log(`Reconnecting listener for ${targetId}...`);
-      //   setTimeout(() => this.OpenAudienceWsListen(targetId), 2000); // retry after delay
-      // }
-    // };
 
     ws.onclose = (event) => {
       console.log(`WebSocket closed for target ${targetId}`, event);
