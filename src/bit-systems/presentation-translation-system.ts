@@ -157,8 +157,9 @@ export class TranslationSystem {
 
   }
   StopSocket() {
+    console.log("stop socket triggered")
     this.StopTranscription()
-    console.log("close socket")
+   
   }  
   async StartTranscription() {
     // APP.dialog.enableMicrophone(true)
@@ -186,6 +187,7 @@ export class TranslationSystem {
   }
 
   StopTranscription() {
+    console.log(" close socket for transcription triggered ")
     if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
       this.websocket.close(1000, "Closing connection");
       console.log("WebSocket connection closed");
@@ -262,12 +264,21 @@ export class TranslationSystem {
       this.websocket.onopen = () => {
         
         console.log("connected to websocket");
+        this.startPing(this.websocket!); // ⬅️ add this
         this.StartTranscription().then(resolve); // only resolve after StartTranscription
       };
   
       this.websocket.onerror = error => {
         console.log({ event: "onerror", error });
         resolve(); // resolve anyway to not block
+      };
+      this.websocket.onclose = () => {
+        console.log({ event: "onclose" });
+        this.stopPing();
+        if (this.wsActive){
+          console.log("reconnecting");
+        } this.OpenWs(id);
+    
       };
   
       // this.websocket.onclose = () => {
@@ -304,8 +315,12 @@ export class TranslationSystem {
     // };
 
     this.websocket.onclose = () => {
-      if (this.wsActive) this.OpenWs(id);
       console.log({ event: "onclose" });
+      this.stopPing();
+      if (this.wsActive){
+        console.log("reconnecting");
+      } this.OpenWs(id);
+  
     };
 
     this.websocket.onerror = error => {
@@ -391,7 +406,7 @@ export class TranslationSystem {
   
     ws.onopen = () => {
       console.log(`WebSocket opened for target ${targetId}`);
-      // this.startPing(ws);
+      this.startPing(ws);
     };
 
     ws.onmessage = (event: MessageEvent) => {
@@ -400,22 +415,7 @@ export class TranslationSystem {
         const text = eventData.translation;
         const eventDataNew = JSON.parse(event.data)  
         this.subtitleBuffer.addText(eventDataNew.translation);
-        // const maybeLines = this.subtitleBuffer.addText(text);
-        // const now = Date.now();
-    
-        // Flush due to word limit
-        // if (maybeLines) {
-        //   this.flushSubtitleLines(targetId, maybeLines);
-        // } else {
-        //   // Set up a timeout to flush what we have after 2s if nothing else triggers it
-        //   if (!this.subtitleQueueTimer) {
-        //     this.subtitleQueueTimer = window.setTimeout(() => {
-        //       const lines = this.subtitleBuffer.flushLine(true); // force flush
-        //       this.flushSubtitleLines(targetId, lines);
-        //       this.subtitleQueueTimer = null;
-        //     }, 1200);
-        //   }
-        // }
+     
       } catch (e) {
         console.warn(`Invalid message from ${targetId}:`, event.data);
       }
@@ -469,11 +469,11 @@ export class TranslationSystem {
 
     ws.onclose = (event) => {
       console.log(`WebSocket closed for target ${targetId}`, event);
-      // this.stopPing();
+      this.stopPing();
 
       // Always clear
       this.listenerSocket = null;
-    
+    console.warn(`Abnormal close (${event.code})`);
       // Reconnect only if it closed abnormally
       // if (event.code !== 1000 && event.code !== 1001) {
       //   console.warn(`Abnormal close (${event.code}). Reconnecting in 1s...`);

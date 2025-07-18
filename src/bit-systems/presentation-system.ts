@@ -81,29 +81,7 @@ maxWords: number = 10;
     this.ToggleSubtitles = this.ToggleSubtitles.bind(this);
     this.OnToggleHand = this.OnToggleHand.bind(this);
   }
-  private lastSessionId: string | null = null;
-private sessionIdWatcher: NodeJS.Timeout | null = null;
-
-WatchSessionId() {
-  this.lastSessionId = sessionStorage.getItem("presentation_session_id");
-
-  if (this.sessionIdWatcher) clearInterval(this.sessionIdWatcher);
-
-  this.sessionIdWatcher = setInterval(() => {
-    const currentId = sessionStorage.getItem("presentation_session_id");
-
-    if (this.active && currentId && currentId !== this.lastSessionId) {
-      console.log("Session ID changed, restarting translation socket...");
-
-      // Restart translation socket with new ID
-      presentationTranslationSystem.StopSocket();
-      presentationTranslationSystem.AudienceListenSocket(currentId);
-
-      this.lastSessionId = currentId;
-    }
-  }, 2000); // every 2 seconds
-}
-
+ 
   Init(reset: boolean) {
     this.allowed = roomPropertiesReader.AllowPresentation;
 
@@ -112,8 +90,7 @@ WatchSessionId() {
       this.UpdateTranslation(text, from);
     }; 
 
-    APP.dialog.on("speakerInfo", (data: { speakerId: string }) => {
-      console.log("444444i")
+    APP.dialog.on("speakerInfo", (data: { speakerId: string }) => { 
      
     });
 
@@ -219,8 +196,7 @@ WatchSessionId() {
     }
   } 
 
-  ProccessRaisedHandRequest(from: string, raised: boolean) {
-    console.log(4)
+  ProccessRaisedHandRequest(from: string, raised: boolean) { 
     const includes = this.questionQueue.includes(from);
     if (!raised && includes) {
       this.questionQueue.splice(this.questionQueue.indexOf(from), 1);
@@ -229,17 +205,8 @@ WatchSessionId() {
       this.questionQueue.push(from);
       console.log(`adding ${from} to q&a list`, this.questionQueue);
     }
-  }
-
-  // RespondToHandRequest(result: boolean, peer: string) {
-  //   // if (Date.now() - respondTime > 3000) { 
-  //   console.log(peer, this.questionQueue); 
-  //   if (this.questionQueue.includes(peer)) {
-  //     APP.dialog.RespondToHandRequest(true, peer);
-  //     this.questionQueue.splice(this.questionQueue.indexOf(peer), 1);
-  //   } 
-  // }
-
+  } 
+ 
   RespondToHandRequest(result: boolean, peer: string) {
     if (!peer || typeof peer !== "string") {
       console.warn("❌ Invalid peer ID when calling RespondToHandRequest:", peer);
@@ -330,27 +297,17 @@ WatchSessionId() {
       } 
     else if (!this.presenter && this.panelObj) this.HidePresenterPanel();
   }
-  UpdateSpeakerInfo(newSpeaker: string) {
-    // if (this.presenter === newPresenter) return;
-    // this.presenter = newPresenter;
-    console.log(newSpeaker)
-    // sessionStorage.setItem("new_speaker_id", newSpeaker);
-
+  UpdateSpeakerInfo(newSpeaker: string) { 
+    console.log(newSpeaker)  
     this.presentationSessionId = newSpeaker;
     // sessionStorage.setItem("presentation_session_id",newSpeaker);
     this.ShowPresenterPanel(); 
-    presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId)
-
- 
-
+    presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId) 
     console.log(`New speaker: ${newSpeaker} `);
-     }
-  
-
+     } 
    
   StopSubtitleOverlay() {
-    if (this.subtitleInterval) clearInterval(this.subtitleInterval);
-  
+    if (this.subtitleInterval) clearInterval(this.subtitleInterval); 
     if (this.subtitleEl) {
       this.subtitleEl.remove();
       this.subtitleEl = null;
@@ -382,7 +339,7 @@ WatchSessionId() {
  
 
   UpdateTranslation(data: string, producer: string) {
-    console.log("p1")
+   
     this.StopWaitingDots();
     this.StopFixedPanelWaitingDots()
     if (!this.panelShown && !this.presenterState) {
@@ -393,22 +350,21 @@ WatchSessionId() {
     UpdatePanelColor(newColor);
     if(this.panelShown){
       UpdateFixedPanelText(data); 
-      console.log("p2")
+   
     } else {
-      console.log("p3")
+   
       UpdateFixedPanelText("");
     }  
     if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
-      console.log("p3")
+ 
       const newWords = data.split(/\s+/).filter((w: string) => w.length > 0);
       this.wordBuffer.push(...newWords);
     
       if (!this.bufferUpdateInterval) {
-        console.log("p4")
+   
         this.bufferUpdateInterval = setInterval(() => this.updateBlackSquareText(), 300);
       }
-    } 
-    console.log(33)
+    }  
   } 
 // for the aditors we have these event if  mic on or off
   RegisterAudienceEvents(register: boolean) {
@@ -448,25 +404,7 @@ WatchSessionId() {
     this.wordBuffer.splice(0, currentWords.length);
   }
 
-  // AudienceEvent(e: any) {
-  //   console.log("audience event", e);
-  //   //start auditors transcription
-  //   presentationTranslationSystem.AudienceTranscription(e.enabled);
-  // }  
-
-//   AudienceEvent = (e: { enabled: boolean }) => {
-//     console.log("Mic state changed:", e);
-//     if (e.enabled) {
-//       // APP.dialog.sendSpeakerInfo(this.peerId);
-//       // presentationTranslationSystem.PresentationTranscription(true);
-
-//       await presentationTranslationSystem.PresentationTranscription(true);
-// APP.dialog.sendSpeakerInfo(this.peerId);
-//     } else {
-     
-//       presentationTranslationSystem.PresentationTranscription(false);
-//     }
-//   };
+   
 
   AudienceEventOld = async (e: { enabled: boolean }) => {
     console.log("Mic state changed:", e);
