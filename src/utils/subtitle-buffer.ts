@@ -5,9 +5,10 @@ export class SubtitleBuffer {
   private timer: number | null = null;
   private lastFlushTime = 0;
 
-  private readonly maxWordsPerLine = 8;
-  private readonly flushDelay = 2500; // milliseconds
-  private readonly minFlushDelay = 1500; // minimum delay between flushes
+  private readonly maxWordsPerLine = 12;
+  private readonly minDelay = 1500; // ms
+  private readonly maxDelay = 4000; // ms
+  private readonly msPerWord = 400; // average reading speed: 200 wpm
   private readonly callback: (line1: string, line2: string) => void;
 
   constructor(callback: (line1: string, line2: string) => void) {
@@ -24,23 +25,23 @@ export class SubtitleBuffer {
 
   private maybeFlush() {
     const now = Date.now();
+    const timeSinceLast = now - this.lastFlushTime;
 
-    if (!this.line1) {
-      this.line1 = this.pullLine();
-    }
+    const lineReady = this.buffer.length >= this.maxWordsPerLine;
+    const timeoutReady = timeSinceLast >= this.getDynamicDelay();
 
-    if (!this.line2 && this.buffer.length > 0) {
-      this.line2 = this.pullLine();
-    }
-
-    const enoughContent = this.line1 && this.line2;
-    const timePassed = now - this.lastFlushTime >= this.flushDelay;
-
-    if (enoughContent || timePassed) {
+    if (lineReady || timeoutReady) {
       this.flush();
     } else if (!this.timer) {
-      this.timer = window.setTimeout(() => this.flush(), this.flushDelay);
+      const remainingTime = this.getDynamicDelay() - timeSinceLast;
+      this.timer = window.setTimeout(() => this.flush(), remainingTime);
     }
+  }
+
+  private getDynamicDelay(): number {
+    const wordCount = this.line2 ? this.line2.split(/\s+/).length : this.maxWordsPerLine;
+    const estimated = wordCount * this.msPerWord;
+    return Math.min(this.maxDelay, Math.max(this.minDelay, estimated));
   }
 
   private pullLine(): string {
@@ -57,15 +58,14 @@ export class SubtitleBuffer {
       this.timer = null;
     }
 
-    if (!this.line1 && !this.line2) return;
+    if (this.buffer.length === 0 && !this.line2) return;
 
-    const l1 = this.line1;
-    const l2 = this.line2;
+    // Scroll up
+    this.line1 = this.line2;
+    this.line2 = this.pullLine();
 
-    this.line1 = "";
-    this.line2 = "";
     this.lastFlushTime = Date.now();
-
-    this.callback(l1, l2);
+    this.callback(this.line1, this.line2);
   }
 }
+
