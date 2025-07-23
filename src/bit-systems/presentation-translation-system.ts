@@ -26,14 +26,9 @@ class TranslationTarget {
   }
  
   // UpdateText(newText: string) {
-    UpdateText(eventData:any) {
-      console.log("eventData")
-      console.log(this.name)
-      console.log(eventData)
+    UpdateText(eventData:any) { 
       APP.scene!.emit("update_avatar_panel", { id: eventData.id, message: eventData.message });
-      // APP.scene!.emit("update_avatar_panel", { id: eventData.id, message: eventData.message });
-    // APP.scene!.emit("panel_text_update", { id: eventData.id, message: eventData.message });
-  }
+    }
 
   Close() {
     APP.scene!.emit("remove_translate_target", { id: this.id });
@@ -64,11 +59,7 @@ export class TranslationSystem {
 
  pingInterval: number | null 
  constructor() {
-  // this.subtitleBuffer = new SubtitleBuffer((line1, line2) => {
-  //   if (this.onFixedPanelTextUpdate) {
-  //     this.onFixedPanelTextUpdate(`${line1}\n${line2}`, "presentation");
-  //   }
-  // });
+ 
 }
 
   Init() {
@@ -110,20 +101,7 @@ export class TranslationSystem {
   
 
   onFixedPanelTextUpdate?: (text: string, from: string) => void; 
-
-  // PresentationTranscription(start: boolean) {
-  //   console.log("Presentation transcription")
-  //   let flagMessage;
-  //   if (start) {
-  //     flagMessage = " Starting to transcribe text";
-  //     this.OpenWs();
-  //   } else {
-  //     this.StopTranscription();
-  //     flagMessage = " Stop transcribing text";
-  //   } 
-  //   console.log(`Presentation Presenter: ${flagMessage}`);
-  // }
-
+ 
   async PresentationTranscription(start: boolean) {
     console.log("Presentation transcription");
   
@@ -162,12 +140,10 @@ export class TranslationSystem {
    
   }  
   async StartTranscription() {
-    // APP.dialog.enableMicrophone(true)
-    console.log(this.peerId, APP.dialog._clientId);
-    // const mediaStream: MediaStream = await APP.dialog.getMediaStream(APP.dialog._clientId);
-    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    console.log(mediaStream);
-
+  const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+ 
+    const tracks = mediaStream.getAudioTracks();
+ 
     this.context = new window.AudioContext();
     console.log(`audio context created with state: ${this.context.state}`);
     await this.context.resume();
@@ -180,10 +156,7 @@ export class TranslationSystem {
     input.connect(this.processor);
     this.processor.connect(this.gainNode);
     this.gainNode.connect(this.context.destination);
-
-    console.log("AudioContext state:", this.context.state);
-    console.log("MediaStreamSource connected:", input.numberOfInputs);
-    console.log("Processor connected:", this.processor.numberOfInputs);
+ 
   }
 
   StopTranscription() {
@@ -227,20 +200,7 @@ export class TranslationSystem {
     console.log("Cleanup completed");
   }
 
-  // ProcessAudio(event: AudioProcessingEvent) {
-  //   const inputSampleRate = this.context!.sampleRate;
-  //   const outputSampleRate = 16000; // Target sample rate
-
-  //   const left = event.inputBuffer.getChannelData(0);
-  //   const downsampledBuffer = DownsampleBuffer(left, inputSampleRate, outputSampleRate);
-  //   const audioData = ConvertFloat32ToInt16(downsampledBuffer);
-
-  //   // console.log(">>>>>>>>> " + audioData);
-  //   if (this.websocket && this.websocket.readyState == 1) {
-  //     this.websocket.send(audioData);
-  //   }
-  // }  
-  
+ 
   ProcessAudio(event: AudioProcessingEvent) {
     if (!this.context || !this.websocket) return;
   
@@ -250,41 +210,46 @@ export class TranslationSystem {
     const left = event.inputBuffer.getChannelData(0);
     const downsampledBuffer = DownsampleBuffer(left, inputSampleRate, outputSampleRate);
     const audioData = ConvertFloat32ToInt16(downsampledBuffer);
-  
+
+ 
+  try {
     if (this.websocket.readyState === WebSocket.OPEN) {
       this.websocket.send(audioData);
+      // if ( allowedSeconds.includes(currentSecond)  && currentMs <= 100 ){
+
+   
+      // } else   {
+
+      //   // console.log("not right time")
+      // }
+    } else {
+      console.warn("⚠️ Tried to send but WebSocket is not open");
     }
+  } catch (e) {
+    console.error("❌ Error sending audio chunk:", e);
+  }
   }
 
   OpenWs(id: any): Promise<void> {
     return new Promise(resolve => {
-      this.wsActive = true;
-      this.websocket = new WebSocket(getAIUrls().transcribe_audio + APP.dialog._clientId);
-  
-      this.websocket.onopen = () => {
-        
-        console.log("connected to websocket");
-        // this.startPing(this.websocket!); // ⬅️ add this
+      this.wsActive = true; 
+    this.websocket = new WebSocket(getAIUrls().transcribe_audio + APP.dialog._clientId);
+      this.websocket.onopen = () => { 
+        console.log("connected to websocket"); 
         this.StartTranscription().then(resolve); // only resolve after StartTranscription
       };
   
       this.websocket.onerror = error => {
-        console.log({ event: "onerror", error });
+        console.log({ event:  error });
         resolve(); // resolve anyway to not block
       };
-      this.websocket.onclose = () => {
-        console.log({ event: "onclose" });
-        // this.stopPing();
-        // if (this.wsActive){
-        //   console.log("reconnecting");
-        // } this.OpenWs(id);
-    
+      this.websocket.onclose = (e) => {
+        console.log(e)
+        console.log({ event: "onclose" }); 
       };
-  
-      // this.websocket.onclose = () => {
-      //   if (this.wsActive) this.OpenWs(id);
-      //   console.log({ event: "onclose" });
-      // };
+      this.websocket.onmessage = (e) => {
+        console.log('message '+  e) 
+      }; 
     });
   }
 
@@ -300,35 +265,21 @@ export class TranslationSystem {
     
     if (!this.peerId) this.peerId = APP.dialog._clientId;
 
-   this.websocket.onopen = () => {
-      console.log("connected to websocket");
-      // this.SendAudioConfig();
-      this.StartTranscription();
-      // this.wsActive = true;
+   this.websocket.onopen = () => { 
+      this.StartTranscription(); 
     };
-
-    //George start
-    // this.websocket.onmessage = (event: MessageEvent) => {
-    //   const eventData = JSON.parse(event.data) as WsData;
-    //   console.log("Message from trans server:", eventData);
-    //   APP.dialog.SendTranscription(eventData.text, this.mylanguage);
-    // };
-
+ 
     this.websocket.onclose = () => {
-      console.log({ event: "onclose" });
-      // this.stopPing();
+      console.log({ event: "onclose" }); 
       if (this.wsActive){
         console.log("reconnecting");
-      } this.OpenWs(id);
-  
+      } this.OpenWs(id); 
     };
 
     this.websocket.onerror = error => {
       console.log({ event: "onerror", error });
     }; 
-  }
-
-
+  }  
   
   OpenWsListen(targetId: string) {
    setTimeout(()=>{    const url = getAIUrls().transcribe_audio_listen  +  targetId + "/" +APP.store.state.preferences.locale
@@ -345,29 +296,22 @@ export class TranslationSystem {
     console.log(`[WS LISTENER RAW] ${event.data}`);
     try {
       const eventData = JSON.parse(event.data) as WsData;
-      const eventDataNew = JSON.parse(event.data) 
-      console.log(eventData)
-      console.log(eventDataNew)
-      console.log(`Message from ${targetId}:`, eventData.text);
-      console.log(`Message from ${targetId}:`, eventData );
+      const eventDataNew = JSON.parse(event.data)  
       this.targets[targetId].UpdateText({id: targetId ,  message:  eventDataNew.translation  });
-     
-      console.log(this.targets)
+      
     } catch (e) {
       console.warn(`Invalid message from ${targetId}:`, event.data);
     }
   };
  
-   ws.onclose = () => {
-     console.log(`WebSocket closed for target ${targetId}`);
-    //  delete this.websocket_listeners[targetId];
+   ws.onclose = (event) => {
+     console.log(`WebSocket closed for target ${targetId}`); 
+    console.log(`event code (${event})`); 
    };
  
    ws.onerror = (err) => {
      console.error(`WebSocket error for target ${targetId}`, err);
-   };
- 
-  //  this.websocket_listeners[targetId] = ws
+   }; 
    ;} , 1000)
 
   }
@@ -386,13 +330,9 @@ export class TranslationSystem {
     }, delay);
   }
   
-  OpenAudienceWsListen(targetId: string) {
-    // setTimeout(()=>{  
-      
+  OpenAudienceWsListen(targetId: string) { 
         const url = getAIUrls().transcribe_audio_listen  +  targetId + "/"   +APP.store.state.preferences.locale
-  
-    //  const url = getAIUrls().transcribe_audio_listen  +  "3432-34320-3322-336" + "/"   +APP.store.state.preferences.locale
-    console.log("Opening listener WebSocket for", targetId, "URL:", url);
+       console.log("Opening listener WebSocket for", targetId, "URL:", url);
   
     this.listenerSocket = new WebSocket(url);
     const ws = this.listenerSocket;
@@ -405,8 +345,7 @@ export class TranslationSystem {
 
   
     ws.onopen = () => {
-      console.log(`WebSocket opened for target ${targetId}`);
-      // this.startPing(ws);
+      console.log(`WebSocket opened for target ${targetId}`); 
     };
 
     ws.onmessage = (event: MessageEvent) => {
@@ -424,32 +363,18 @@ export class TranslationSystem {
 
     ws.onclose = (event) => {
       console.log(`WebSocket closed for target ${targetId}`, event);
-      this.stopPing();
-
-      // Always clear
+ 
       this.listenerSocket = null;
     console.warn(`Abnormal close (${event.code})`);
-      // Reconnect only if it closed abnormally
-      // if (event.code !== 1000 && event.code !== 1001) {
-      //   console.warn(`Abnormal close (${event.code}). Reconnecting in 1s...`);
-      //   setTimeout(() => this.OpenAudienceWsListen(targetId), 1000);
-      // }
+ 
     };
   
     ws.onerror = (err) => {
       console.error(`WebSocket error for target ${targetId}`, err);
-    };
-  
-    // this.websocket_listeners[targetId] = ws;
-  // } , 1000)
- 
-   }
-   
-  
-
+    }; 
+   } 
   Tick() {
-    if (!this.allowed || !APP.scene!.is("entered")) return;
-    // if (this.consumers.length > 0) this.TranscribeText();
+    if (!this.allowed || !APP.scene!.is("entered")) return; 
   }
 }
 
