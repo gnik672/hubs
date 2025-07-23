@@ -11,7 +11,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn = this.el.querySelector(".agent-btn");
     this.mapBtn = this.el.querySelector(".map-btn");
     this.helpBtn = this.el.querySelector(".help-btn");
-    this.transBtn = this.el.querySelector(".trans-btn");
+    // this.transBtn = this.el.querySelector(".trans-btn");
     this.askBtn = this.el.querySelector(".ask-btn");
     this.background = this.el.querySelector(".bg");
 
@@ -28,7 +28,7 @@ AFRAME.registerComponent("in-world-hud", {
         this.agentBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsAgent);
         this.mapBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsMap);
         this.helpBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsHelp);
-        this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowPresentation);
+        // this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowPresentation);
         this.askBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowPresentation);
 
         // this.taskBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("task"));
@@ -40,7 +40,7 @@ AFRAME.registerComponent("in-world-hud", {
         if (roomPropertiesReader.AllowsHelp)
           this.helpBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("help"));
         if (roomPropertiesReader.AllowPresentation) {
-          this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("translation"));
+          // this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("translation"));
           this.askBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("handraise"));
         }
       });
@@ -130,7 +130,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn.object3D.addEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.addEventListener("interact", this.onMapClick);
     this.helpBtn.object3D.addEventListener("interact", this.onHelpClick);
-    this.transBtn.object3D.addEventListener("interact", this.onTransClick);
+    // this.transBtn.object3D.addEventListener("interact", this.onTransClick);
     this.askBtn.object3D.addEventListener("interact", this.onAskClick);
   },
 
@@ -144,7 +144,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.removeEventListener("interact", this.onMapClick);
     this.helpBtn.object3D.removeEventListener("interact", this.onHelpClick);
-    this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
+    // this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
     this.askBtn.object3D.removeEventListener("interact", this.onAskClick);
   }
 });
