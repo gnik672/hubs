@@ -44,6 +44,11 @@ export class PresentationSystem {
   waitingDotsInterval: NodeJS.Timeout | null = null;
   dotStage: number = 0;
 
+  presenterColorLine1: Color;
+presenterColorLine2: Color;
+audienceColorLine1: Color;
+audienceColorLine2: Color;
+
   fixedPanelWaitingDotsInterval: NodeJS.Timeout | null = null;
 fixedPanelDotStage: number = 0;
 
@@ -65,8 +70,10 @@ maxWords: number = 10;
 
   constructor() {
     this.presenter = "";
-    this.presenterColor = new Color(255, 255, 255);
-    this.audienceColor = new Color(255, 255, 0);
+    this.presenterColorLine1 = new Color(0.5, 0.5, 0.5);
+    this.audienceColorLine1 =  new Color(0.5, 0.5, 0);
+    this.presenterColorLine2 = new Color(1, 1, 1);
+    this.audienceColorLine2  = new Color(1, 1, 0);
     this.allowed = false;
     this.presenterState = false;
     this.active = false;
@@ -85,10 +92,37 @@ maxWords: number = 10;
   Init(reset: boolean) {
     this.allowed = roomPropertiesReader.AllowPresentation;
 
+    // presentationTranslationSystem.onFixedPanelTextUpdate = (text, from) => {
+    //   console.log("Translation received for panel:", text, from);
+    //   this.UpdateTranslation(text, from);
+    // }; 
+
+    // presentationTranslationSystem.onFixedPanelTextUpdate = (text, from) => {
+    //   const [line1 = "", line2 = ""] = text.split("\n");
+    
+    //   this.UpdateTranslation([
+    //     { text: line1, color: this.presenterColor },
+    //     { text: line2, color: this.audienceColor }
+    //   ], from);
+    // };
+
     presentationTranslationSystem.onFixedPanelTextUpdate = (text, from) => {
-      console.log("Translation received for panel:", text, from);
-      this.UpdateTranslation(text, from);
-    }; 
+      const [line1 = "", line2 = ""] = text.split("\n");
+    
+      const isPresenter = from === this.presenter;
+    
+      const lines = isPresenter
+        ? [
+            { text: line1, color: this.presenterColorLine1 },
+            { text: line2, color: this.presenterColorLine2 }
+          ]
+        : [
+            { text: line1, color: this.audienceColorLine1 },
+            { text: line2, color: this.audienceColorLine2 }
+          ];
+    
+      this.UpdateTranslation(lines, from);
+    };
 
     APP.dialog.on("speakerInfo", (data: { speakerId: string }) => { 
      
@@ -179,7 +213,7 @@ maxWords: number = 10;
          this.ShowPresenterPanel(); 
          presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId)
  
-        //  presentationTranslationSystem.AudienceListenSocket(this.peerId);
+      presentationTranslationSystem.AudienceListenSocket(this.peerId);
       }
     } else {
       APP.scene!.removeState("translation");
@@ -338,34 +372,33 @@ maxWords: number = 10;
   } 
  
 
-  UpdateTranslation(data: string, producer: string) {
-   
-    this.StopWaitingDots();
-    this.StopFixedPanelWaitingDots()
-    if (!this.panelShown && !this.presenterState) {
-      return; // Skip only if no fixed panel AND not the presenter
-    }
-    let newColor = producer === this.presenter ? this.presenterColor : this.audienceColor;
-    if (!this.panelObj) this.ShowPresenterPanel();
-    UpdatePanelColor(newColor);
-    if(this.panelShown){
-      UpdateFixedPanelText(data); 
-   
-    } else {
-   
-      UpdateFixedPanelText("");
-    }  
-    if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
- 
-      const newWords = data.split(/\s+/).filter((w: string) => w.length > 0);
-      this.wordBuffer.push(...newWords);
+  // UpdateTranslation(data: string, producer: string) {
+    UpdateTranslation(lines: { text: string, color: Color }[], producer: string){
+      this.StopWaitingDots();
+      this.StopFixedPanelWaitingDots();
     
-      if (!this.bufferUpdateInterval) {
-   
-        this.bufferUpdateInterval = setInterval(() => this.updateBlackSquareText(), 300);
+      if (!this.panelShown && !this.presenterState) {
+        return;
       }
-    }  
-  } 
+    
+      if (!this.panelObj) this.ShowPresenterPanel();
+    
+      if (this.panelShown) {
+        UpdateFixedPanelText(lines);
+      } else {
+        UpdateFixedPanelText([]);
+      }
+    
+      if (this.presenterState && this.blackSquareCtx && this.blackSquareTexture) {
+        const combinedText = lines.map(l => l.text).join(" ");
+        const newWords = combinedText.split(/\s+/).filter(w => w.length > 0);
+        this.wordBuffer.push(...newWords);
+    
+        if (!this.bufferUpdateInterval) {
+          this.bufferUpdateInterval = setInterval(() => this.updateBlackSquareText(), 300);
+        }
+      }
+    }
 // for the aditors we have these event if  mic on or off
   RegisterAudienceEvents(register: boolean) {
     if (register) {
@@ -446,7 +479,7 @@ maxWords: number = 10;
       if (this.presenter === this.peerId && !this.blackSquareCanvas) addBlackSquareToCamera(this);
       this.StartWaitingDots();
       console.log("🎤 Starting translation socket with session ID:", this.presentationSessionId);
-      presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId);
+     presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId);
   
       APP.dialog.sendSpeakerInfo(this.peerId);
     } else {
@@ -484,6 +517,21 @@ maxWords: number = 10;
     }
   }
 
+  // StartFixedPanelWaitingDots() {
+  //   this.StopFixedPanelWaitingDots(); // Prevent double intervals
+  //   this.fixedPanelDotStage = 0;
+  
+  //   this.fixedPanelWaitingDotsInterval = setInterval(() => {
+  //     const dots = ".".repeat((this.fixedPanelDotStage % 4) + 1);
+  //     this.fixedPanelDotStage++;
+  //     // UpdateFixedPanelText(`${dots}`);
+  //     UpdateFixedPanelText([
+  //       { text: `${dots}`, color: this.presenterColorLine1 },
+  //       { text: "", color: this.presenterColorLine2 }
+  //     ]);
+  //   }, 500);
+  // }
+
   StartFixedPanelWaitingDots() {
     this.StopFixedPanelWaitingDots(); // Prevent double intervals
     this.fixedPanelDotStage = 0;
@@ -491,7 +539,11 @@ maxWords: number = 10;
     this.fixedPanelWaitingDotsInterval = setInterval(() => {
       const dots = ".".repeat((this.fixedPanelDotStage % 4) + 1);
       this.fixedPanelDotStage++;
-      UpdateFixedPanelText(`${dots}`);
+  
+      UpdateFixedPanelText([
+        { text: "", color: this.presenterColorLine1 }, // empty top line
+        { text: dots, color: this.presenterColorLine2 } // dots in bottom line
+      ]);
     }, 500);
   }
   
