@@ -100,6 +100,35 @@ export class SubtitleBuffer {
   //   this.callback(this.line1, this.line2);
   // }
 
+  // private flush() {
+  //   if (this.timer) {
+  //     clearTimeout(this.timer);
+  //     this.timer = null;
+  //   }
+  
+  //   if (this.buffer.length === 0 && !this.line2) return;
+  
+  //   const combined = this.buffer.join(" ");
+  
+  //   if (combined.length > this.maxCharsPerLine * 2) {
+  //     const slice = combined.slice(0, this.maxCharsPerLine * 2);
+  //     const [part1, part2] = this.splitByChar(slice, this.maxCharsPerLine);
+  
+  //     this.line1 = part1;
+  //     this.line2 = part2;
+  
+  //     // Remove words that were used
+  //     const usedWordCount = (part1 + " " + part2).trim().split(/\s+/).length;
+  //     this.buffer.splice(0, usedWordCount);
+  //   } else {
+  //     this.line1 = this.line2;
+  //     this.line2 = this.pullLineByChar();
+  //   }
+  
+  //   this.lastFlushTime = Date.now();
+  //   this.callback(this.line1, this.line2);
+  // }
+
   private flush() {
     if (this.timer) {
       clearTimeout(this.timer);
@@ -110,24 +139,36 @@ export class SubtitleBuffer {
   
     const combined = this.buffer.join(" ");
   
+    let newLine1 = "";
+    let newLine2 = "";
+  
     if (combined.length > this.maxCharsPerLine * 2) {
       const slice = combined.slice(0, this.maxCharsPerLine * 2);
       const [part1, part2] = this.splitByChar(slice, this.maxCharsPerLine);
   
-      this.line1 = part1;
-      this.line2 = part2;
+      newLine1 = part1;
+      newLine2 = part2;
   
-      // Remove words that were used
       const usedWordCount = (part1 + " " + part2).trim().split(/\s+/).length;
       this.buffer.splice(0, usedWordCount);
     } else {
-      this.line1 = this.line2;
-      this.line2 = this.pullLineByChar();
+      newLine1 = this.line2;
+      newLine2 = this.pullLineByChar();
     }
   
+    this.line1 = "";
+    this.line2 = "";
+    this.callback("", ""); // 🔸 Show blank panel for 0.4 sec
+  
     this.lastFlushTime = Date.now();
-    this.callback(this.line1, this.line2);
+  
+    setTimeout(() => {
+      this.line1 = newLine1;
+      this.line2 = newLine2;
+      this.callback(this.line1, this.line2);
+    }, 200); // ⏱ Blank gap before showing next content
   }
+  
 
   private pullLineByChar(): string {
     let chars = 0;
