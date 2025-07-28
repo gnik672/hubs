@@ -34,7 +34,7 @@ import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
 import { navSystem } from "./bit-systems/routing-system";
 import { languagePanel } from "./bit-systems/language-panel";
-import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
+// import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
 import { helpButton } from "./bit-systems/help-system";
 import { logger } from "./bit-systems/logging-system";
@@ -89,7 +89,7 @@ export default class SceneEntryManager {
     virtualAgent.Init(reset);
     floorMap.Init(reset);
     navSystem.Init(reset);
-    tutorialManager.Init(reset);
+    // tutorialManager.Init(reset);
     helpButton.Init(reset);
     labelOrganizer.Init();
     presentationSystem.Init(reset);
