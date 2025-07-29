@@ -240,7 +240,8 @@ export async function vlModule(destination: string) {
     checkTilt();
   });
 
-  const pov = await SnapPov();
+  // const pov = await SnapPov();
+  const pov = await getDevicePov();
    formData.append("file", pov, "camera_pov.png");
   const response = await fetch(`${getAIUrls().navqa}/?question=${destination}`, {
     method: "POST",
@@ -259,9 +260,40 @@ export async function vlModule(destination: string) {
 }
 
 const fakeCamera = new THREE.PerspectiveCamera();
+const isMobile = AFRAME.utils.device.isMobile();
+export async function getDevicePov(): Promise<Blob> {
+  if (isMobile) {
+    // Phones & tablets
+    return SnapPovT();
+  } else {
+    // Laptops & desktops
+    return SnapPov();
+  }
+}
 
+export async function SnapPov() {
+  const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  APP.scene?.renderer.setRenderTarget(renderTarget);
+  APP.scene?.renderer.render(APP.scene!.object3D, APP.scene!.camera);
+  APP.scene?.renderer.setRenderTarget(null);
+  const canvas = APP.scene!.renderer.domElement;
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+  // if (blob) {
 
-export async function SnapPov(): Promise<Blob> {
+  //   saveFile(blob, "png");
+  // }
+
+  virtualAgent.agent.obj!.visible = true;
+  virtualAgent.agent.obj!.updateMatrix();
+
+  hiddenAvatars.forEach(obj => (obj.visible = true));
+
+  
+  if (!blob) throw new Error("something went wrong");
+  return blob;
+}
+
+export async function SnapPovT(): Promise<Blob> {
   const renderer = APP.scene?.renderer!;
   const scene = APP.scene?.object3D!;
   const camera = APP.scene?.camera! as THREE.PerspectiveCamera;
