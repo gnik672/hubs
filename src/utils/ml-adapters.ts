@@ -272,7 +272,8 @@ export async function isVRHeadset(): Promise<boolean> {
 export async function getDevicePov(): Promise<Blob> {
   if (await isVRHeadset()) {
     // Meta Quest or VR headset
-    return SnapPovT();
+    return SnapPov();
+    // return SnapPovT();
   } else {
     // Laptop, mobile, or tablet
     return SnapPov();
