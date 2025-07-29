@@ -261,16 +261,23 @@ export async function vlModule(destination: string) {
 
 const fakeCamera = new THREE.PerspectiveCamera();
 const isMobile = AFRAME.utils.device.isMobile();
+
+export async function isVRHeadset(): Promise<boolean> {
+  if (navigator.xr && navigator.xr.isSessionSupported) {
+    return await navigator.xr.isSessionSupported("immersive-vr");
+  }
+  return false;
+}
+
 export async function getDevicePov(): Promise<Blob> {
-  if (isMobile) {
-    // Phones & tablets
+  if (await isVRHeadset()) {
+    // Meta Quest or VR headset
     return SnapPovT();
   } else {
-    // Laptops & desktops
+    // Laptop, mobile, or tablet
     return SnapPov();
   }
 }
-
 export async function SnapPov() {
   const renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
   APP.scene?.renderer.setRenderTarget(renderTarget);
