@@ -1429,10 +1429,10 @@ export class NavigationSystem {
   }
 
   ShouldFinish() {
-    if (avatarPos().distanceTo(this.dest.pos!.vector) < 3) {
+    if (avatarPos().distanceTo(this.dest.pos!.vector) < 5) {
       this.StopNavigating();
       virtualAgent.UpdateWithRandomPhrase("success");
-    } else if (new Date().getTime() - this.dest.time! > 30000) this.StopNavigating();
+    } else if (new Date().getTime() - this.dest.time! > 90000) this.StopNavigating();
   }
 }
 
