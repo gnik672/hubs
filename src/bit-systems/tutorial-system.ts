@@ -124,6 +124,16 @@ class TutorialManager {
 
       if (this.activeTimeout) clearTimeout(this.activeTimeout);
       if (this.redirectionTimeout) clearTimeout(this.redirectionTimeout);
+
+
+      // ✅ hard reset tutorial state
+    this.slideIndex = 0;
+    this.chapterIndex = 0;
+    this.activeSlide = undefined as any;
+    this.activeChapter = undefined as any;
+    this.chapters = [];
+
+
     }
 
     if (!roomPropertiesReader.AllowsTutorial) {
@@ -258,8 +268,24 @@ class TutorialManager {
     for (let i = 0; i < congratsUrls.length; i++)
       this.congratsSlides.push(this.panelObj.getObjectByName(`congrats_slide_${i}`)!);
 
+  // ✅ start from the first chapter/slide every time
+  this.chapterIndex = 0;
+  this.slideIndex = 0;
+
+
+
     this.activeChapter = this.chapters[this.chapterIndex];
     this.activeSlide = this.activeChapter[this.slideIndex];
+    
+
+     // Safety guard to avoid “reading 'loopFunc' of undefined”
+  if (!this.activeChapter || !this.activeSlide) {
+    console.warn("[tutorial] No active slide found after building panel.");
+    return;
+  }
+    
+    
+    
     this.showArrows = true;
     this.Ascene.addState("task");
     APP.scene!.addEventListener("task-toggle", this.onTaskToggle);
