@@ -110,6 +110,13 @@ class TutorialManager {
     this.Ascene = document.querySelector("a-scene") as AScene;
     this.avatarHead = avatarheadElement.object3D;
 
+
+     // ✅ Check for VR headset before tutorial6
+     const hasVR = AFRAME.utils.device.isMobileVR();
+     console.log("VR headset detected (fallback):", hasVR);
+     const agentEnabled = !!roomPropertiesReader.roomProps.agent;
+     console.log("has_agent", agentEnabled);
+
     if (reset) {
       if (this.panelRef && entityExists(APP.world, this.panelRef)) {
         this.RemovePanel();
@@ -132,6 +139,31 @@ class TutorialManager {
     console.log("tutorial9")
     console.log(tutorial)
     tutorial.name = roomPropertiesReader.roomProps.name;
+
+
+  // ✅ Skip "welcome_1" if no VR
+  // if (!hasVR && chaptersDict[tutorial.name]) {
+  //   chaptersDict[tutorial.name]!.chapters =
+  //     chaptersDict[tutorial.name]!.chapters.filter(c => c.name !== "welcome_1");
+  // }
+
+
+  // Skip welcome_2 if agent is true
+  if(tutorial.name === "main area"){  
+    if (!agentEnabled) {
+    console.log("agent")
+    chaptersDict[tutorial.name]!.chapters =
+    chaptersDict[tutorial.name]!.chapters.filter(c => c.name.includes("without"));
+      }
+      // Skip welcome_2 if agent is true
+      if (agentEnabled) {
+    console.log("not_agent")
+    chaptersDict[tutorial.name]!.chapters =
+    chaptersDict[tutorial.name]!.chapters.filter(c => !c.name.includes("without"));
+      }
+  }
+
+
     this.tutorial = tutorial;
     // this.chapters = chaptersDict[tutorial.name].chapters.map(chapter => chapter.steps);
     this.allowed = true;
@@ -450,7 +482,275 @@ const MapPanelSteps: Array<Step> = [
 ];
 let targetPos: Vector3;
 
- const lobbyChapters: Array<TutorialChapter> = [
+const lobbyChapters: Array<TutorialChapter> = [
+  {
+    name: "lobby_1",
+    steps: [
+      {
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = false;
+          tutorialManager.clickButtonObj.visible = false;
+          tutorialManager.prevObj.visible = false;
+          tutorialManager.nextObj.visible = true;
+        },
+        exitFunc: () => {
+          tutorialManager.prevObj.visible = false;
+        }
+      }
+    ]
+  },
+
+  {
+    name: "lobby_2",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  },
+
+  {
+    name: "lobby_3",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+           tutorialManager.clickButtonObj.visible = true;
+       },
+      }
+    ]
+  },
+  {
+    name: "lobby_4",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  },
+  {
+   name: "lobby_5",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  },
+  {
+   name: "lobby_6",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  },
+  {
+   name: "lobby_7",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  },
+  {
+   name: "lobby_8",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  },
+  {
+   name: "lobby_9",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  },
+  {
+   name: "lobby_10",
+    steps: [
+      {
+
+        openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = true;
+          tutorialManager.nextObj.visible = true;
+       },
+      }
+    ]
+  }, 
+ 
+ //  ,
+
+
+//  {
+//    name: "welcome_1",
+//   steps: [
+//     {
+//      openingFunc: () => {
+//          tutorialManager.resetButtonObj.visible = false;
+//        tutorialManager.clickButtonObj.visible = false;
+//       tutorialManager.prevObj.visible = false;
+//     },
+//        exitFunc: () => {
+//          tutorialManager.prevObj.visible = true;
+// }
+//      }
+//   ]
+//   },
+// {
+//   name: "welcome_2",
+//   steps: [
+//     {
+//       openingFunc: () => {}
+//     }
+//   ]
+// },
+// {
+//   name: "click",
+//   steps: [
+//     {
+//       openingFunc: () => {
+//         tutorialManager.activeTimeout = setTimeout(() => {
+//           tutorialManager.clickButtonObj.visible = true;
+//         }, 1000);
+//       },
+//       exitFunc: () => {
+//         tutorialManager.clickButtonObj.visible = false;
+//       }
+//     }
+//   ]
+// },
+// {
+//   name: "move",
+//   steps: [
+//     {
+//       openingFunc: () => {}
+//     },
+//     {
+//       openingFunc: () => {
+//         tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+//       },
+//       loopFunc: () => {
+//         const currentPos = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+//         const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
+//         if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
+//       }
+//     }
+//   ]
+// },
+// {
+//   name: "teleport",
+//   steps: [
+//     {
+//       openingFunc: () => {
+//         tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+//       },
+//       loopFunc: () => {
+//         const currentPos = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+//         const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
+//         if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
+//       }
+//     }
+//   ]
+// },
+// {
+//   name: "turn",
+//   steps: [
+//     {
+//       openingFunc: () => {
+//         tutorialManager.initDir = tutorialManager.avatarHead.getWorldDirection(new Vector3());
+//       },
+//       loopFunc: () => {
+//         const orientation = tutorialManager.avatarHead.getWorldDirection(new Vector3());
+//         const radAngle = tutorialManager.initDir.angleTo(orientation.setY(tutorialManager.initDir.y).normalize());
+//         const angle = THREE.MathUtils.radToDeg(radAngle);
+//         if (angle >= ANGLE_THRESH) tutorialManager.Next(true);
+//       }
+//     }
+//   ]
+// },
+// {
+//   name: "speak",
+//   agent: true,
+//   steps: [
+//     {
+//       openingFunc: () => {}
+//     },
+//     {
+//       openingFunc: () => {
+//         APP.dialog.on("mic-state-changed", onUnmuting);
+//       },
+//       exitFunc: () => {
+//         APP.dialog.off("mic-state-changed", onUnmuting);
+//       }
+//     },
+//     {
+//       openingFunc: () => {
+//         APP.dialog.on("mic-state-changed", onMuting);
+//       },
+//       exitFunc: () => {
+//         APP.dialog.off("mic-state-changed", onMuting);
+//       }
+//     }
+//   ]
+// },
+// {
+//   name: "panel",
+//   agent: true,
+//   steps: MapPanelSteps
+// },
+
+// {
+//   name: "finish",
+
+//   steps: [
+//     {
+//       openingFunc: () => {
+//         tutorialManager.resetButtonObj.visible = true;
+//         tutorialManager.nextObj.visible = false;
+//       },
+//       exitFunc: () => {
+//         tutorialManager.resetButtonObj.visible = false;
+//         tutorialManager.nextObj.visible = true;
+//       }
+//     }
+//   ]
+// }
+];
+
+ const lobbyChapters2: Array<TutorialChapter> = [
       {
         name: "welcome_1",
         steps: [
@@ -1091,9 +1391,424 @@ let targetPos: Vector3;
 //   // }
 // ];
 
-const tradeshowChapters: Array<TutorialChapter> = [ 
-  ];
+// const tradeshowChapters: Array<TutorialChapter> = [ 
+//   ];
 
+  const tradeshowChapters: Array<TutorialChapter> = [ 
+    {
+   name: "m_a_1_with_pilot",
+    steps: [
+        {
+         openingFunc: () => {
+          tutorialManager.resetButtonObj.visible = false;
+          tutorialManager.clickButtonObj.visible = false;
+          tutorialManager.prevObj.visible = false;
+          tutorialManager.nextObj.visible = true;
+        tutorialManager.activeTimeout = setTimeout(() => {
+                tutorialManager.HidePanel();
+               }, 120000);
+        },
+         exitFunc: () => {
+          tutorialManager.prevObj.visible = true;
+       }
+      },
+    ]
+   },
+   {
+    name: "m_a_2_with_pilot",
+     steps: [
+         {
+          openingFunc: () => {
+           tutorialManager.resetButtonObj.visible = false;
+           tutorialManager.clickButtonObj.visible = false;
+           tutorialManager.prevObj.visible = false;
+           tutorialManager.nextObj.visible = true;
+         tutorialManager.activeTimeout = setTimeout(() => {
+                 tutorialManager.HidePanel();
+                }, 120000);
+         },
+          exitFunc: () => {
+           tutorialManager.prevObj.visible = true;
+        }
+       },
+     ]
+    },  {
+      name: "m_a_3_with_pilot",
+       steps: [
+           {
+            openingFunc: () => {
+             tutorialManager.resetButtonObj.visible = false;
+             tutorialManager.clickButtonObj.visible = false;
+             tutorialManager.prevObj.visible = false;
+             tutorialManager.nextObj.visible = true;
+           tutorialManager.activeTimeout = setTimeout(() => {
+                   tutorialManager.HidePanel();
+                  }, 120000);
+           },
+            exitFunc: () => {
+             tutorialManager.prevObj.visible = true;
+          }
+         },
+       ]
+      },  {
+        name: "m_a_4_with_pilot",
+         steps: [
+             {
+              openingFunc: () => {
+               tutorialManager.resetButtonObj.visible = false;
+               tutorialManager.clickButtonObj.visible = false;
+               tutorialManager.prevObj.visible = false;
+               tutorialManager.nextObj.visible = true;
+             tutorialManager.activeTimeout = setTimeout(() => {
+                     tutorialManager.HidePanel();
+                    }, 120000);
+             },
+              exitFunc: () => {
+               tutorialManager.prevObj.visible = true;
+            }
+           },
+         ]
+        },
+        {
+          name: "m_a_5_with_pilot",
+           steps: [
+               {
+                openingFunc: () => {
+                 tutorialManager.resetButtonObj.visible = false;
+                 tutorialManager.clickButtonObj.visible = false;
+                 tutorialManager.prevObj.visible = false;
+                 tutorialManager.nextObj.visible = true;
+               tutorialManager.activeTimeout = setTimeout(() => {
+                       tutorialManager.HidePanel();
+                      }, 120000);
+               },
+                exitFunc: () => {
+                 tutorialManager.prevObj.visible = true;
+              }
+             },
+           ]
+          },  {
+            name: "m_a_6_with_pilot",
+             steps: [
+                 {
+                  openingFunc: () => {
+                   tutorialManager.resetButtonObj.visible = false;
+                   tutorialManager.clickButtonObj.visible = false;
+                   tutorialManager.prevObj.visible = false;
+                   tutorialManager.nextObj.visible = true;
+                 tutorialManager.activeTimeout = setTimeout(() => {
+                         tutorialManager.HidePanel();
+                        }, 120000);
+                 },
+                  exitFunc: () => {
+                   tutorialManager.prevObj.visible = true;
+                }
+               },
+             ]
+            },
+            {
+              name: "m_a_7_with_pilot",
+               steps: [
+                   {
+                    openingFunc: () => {
+                     tutorialManager.resetButtonObj.visible = false;
+                     tutorialManager.clickButtonObj.visible = false;
+                     tutorialManager.prevObj.visible = false;
+                     tutorialManager.nextObj.visible = true;
+                   tutorialManager.activeTimeout = setTimeout(() => {
+                           tutorialManager.HidePanel();
+                          }, 120000);
+                   },
+                    exitFunc: () => {
+                     tutorialManager.prevObj.visible = true;
+                  }
+                 },
+               ]
+              },{
+                name: "m_a_8_with_pilot",
+                 steps: [
+                     {
+                      openingFunc: () => {
+                       tutorialManager.resetButtonObj.visible = false;
+                       tutorialManager.clickButtonObj.visible = false;
+                       tutorialManager.prevObj.visible = false;
+                       tutorialManager.nextObj.visible = true;
+                     tutorialManager.activeTimeout = setTimeout(() => {
+                             tutorialManager.HidePanel();
+                            }, 120000);
+                     },
+                      exitFunc: () => {
+                       tutorialManager.prevObj.visible = true;
+                    }
+                   },
+                 ]
+                },
+                {
+                  name: "m_a_9_with_pilot",
+                   steps: [
+                       {
+                        openingFunc: () => {
+                         tutorialManager.resetButtonObj.visible = false;
+                         tutorialManager.clickButtonObj.visible = false;
+                         tutorialManager.prevObj.visible = false;
+                         tutorialManager.nextObj.visible = true;
+                       tutorialManager.activeTimeout = setTimeout(() => {
+                               tutorialManager.HidePanel();
+                              }, 120000);
+                       },
+                        exitFunc: () => {
+                         tutorialManager.prevObj.visible = true;
+                      }
+                     },
+                   ]
+                  },
+                  {
+                    name: "m_a_10_with_pilot",
+                     steps: [
+                         {
+                          openingFunc: () => {
+                           tutorialManager.resetButtonObj.visible = false;
+                           tutorialManager.clickButtonObj.visible = false;
+                           tutorialManager.prevObj.visible = false;
+                           tutorialManager.nextObj.visible = true;
+                         tutorialManager.activeTimeout = setTimeout(() => {
+                                 tutorialManager.HidePanel();
+                                }, 120000);
+                         },
+                          exitFunc: () => {
+                           tutorialManager.prevObj.visible = true;
+                        }
+                       },
+                     ]
+                    },
+                    {
+                      name: "m_a_11_with_pilot",
+                       steps: [
+                           {
+                            openingFunc: () => {
+                             tutorialManager.resetButtonObj.visible = false;
+                             tutorialManager.clickButtonObj.visible = false;
+                             tutorialManager.prevObj.visible = false;
+                             tutorialManager.nextObj.visible = true;
+                           tutorialManager.activeTimeout = setTimeout(() => {
+                                   tutorialManager.HidePanel();
+                                  }, 120000);
+                           },
+                            exitFunc: () => {
+                             tutorialManager.prevObj.visible = true;
+                          }
+                         },
+                       ]
+                      },
+                      {
+                        name: "m_a_12_with_pilot",
+                         steps: [
+                             {
+                              openingFunc: () => {
+                               tutorialManager.resetButtonObj.visible = false;
+                               tutorialManager.clickButtonObj.visible = false;
+                               tutorialManager.prevObj.visible = false;
+                               tutorialManager.nextObj.visible = true;
+                             tutorialManager.activeTimeout = setTimeout(() => {
+                                     tutorialManager.HidePanel();
+                                    }, 120000);
+                             },
+                              exitFunc: () => {
+                               tutorialManager.prevObj.visible = true;
+                            }
+                           },
+                         ]
+                        },
+                        {
+                          name: "m_a_13_with_pilot",
+                           steps: [
+                               {
+                                openingFunc: () => {
+                                 tutorialManager.resetButtonObj.visible = false;
+                                 tutorialManager.clickButtonObj.visible = false;
+                                 tutorialManager.prevObj.visible = false;
+                                 tutorialManager.nextObj.visible = true;
+                               tutorialManager.activeTimeout = setTimeout(() => {
+                                       tutorialManager.HidePanel();
+                                      }, 120000);
+                               },
+                                exitFunc: () => {
+                                 tutorialManager.prevObj.visible = true;
+                              }
+                             },
+                           ]
+                          },
+                          {
+                            name: "m_a_14_with_pilot",
+                             steps: [
+                                 {
+                                  openingFunc: () => {
+                                   tutorialManager.resetButtonObj.visible = false;
+                                   tutorialManager.clickButtonObj.visible = false;
+                                   tutorialManager.prevObj.visible = false;
+                                   tutorialManager.nextObj.visible = true;
+                                 tutorialManager.activeTimeout = setTimeout(() => {
+                                         tutorialManager.HidePanel();
+                                        }, 120000);
+                                 },
+                                  exitFunc: () => {
+                                   tutorialManager.prevObj.visible = true;
+                                }
+                               },
+                             ]
+                            },
+
+                            {
+                              name: "m_a_1_without_pilot",
+                               steps: [
+                                   {
+                                    openingFunc: () => {
+                                     tutorialManager.resetButtonObj.visible = false;
+                                     tutorialManager.clickButtonObj.visible = false;
+                                     tutorialManager.prevObj.visible = false;
+                                     tutorialManager.nextObj.visible = true;
+                                   tutorialManager.activeTimeout = setTimeout(() => {
+                                           tutorialManager.HidePanel();
+                                          }, 120000);
+                                   },
+                                    exitFunc: () => {
+                                     tutorialManager.prevObj.visible = true;
+                                  }
+                                 },
+                               ]
+                              },
+                              {
+                               name: "m_a_2_without_pilot",
+                                steps: [
+                                    {
+                                     openingFunc: () => {
+                                      tutorialManager.resetButtonObj.visible = false;
+                                      tutorialManager.clickButtonObj.visible = false;
+                                      tutorialManager.prevObj.visible = false;
+                                      tutorialManager.nextObj.visible = true;
+                                    tutorialManager.activeTimeout = setTimeout(() => {
+                                            tutorialManager.HidePanel();
+                                           }, 120000);
+                                    },
+                                     exitFunc: () => {
+                                      tutorialManager.prevObj.visible = true;
+                                   }
+                                  },
+                                ]
+                               },  {
+                                 name: "m_a_3_without_pilot",
+                                  steps: [
+                                      {
+                                       openingFunc: () => {
+                                        tutorialManager.resetButtonObj.visible = false;
+                                        tutorialManager.clickButtonObj.visible = false;
+                                        tutorialManager.prevObj.visible = false;
+                                        tutorialManager.nextObj.visible = true;
+                                      tutorialManager.activeTimeout = setTimeout(() => {
+                                              tutorialManager.HidePanel();
+                                             }, 120000);
+                                      },
+                                       exitFunc: () => {
+                                        tutorialManager.prevObj.visible = true;
+                                     }
+                                    },
+                                  ]
+                                 },  {
+                                   name: "m_a_4_without_pilot",
+                                    steps: [
+                                        {
+                                         openingFunc: () => {
+                                          tutorialManager.resetButtonObj.visible = false;
+                                          tutorialManager.clickButtonObj.visible = false;
+                                          tutorialManager.prevObj.visible = false;
+                                          tutorialManager.nextObj.visible = true;
+                                        tutorialManager.activeTimeout = setTimeout(() => {
+                                                tutorialManager.HidePanel();
+                                               }, 120000);
+                                        },
+                                         exitFunc: () => {
+                                          tutorialManager.prevObj.visible = true;
+                                       }
+                                      },
+                                    ]
+                                   },
+                                   {
+                                     name: "m_a_5_without_pilot",
+                                      steps: [
+                                          {
+                                           openingFunc: () => {
+                                            tutorialManager.resetButtonObj.visible = false;
+                                            tutorialManager.clickButtonObj.visible = false;
+                                            tutorialManager.prevObj.visible = false;
+                                            tutorialManager.nextObj.visible = true;
+                                          tutorialManager.activeTimeout = setTimeout(() => {
+                                                  tutorialManager.HidePanel();
+                                                 }, 120000);
+                                          },
+                                           exitFunc: () => {
+                                            tutorialManager.prevObj.visible = true;
+                                         }
+                                        },
+                                      ]
+                                     },  {
+                                       name: "m_a_6_without_pilot",
+                                        steps: [
+                                            {
+                                             openingFunc: () => {
+                                              tutorialManager.resetButtonObj.visible = false;
+                                              tutorialManager.clickButtonObj.visible = false;
+                                              tutorialManager.prevObj.visible = false;
+                                              tutorialManager.nextObj.visible = true;
+                                            tutorialManager.activeTimeout = setTimeout(() => {
+                                                    tutorialManager.HidePanel();
+                                                   }, 120000);
+                                            },
+                                             exitFunc: () => {
+                                              tutorialManager.prevObj.visible = true;
+                                           }
+                                          },
+                                        ]
+                                       },
+                                       {
+                                         name: "m_a_7_without_pilot",
+                                          steps: [
+                                              {
+                                               openingFunc: () => {
+                                                tutorialManager.resetButtonObj.visible = false;
+                                                tutorialManager.clickButtonObj.visible = false;
+                                                tutorialManager.prevObj.visible = false;
+                                                tutorialManager.nextObj.visible = true;
+                                              tutorialManager.activeTimeout = setTimeout(() => {
+                                                      tutorialManager.HidePanel();
+                                                     }, 120000);
+                                              },
+                                               exitFunc: () => {
+                                                tutorialManager.prevObj.visible = true;
+                                             }
+                                            },
+                                          ]
+                                         },{
+                                           name: "m_a_8_without_pilot",
+                                            steps: [
+                                                {
+                                                 openingFunc: () => {
+                                                  tutorialManager.resetButtonObj.visible = false;
+                                                  tutorialManager.clickButtonObj.visible = false;
+                                                  tutorialManager.prevObj.visible = false;
+                                                  tutorialManager.nextObj.visible = true;
+                                                tutorialManager.activeTimeout = setTimeout(() => {
+                                                        tutorialManager.HidePanel();
+                                                       }, 120000);
+                                                },
+                                                 exitFunc: () => {
+                                                  tutorialManager.prevObj.visible = true;
+                                               }
+                                              },
+                                            ]
+                                           },
+
+  
+];
 
  
 const conferenceChapters: Array<TutorialChapter> = [
