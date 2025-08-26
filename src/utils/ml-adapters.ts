@@ -268,13 +268,18 @@ export async function isVRHeadset(): Promise<boolean> {
   }
   return false;
 }
+const hasVR = AFRAME.utils.device.isMobileVR();
 
 export async function getDevicePov(): Promise<Blob> {
-  if (await isVRHeadset()) {
+  // if (await isVRHeadset()) {
+    if (hasVR) {
+      console.log("meta")
     // Meta Quest or VR headset
-    return SnapPov();
+    return SnapPovT();
     // return SnapPovT();
   } else {
+    console.log(AFRAME.utils.device)
+    console.log("laptop")
     // Laptop, mobile, or tablet
     return SnapPov();
   }
@@ -347,25 +352,25 @@ export async function SnapPovT(): Promise<Blob> {
 
   // Convert to PNG
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-//   if (blob) {
+    //   if (blob) {
 
-//     saveFile(blob, "png");
-//  }
+    //     saveFile(blob, "png");
+    //  }
   
   if (!blob) throw new Error("Failed to generate screenshot blob.");
 
   // Restore everything
   renderer.setRenderTarget(prevRenderTarget);
   renderer.setSize(prevSize.x, prevSize.y);
- // const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
-// screenshotCamera.aspect = width / height;
-// screenshotCamera.updateProjectionMatrix();
+     // const screenshotCamera = camera.clone() as THREE.PerspectiveCamera;
+    // screenshotCamera.aspect = width / height;
+  // screenshotCamera.updateProjectionMatrix();
 
-// renderer.render(scene, screenshotCamera);
+  // renderer.render(scene, screenshotCamera);
   renderer.xr.enabled = prevXrEnabled;
   virtualAgent.agent.obj!.visible = true;
   hiddenAvatars.forEach(obj => obj.visible = true);
   hiddenLabels.forEach(obj => obj.visible = true);
-//
+  //
   return blob;
 }
