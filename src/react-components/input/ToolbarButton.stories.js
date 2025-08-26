@@ -55,7 +55,7 @@ const containerStyles = {
 
 export const RoomToolbar = args => (
   <RoomLayout
-    toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" {...args} />}
+   toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" {...args} />}
     toolbarCenter={
       <>
         <div style={containerStyles}>
@@ -71,7 +71,7 @@ export const RoomToolbar = args => (
         </div>
         <ToolbarButton icon={<ShareIcon />} label="Share" preset="accent5" {...args} />
         <ToolbarButton icon={<ObjectIcon />} label="Place" preset="accent3" {...args} />
-        <ToolbarButton icon={<ReactionIcon />} label="React" preset="accent2" {...args} />
+        {/* <ToolbarButton icon={<ReactionIcon />} label="React" preset="accent2" {...args} /> */}
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" {...args} />
         <ToolbarButton icon={<AvatarIcon />} label="Agent" preset="accent4" {...args} />
         
@@ -81,7 +81,7 @@ export const RoomToolbar = args => (
     toolbarRight={
       <>
         <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="accent1" {...args} />
-        <ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" {...args} />
+    <ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" {...args} />  
       </>
     }
   />
@@ -89,13 +89,13 @@ export const RoomToolbar = args => (
 
 export const EntryToolbar = args => (
   <RoomLayout
-    toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" {...args} />}
+   toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" {...args} />}
     toolbarCenter={
       <>
-        <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideLg} {...args} />
+       <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideLg} {...args} /> 
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" {...args} />
       </>
     }
-    toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" {...args} />}
+   toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" {...args} />}
   />
 );
