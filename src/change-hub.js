@@ -5,7 +5,7 @@ import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import qsTruthy from "./utils/qs_truthy";
 import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
 import { storedUpdates } from "./bit-systems/network-receive-system";
-import { tutorialManager } from "./bit-systems/tutorial-system";
+// import { tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
 
 function unloadRoomObjects() {
@@ -32,9 +32,9 @@ function loadRoomObjects(hubId) {
 }
 
 export async function changeHub(hubId, addToHistory = true, waypoint = null) {
-   if (tutorialManager.allowed) {
-     tutorialManager.RunCleanupFunc();
-   }
+  //  if (tutorialManager.allowed) {
+  //    tutorialManager.RunCleanupFunc();
+  //  }
   if (hubId === APP.hub.hub_id) {
     console.log("Change hub called with the current hub id. This is a noop.");
     return;
