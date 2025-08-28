@@ -546,6 +546,15 @@ module.exports = async (env, argv) => {
           ]
         },
         {
+          test: /\.(woff2?|ttf|otf|eot)$/i,
+          type: "asset/resource",
+          generator: {
+            filename: "assets/fonts/[name]-[contenthash][ext]",
+            // Optional: force same-origin root (bypass CDN in BASE_ASSETS_PATH)
+            // publicPath: "/"
+          }
+        },
+        {
           oneOf: [
             { resourceQuery: /inline/, type: "asset/inline" },
             {

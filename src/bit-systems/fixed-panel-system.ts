@@ -9,13 +9,13 @@ import { GetTextSize } from "../utils/interactive-panels";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
 import { voxLanugages } from "./localization-system";
 import { presentationSystem } from "./presentation-system";
+import FONT_URL  from "../assets/fonts/RobotoSlab-Light.ttf"
 
 // const FONT_URL = "/fonts/NotoSans-VariableFont_wdth,wght.ttf"
 
-interface TranslateEventParams {
-  id: string;
-  text: string;
-}
+
+ 
+  // const FONT_URL = `/fonts/RobotoSlab-Light.ttf`
 
 const PANEL_PADDING = 0.05;
 const PANEL_WIDTH = 6.9;
@@ -42,7 +42,7 @@ export function FixedPanelSystem(world: HubsWorld) {
   
       // Create line 1 (Presenter or Audience primary)
       line1Obj = new Text();
-      line1Obj.font=   "https://rawcdn.githack.com/google/fonts/3b179b729ac3306ab2a249d848d94ff08b90a0af/apache/robotoslab/static/RobotoSlab-Black.ttf"
+      line1Obj.font=   FONT_URL
       line1Obj.fontSize = 0.32;
 
       line1Obj.color = presentationSystem.presenterColorLine1;  // Default fallback color
@@ -54,8 +54,8 @@ export function FixedPanelSystem(world: HubsWorld) {
   
       // Create line 2 (Faded style)
       line2Obj = new Text();
-      line2Obj.font=   "https://rawcdn.githack.com/google/fonts/3b179b729ac3306ab2a249d848d94ff08b90a0af/apache/robotoslab/static/RobotoSlab-Black.ttf"
-      // line2Obj.fontWeight = "bold"; 
+      line2Obj.font=  FONT_URL
+       // line2Obj.fontWeight = "bold"; 
       line2Obj.fontSize = 0.36;  // Slightly larger for emphasis if you like
       line2Obj.color = presentationSystem.presenterColorLine2;  // Default fallback color
       line2Obj.anchorX = "center";
@@ -87,16 +87,14 @@ export function UpdateFixedPanelText(lines: { text: string; color: Color }[]) {
 
   // Update line 1
     line1Obj.text = l1?.text || "";
-  line1Obj.font=   "https://rawcdn.githack.com/google/fonts/3b179b729ac3306ab2a249d848d94ff08b90a0af/apache/robotoslab/static/RobotoSlab-Black.ttf"
- 
+  line1Obj.font=  FONT_URL
   // line1Obj.font =   "sans";
   line1Obj.color = l1?.color || presentationSystem.presenterColorLine1;
   line1Obj.sync();
 
   // Update line 2
    line2Obj.text = l2?.text || "";
-  line2Obj.font=   "https://rawcdn.githack.com/google/fonts/3b179b729ac3306ab2a249d848d94ff08b90a0af/apache/robotoslab/static/RobotoSlab-Black.ttf"
- 
+  line2Obj.font=  FONT_URL
   line2Obj.color = l2?.color || presentationSystem.presenterColorLine2;
   line2Obj.sync();
   console.log("line1Obj")
