@@ -122,7 +122,7 @@ window.APP.hub.hub_id ===  "zts4Mhv" ||
     window.APP.hub.hub_id ===  "MZbYQFN" || 
    window.APP.hub.hub_id ===  "DzM288m" || 
    window.APP.hub.hub_id ===  "zKapQ9v"  )
-    { const hubId = "TfszbgCv"; // Your room ID
+    { const hubId = "TfszbgC"; // Your room ID
       const waypoint = null;   // Or a specific waypoint ID if needed
        changeHub(hubId, true, waypoint);
        return;  }
@@ -149,7 +149,7 @@ window.APP.hub.hub_id ===  "zts4Mhv" ||
   //  window.APP.hub.hub_id ===  "Wrof4qm" 
   //  ) {return}
 
-   if(window.APP.hub.hub_id ===  "TfszbgCv" || 
+   if(window.APP.hub.hub_id ===  "TfszbgC" || 
    window.APP.hub.hub_id ===  "uYLmstU" ||
     window.APP.hub.hub_id ===  "CDvPjH9" || 
    window.APP.hub.hub_id ===  "4P2AN2P" 
