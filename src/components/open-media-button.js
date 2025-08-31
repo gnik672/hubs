@@ -76,21 +76,12 @@ window.APP.hub.hub_id ===  "zts4Mhv" ||
      window.APP.hub.hub_id ===  "ZwawSJC" || 
      window.APP.hub.hub_id ===  "pe5ngbm" 
      ) { 
-      const hubId = "TfszbgC"; // Your room ID
-      const waypoint = null;   // Or a specific waypoint ID if needed
-      changeHub(hubId, true, waypoint);
-      return;  
-
-     }
-
-     if(window.APP.hub.hub_id ===  "TfszbgC"  
-     ) { 
       const hubId = "Lf5offt"; // Your room ID
       const waypoint = null;   // Or a specific waypoint ID if needed
       changeHub(hubId, true, waypoint);
       return;  
 
-     }
+     } 
 
      if(window.APP.hub.hub_id ===  "Lf5offt"  
      ) { 
@@ -98,57 +89,74 @@ window.APP.hub.hub_id ===  "zts4Mhv" ||
         const hubId = "DSinvBh"; // Your room ID
        const waypoint = null;   // Or a specific waypoint ID if needed
        changeHub(hubId, true, waypoint);
-       return; 
-
+       return;  
      }
 
      if (username === "user-3" || username === "user-4" ){
       const hubId = "vCAqAvY"; // Your room ID
        const waypoint = null;   // Or a specific waypoint ID if needed
         changeHub(hubId, true, waypoint);
-       return;    }
-       if (username === "user-5" || username === "user-6" ){
+       return;   
+       }
+    if (username === "user-5" || username === "user-6" ){
         const hubId = "MZbYQFN"; // Your room ID
          const waypoint = null;   // Or a specific waypoint ID if needed
          changeHub(hubId, true, waypoint);
          return;    }
-         if (username === "user-7" || username === "user-8" ){
+    if (username === "user-7" || username === "user-8" ){
           const hubId = "DzM288m"; // Your room ID
            const waypoint = null;   // Or a specific waypoint ID if needed
            changeHub(hubId, true, waypoint);
            return;    }   
-           if (username === "user-9" || username === "user-10" ){
-            const hubId = "zKapQ9v"; // Your room ID
-             const waypoint = null;   // Or a specific waypoint ID if needed
-             changeHub(hubId, true, waypoint);
-             return;    }  
-                          
+    if (username === "user-9" || username === "user-10" ){
+          const hubId = "zKapQ9v"; // Your room ID
+          const waypoint = null;   // Or a specific waypoint ID if needed
+          changeHub(hubId, true, waypoint);
+           return;    }   
     
    }
+
 
    if(window.APP.hub.hub_id ===  "DSinvBh" || 
    window.APP.hub.hub_id ===  "vCAqAvY" ||
     window.APP.hub.hub_id ===  "MZbYQFN" || 
    window.APP.hub.hub_id ===  "DzM288m" || 
-   window.APP.hub.hub_id ===  "zKapQ9v" || 
-   window.APP.hub.hub_id ===  "a9a9C6U" || 
-   window.APP.hub.hub_id ===  "5pUKqhb" || 
-   window.APP.hub.hub_id ===  "sY6HJki" || 
-   window.APP.hub.hub_id ===  "9wwPDe8" || 
-   window.APP.hub.hub_id ===  "hBEMigy" || 
-   window.APP.hub.hub_id ===  "xKkxuwL" || 
-   window.APP.hub.hub_id ===  "ngXS8Dg" || 
-   window.APP.hub.hub_id ===  "Eo8WYHm" || 
-   window.APP.hub.hub_id ===  "P34XsVp" || 
-   window.APP.hub.hub_id ===  "6KRbEwB" || 
-   window.APP.hub.hub_id ===  "VXyBdWu" || 
-   window.APP.hub.hub_id ===  "Arvck4f" ||  
-   window.APP.hub.hub_id ===  "aFNyuny" || 
-   window.APP.hub.hub_id ===  "fkLMpzR" || 
-   window.APP.hub.hub_id ===  "Wrof4qm" 
+   window.APP.hub.hub_id ===  "zKapQ9v"  )
+    { const hubId = "TfszbgCv"; // Your room ID
+      const waypoint = null;   // Or a specific waypoint ID if needed
+       changeHub(hubId, true, waypoint);
+       return;  }
+
+  //  if(window.APP.hub.hub_id ===  "DSinvBh" || 
+  //  window.APP.hub.hub_id ===  "vCAqAvY" ||
+  //   window.APP.hub.hub_id ===  "MZbYQFN" || 
+  //  window.APP.hub.hub_id ===  "DzM288m" || 
+  //  window.APP.hub.hub_id ===  "zKapQ9v" || 
+  //  window.APP.hub.hub_id ===  "a9a9C6U" || 
+  //  window.APP.hub.hub_id ===  "5pUKqhb" || 
+  //  window.APP.hub.hub_id ===  "sY6HJki" || 
+  //  window.APP.hub.hub_id ===  "9wwPDe8" || 
+  //  window.APP.hub.hub_id ===  "hBEMigy" || 
+  //  window.APP.hub.hub_id ===  "xKkxuwL" || 
+  //  window.APP.hub.hub_id ===  "ngXS8Dg" || 
+  //  window.APP.hub.hub_id ===  "Eo8WYHm" || 
+  //  window.APP.hub.hub_id ===  "P34XsVp" || 
+  //  window.APP.hub.hub_id ===  "6KRbEwB" || 
+  //  window.APP.hub.hub_id ===  "VXyBdWu" || 
+  //  window.APP.hub.hub_id ===  "Arvck4f" ||  
+  //  window.APP.hub.hub_id ===  "aFNyuny" || 
+  //  window.APP.hub.hub_id ===  "fkLMpzR" || 
+  //  window.APP.hub.hub_id ===  "Wrof4qm" 
+  //  ) {return}
+
+   if(window.APP.hub.hub_id ===  "TfszbgCv" || 
+   window.APP.hub.hub_id ===  "uYLmstU" ||
+    window.APP.hub.hub_id ===  "CDvPjH9" || 
+   window.APP.hub.hub_id ===  "4P2AN2P" 
+  
    ) {return}
    
-  
+       
  
 
 // from lobby  session 2
@@ -158,20 +166,11 @@ window.APP.hub.hub_id ===  "LB93AmU" ||
 window.APP.hub.hub_id ===  "XQPkmkk" ||
   window.APP.hub.hub_id ===  "9f3jrjg" ||
   window.APP.hub.hub_id ===  "XfETMdM" || 
-   window.APP.hub.hub_id ===  "zKM5ykf" ||
-    window.APP.hub.hub_id ===  "PKXyPyW" || 
-     window.APP.hub.hub_id ===  "Db39mTE"  || 
-     window.APP.hub.hub_id ===  "znaYFyF" || 
-     window.APP.hub.hub_id ===  "6RobLnj" 
-     ) { 
-      const hubId = "CDvPjH9"; // Your room ID
-      const waypoint = null;   // Or a specific waypoint ID if needed
-      changeHub(hubId, true, waypoint);
-      return;  
-
-     }
-
-     if(window.APP.hub.hub_id ===  "CDvPjH9"  
+ window.APP.hub.hub_id ===  "zKM5ykf" ||
+window.APP.hub.hub_id ===  "PKXyPyW" || 
+ window.APP.hub.hub_id ===  "Db39mTE"  || 
+window.APP.hub.hub_id ===  "znaYFyF" || 
+window.APP.hub.hub_id ===  "6RobLnj" 
      ) { 
       const hubId = "5tsdP2w"; // Your room ID
       const waypoint = null;   // Or a specific waypoint ID if needed
@@ -179,6 +178,15 @@ window.APP.hub.hub_id ===  "XQPkmkk" ||
       return;  
 
      }
+
+    //  if(window.APP.hub.hub_id ===  "CDvPjH9"  
+    //  ) { 
+    //   const hubId = "5tsdP2w"; // Your room ID
+    //   const waypoint = null;   // Or a specific waypoint ID if needed
+    //   changeHub(hubId, true, waypoint);
+    //   return;  
+
+    //  }
 
      if(window.APP.hub.hub_id ===  "5tsdP2w"  
      ) { 
@@ -215,6 +223,17 @@ window.APP.hub.hub_id ===  "XQPkmkk" ||
    }
 
 
+   if(window.APP.hub.hub_id ===  "a9a9C6U" || 
+   window.APP.hub.hub_id ===  "5pUKqhb" ||
+    window.APP.hub.hub_id ===  "sY6HJki" || 
+   window.APP.hub.hub_id ===  "9wwPDe8" || 
+   window.APP.hub.hub_id ===  "hBEMigy"  )
+    { const hubId = "CDvPjH9"; // Your room ID
+      const waypoint = null;   // Or a specific waypoint ID if needed
+       changeHub(hubId, true, waypoint);
+       return;  }
+
+
 
 
 // from lobby  session 3
@@ -230,21 +249,20 @@ window.APP.hub.hub_id ===  "xHduK5S" ||
      window.APP.hub.hub_id ===  "sgvW4vB" || 
      window.APP.hub.hub_id ===  "pir7nGq" 
      ) { 
-      const hubId = "uYLmstU"; // Your room ID
-      const waypoint = null;   // Or a specific waypoint ID if needed
-      changeHub(hubId, true, waypoint);
-      return;  
-
-     }
-
-     if(window.APP.hub.hub_id ===  "uYLmstU"  
-     ) { 
       const hubId = "wmJrZRW"; // Your room ID
       const waypoint = null;   // Or a specific waypoint ID if needed
-      changeHub(hubId, true, waypoint);
-      return;  
-
+      changeHub(hubId, true, waypoint)
+       return;  
      }
+
+    //  if(window.APP.hub.hub_id ===  "uYLmstU"  
+    //  ) { 
+    //   const hubId = "wmJrZRW"; // Your room ID
+    //   const waypoint = null;   // Or a specific waypoint ID if needed
+    //   changeHub(hubId, true, waypoint);
+    //   return;  
+
+    //  }
 
      if(window.APP.hub.hub_id ===  "wmJrZRW"  
      ) { 
@@ -279,6 +297,17 @@ window.APP.hub.hub_id ===  "xHduK5S" ||
                           
     
    }
+
+   if(window.APP.hub.hub_id ===  "xKkxuwL" || 
+   window.APP.hub.hub_id ===  "ngXS8Dg" ||
+    window.APP.hub.hub_id ===  "Eo8WYHm" || 
+   window.APP.hub.hub_id ===  "P34XsVp" || 
+   window.APP.hub.hub_id ===  "6KRbEwB"  )
+    { const hubId = "uYLmstU"; // Your room ID
+      const waypoint = null;   // Or a specific waypoint ID if needed
+       changeHub(hubId, true, waypoint);
+       return;  }
+
      
      
                          
@@ -335,21 +364,21 @@ window.APP.hub.hub_id ===  "J2LSN4u" ||
      window.APP.hub.hub_id ===  "dghjLoq" || 
      window.APP.hub.hub_id ===  "iFtyp99" 
      ) { 
-      const hubId = "4P2AN2P"; // Your room ID
-      const waypoint = null;   // Or a specific waypoint ID if needed
-      changeHub(hubId, true, waypoint);
-      return;  
-
-     }
-
-     if(window.APP.hub.hub_id ===  "4P2AN2P"  
-     ) { 
       const hubId = "JqLXc2T"; // Your room ID
       const waypoint = null;   // Or a specific waypoint ID if needed
       changeHub(hubId, true, waypoint);
       return;  
 
      }
+    
+    //  if(window.APP.hub.hub_id ===  "4P2AN2P"  
+    //  ) { 
+    //   const hubId = "JqLXc2T"; // Your room ID
+    //   const waypoint = null;   // Or a specific waypoint ID if needed
+    //   changeHub(hubId, true, waypoint);
+    //   return;  
+
+    //  }
 
      if(window.APP.hub.hub_id ===  "JqLXc2T"  
      ) { 
@@ -384,6 +413,17 @@ window.APP.hub.hub_id ===  "J2LSN4u" ||
                           
     
    }
+
+
+   if(window.APP.hub.hub_id ===  "VXyBdWu" || 
+   window.APP.hub.hub_id ===  "Arvck4f" ||
+    window.APP.hub.hub_id ===  "aFNyuny" || 
+   window.APP.hub.hub_id ===  "fkLMpzR" || 
+   window.APP.hub.hub_id ===  "Wrof4qm"  )
+    { const hubId = "4P2AN2P"; // Your room ID
+      const waypoint = null;   // Or a specific waypoint ID if needed
+       changeHub(hubId, true, waypoint);
+       return;  }
      
      
 
