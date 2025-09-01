@@ -2,6 +2,31 @@ import { virtualAgent } from "../bit-systems/agent-system";
 import { languageCodes, voxLanugages } from "../bit-systems/localization-system";
 
 export type Room = "lobby" | "conference room" | "main area" | "social area" | "business room" | "unknown";
+// import Lobby_1 from "../assets/images/help_lobby/1.png";
+// import Lobby_2 from "../assets/images/help_lobby/2.png";
+// import Lobby_3 from "../assets/images/help_lobby/3.png";
+// import Lobby_4 from "../assets/images/help_lobby/4.png";
+// import Lobby_5 from "../assets/images/help_lobby/5.png";
+// import Lobby_6 from "../assets/images/help_lobby/6.png";
+// import Lobby_7 from "../assets/images/help_lobby/7.png";
+// import Lobby_8 from "../assets/images/help_lobby/8.png";
+// import Lobby_9 from "../assets/images/help_lobby/9.png";
+// import Lobby_10 from "../assets/images/help_lobby/10.png";
+
+import Conference_1 from "../assets/images/help_conference/1.png";
+import Conference_2 from "../assets/images/help_conference/2.png";
+import Conference_3 from "../assets/images/help_conference/3.png";
+import Conference_4 from "../assets/images/help_conference/4.png";
+
+
+import Business_1 from "../assets/images/help_business/1.png";
+import Business_2 from "../assets/images/help_business/2.png";
+import Business_3 from "../assets/images/help_business/3.png";
+import Business_4 from "../assets/images/help_business/4.png";
+
+
+import Social_1 from "../assets/images/help_social/1.png";
+import Social_2 from "../assets/images/help_social/2.png"; 
 
 interface Properties {
   name: Room;
@@ -299,28 +324,191 @@ class RoomPropertiesReader {
         if (!response.ok) throw new Error("Response not OK");
         const responseProperties = ((await response.json()) as { message: Properties }).message;
 
+        // 🔽 Always add Screenshot.png at index 0
+// if (responseProperties.help && 4<3) {
+//   // Prepend custom slide
+//   responseProperties.help = [
+//     {
+//       index: 0,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_1      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 1,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_2      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 2,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_3      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 3,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_4      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 4,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_5      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 5,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_6      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 6,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_7      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 7,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_8      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 8,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_9      // 👈 local import instead of server file
+//     },
+//     {
+//       index: 9,
+//       ratio: 0.4545,         // 👈 set whatever ratio fits best
+//       filename: Lobby_10      // 👈 local import instead of server file
+//     },
+  
+//     // ...responseProperties.help
+//   ]
+  
+  
+  
+  
+//   // .map((slide, newIndex) => ({
+//   //   ...slide,
+//   //   index: newIndex          // reindex sequentially
+//   // }));
+// }
+if (responseProperties.name === "conference room" && responseProperties.help) {
+  // Prepend custom slide
+  responseProperties.help = [
+    {
+      index: 0,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Conference_1      // 👈 local import instead of server file
+    },
+    {
+      index: 1,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Conference_2      // 👈 local import instead of server file
+    },
+    {
+      index: 2,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Conference_3      // 👈 local import instead of server file
+    },
+    {
+      index: 3,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Conference_4      // 👈 local import instead of server file
+    }, 
+  
+    // ...responseProperties.help
+  ]
+  
+  
+  
+  
+  // .map((slide, newIndex) => ({
+  //   ...slide,
+  //   index: newIndex          // reindex sequentially
+  // }));
+}
+
+if (responseProperties.name === "business room" && responseProperties.help) {
+  // Prepend custom slide
+  responseProperties.help = [
+    {
+      index: 0,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Business_1      // 👈 local import instead of server file
+    },
+    {
+      index: 1,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Business_2      // 👈 local import instead of server file
+    },
+    {
+      index: 2,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Business_3      // 👈 local import instead of server file
+    },
+    {
+      index: 3,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Business_4      // 👈 local import instead of server file
+    }, 
+  
+    // ...responseProperties.help
+  ]
+  
+  
+  
+  
+  // .map((slide, newIndex) => ({
+  //   ...slide,
+  //   index: newIndex          // reindex sequentially
+  // }));
+}
+
+if (responseProperties.name === "social area" && responseProperties.help) {
+  // Prepend custom slide
+  responseProperties.help = [
+    {
+      index: 0,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Social_1      // 👈 local import instead of server file
+    },
+    {
+      index: 1,
+      ratio: 0.4545,         // 👈 set whatever ratio fits best
+      filename: Social_2      // 👈 local import instead of server file
+    },
+  
+  
+    // ...responseProperties.help
+  ]
+  
+  
+  
+  
+  // .map((slide, newIndex) => ({
+  //   ...slide,
+  //   index: newIndex          // reindex sequentially
+  // }));
+}
+
+          // // ✅ Remove the 2nd help slide (index 1) and reindex the rest
+          // if (responseProperties.name === "conference room" && responseProperties.help && responseProperties.help.length > 1) {
+          //   responseProperties.help = responseProperties.help
+          //     .filter((_, i) => i !== 1)            // drop the 2nd one
+          //     .map((slide, newIndex) => ({
+          //       ...slide,
+          //       index: newIndex                     // reindex sequentially
+          //     }));
+          // }
 
 
-          // ✅ Remove the 2nd help slide (index 1) and reindex the rest
-          if (responseProperties.name === "conference room" && responseProperties.help && responseProperties.help.length > 1) {
-            responseProperties.help = responseProperties.help
-              .filter((_, i) => i !== 1)            // drop the 2nd one
-              .map((slide, newIndex) => ({
-                ...slide,
-                index: newIndex                     // reindex sequentially
-              }));
-          }
-
-
-           // ✅ Remove the 2nd help slide (index 1) and reindex the rest
-           if (responseProperties.name === "business room" && responseProperties.help && responseProperties.help.length > 1) {
-            responseProperties.help = responseProperties.help
-            .filter((_, i) => i < 1 || i > 6) // keep only index 0 and 7+
-              .map((slide, newIndex) => ({
-                ...slide,
-                index: newIndex                     // reindex sequentially
-              }));
-          }
+          //  // ✅ Remove the 2nd help slide (index 1) and reindex the rest
+          //  if (responseProperties.name === "business room" && responseProperties.help && responseProperties.help.length > 1) {
+          //   responseProperties.help = responseProperties.help
+          //   .filter((_, i) => i < 1 || i > 6) // keep only index 0 and 7+
+          //     .map((slide, newIndex) => ({
+          //       ...slide,
+          //       index: newIndex                     // reindex sequentially
+          //     }));
+          // }
           
 
 
