@@ -22,7 +22,17 @@ export function HelpImagePanel(slides: HelpSlide[]) {
   const nextIcon = `${roomPropertiesReader.serverURL}/file/next_icon.png`;
 
   slides.forEach((slide, index) => {
-    const slideUrl = `${roomPropertiesReader.serverURL}/file/${slide.filename}`;
+    // const slideUrl = `${roomPropertiesReader.serverURL}/file/${slide.filename}`;
+
+    const isAbsolute =
+  /^([a-z]+:)?\/\//i.test(slide.filename) || // http://, https://, //cdn...
+   slide.filename.startsWith("/") ||
+   slide.filename.startsWith("data:") ||
+   slide.filename.startsWith("blob:");
+
+ const slideUrl = isAbsolute
+   ? slide.filename
+   : `${roomPropertiesReader.serverURL}/file/${slide.filename}`;
     slideEntities.push(
       <entity
         name={`slide_${index}`}
@@ -49,8 +59,9 @@ export function HelpImagePanel(slides: HelpSlide[]) {
         clickRef: clickRef
       }}
       ref={panelRef}
-      followFov={{ offset: [0, 0, -2] }}
-      scale={[1.5, 1.5, 1.5]}
+      followFov={{ offset: [0, 0.2, -1.4] }}
+      // scale={[1.5, 1.5, 1.5]}
+      scale={[2.7, 2.7, 2.7]}
     >
       {slideEntities}
 
