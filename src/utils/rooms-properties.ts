@@ -111,6 +111,176 @@ class RoomPropertiesReader {
     this.serverURL = "https://repo.vox.lab.synelixis.com";
   }
 
+ 
+  async Read2(HubID: string, reset: boolean): Promise<Properties> {
+    if (reset) {
+      this.read = false;
+    }
+  
+    if (this.read) return Promise.resolve(this.roomProps);
+    else {
+      this.hubId = HubID;
+  
+      const maxRetries = 10;
+      const baseDelay = 200; // ms
+  
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const url = `${this.serverURL}/properties/rood/${this.hubId}?language=${languageCodes[this.language]}&user=${
+            encodeURIComponent(APP.store.state.profile.displayName)
+          }`;
+  
+          const response = await fetch(url, { method: "GET", mode: "cors" });
+  
+          if (!response.ok) throw new Error(`Response not OK (status ${response.status})`);
+  
+          const responseProperties = ((await response.json()) as { message: Properties }).message;
+
+
+
+
+
+
+          this.roomProps = responseProperties;
+          console.log("properties");
+  
+          if (this.roomProps.name === "social area") {
+            virtualAgent.ResetUUID();
+          }
+  
+          APP.scene!.emit("properties_loaded");
+          break; // success, exit retry loop
+  
+        } catch (error) {
+          console.warn(`Fetch attempt ${attempt} failed:`, error);
+  
+          if (attempt === maxRetries) {
+            console.error("All retry attempts failed.");
+            this.roomProps = invalidProps;
+          } else {
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, baseDelay * attempt));
+          }
+        }
+      }
+  
+      this.read = true;
+      if (reset) APP.scene!.emit("room_properties_updated");
+      return this.roomProps;
+    }
+  }
+
+  async Read3(HubID: string, reset: boolean): Promise<Properties> {
+    if (reset) {
+      this.read = false;
+    }
+  
+    if (this.read) return Promise.resolve(this.roomProps);
+  
+    this.hubId = HubID;
+  
+    const maxRetries = 10;
+    const baseDelay = 200; // ms
+  
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const languageCode = languageCodes[this.language] ?? "en";
+        const username = encodeURIComponent(APP.store.state.profile.displayName ?? "unknown");
+  
+        // 💥 Use bad URL for attempts 1–3
+        const path = attempt <= 3 ? "rood" : "room"; // 🔄 switch from fail to success
+        const url = `${this.serverURL}/properties/${path}/${this.hubId}?language=${languageCode}&user=${username}`;
+  
+        console.log(`🧪 Attempt ${attempt}: Fetching ${url}`);
+  
+        const response = await fetch(url, { method: "GET", mode: "cors" });
+  
+        if (!response.ok) throw new Error(`Response not OK (status ${response.status})`);
+  
+        const responseProperties = ((await response.json()) as { message: Properties }).message;
+        this.roomProps = responseProperties;
+        console.log("✅ properties loaded");
+  
+        if (this.roomProps.name === "social area") {
+          virtualAgent.ResetUUID();
+        }
+  
+        APP.scene!.emit("properties_loaded");
+        break; // 🎯 Success: stop retrying
+  
+      } catch (error) {
+        console.warn(`❌ Fetch attempt ${attempt} failed:`, error);
+  
+        if (attempt === maxRetries) {
+          console.error("🚨 All retry attempts failed.");
+          this.roomProps = invalidProps;
+        } else {
+          await new Promise(resolve => setTimeout(resolve, baseDelay * attempt));
+        }
+      }
+    }
+  
+    this.read = true;
+    if (reset) APP.scene!.emit("room_properties_updated");
+    return this.roomProps;
+  }
+
+  async Read4(HubID: string, reset: boolean): Promise<Properties> {
+    if (reset) {
+      this.read = false;
+    }
+  
+    if (this.read) return Promise.resolve(this.roomProps);
+  
+    this.hubId = HubID;
+  
+    const maxRetries = 3;
+    const baseDelay = 200; // ms
+  
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const languageCode = languageCodes[this.language] ?? "en";
+        const username = encodeURIComponent(APP.store.state.profile.displayName ?? "unknown");
+  
+        // 💥 Intentionally invalid URL to force failure
+        const url = `${this.serverURL}/properties/rood/${this.hubId}?language=${languageCode}&user=${username}`;
+  
+        console.log(`🧪 Attempt ${attempt}: Fetching ${url}`);
+  
+        const response = await fetch(url, { method: "GET", mode: "cors" });
+  
+        if (!response.ok) throw new Error(`Response not OK (status ${response.status})`);
+  
+        // ❌ This will never run, since response is expected to fail
+        const responseProperties = ((await response.json()) as { message: Properties }).message;
+        this.roomProps = responseProperties;
+        console.log("✅ properties loaded");
+  
+        if (this.roomProps.name === "social area") {
+          virtualAgent.ResetUUID();
+        }
+  
+        APP.scene!.emit("properties_loaded");
+        break;
+  
+      } catch (error) {
+        console.warn(`❌ Fetch attempt ${attempt} failed:`, error);
+  
+        if (attempt === maxRetries) {
+          console.error("🚨 All retry attempts failed. Returning fallback properties.");
+          this.roomProps = invalidProps;
+        } else {
+          await new Promise(resolve => setTimeout(resolve, baseDelay * attempt));
+        }
+      }
+    }
+  
+    this.read = true;
+    if (reset) APP.scene!.emit("room_properties_updated");
+    return this.roomProps;
+  }
+  
+  
   async Read(HubID: string, reset: boolean): Promise<Properties> {
     if (reset) {
       this.read = false;
@@ -128,7 +298,35 @@ class RoomPropertiesReader {
         );
         if (!response.ok) throw new Error("Response not OK");
         const responseProperties = ((await response.json()) as { message: Properties }).message;
+
+
+
+          // ✅ Remove the 2nd help slide (index 1) and reindex the rest
+          if (responseProperties.name === "conference room" && responseProperties.help && responseProperties.help.length > 1) {
+            responseProperties.help = responseProperties.help
+              .filter((_, i) => i !== 1)            // drop the 2nd one
+              .map((slide, newIndex) => ({
+                ...slide,
+                index: newIndex                     // reindex sequentially
+              }));
+          }
+
+
+           // ✅ Remove the 2nd help slide (index 1) and reindex the rest
+           if (responseProperties.name === "business room" && responseProperties.help && responseProperties.help.length > 1) {
+            responseProperties.help = responseProperties.help
+            .filter((_, i) => i < 1 || i > 6) // keep only index 0 and 7+
+              .map((slide, newIndex) => ({
+                ...slide,
+                index: newIndex                     // reindex sequentially
+              }));
+          }
+          
+
+
+
         this.roomProps = responseProperties;
+        // console.log("properties")
 
         if (this.roomProps.name === "social area") {
           virtualAgent.ResetUUID();
@@ -144,7 +342,8 @@ class RoomPropertiesReader {
       }
     }
   }
-
+   
+ 
   waitForProperties(): Promise<any> {
     if (this.read) return Promise.resolve(null);
     else
