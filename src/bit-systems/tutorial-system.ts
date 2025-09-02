@@ -477,7 +477,7 @@ let targetPos: Vector3;
 
 
   {
-    name: "lobby_1",
+    name: "webinar_l_1",
     steps: [
       {
         openingFunc: () => {
@@ -494,7 +494,7 @@ let targetPos: Vector3;
   },
 
   {
-    name: "lobby_2",
+    name: "webinar_l_2",
     steps: [
       {
 
@@ -507,7 +507,7 @@ let targetPos: Vector3;
   },
 
   {
-    name: "lobby_3",
+    name: "webinar_l_3",
     steps: [
       {
 
@@ -520,7 +520,7 @@ let targetPos: Vector3;
     ]
   },
   {
-    name: "lobby_4",
+    name: "webinar_l_4",
     steps: [
       {
 
@@ -532,7 +532,7 @@ let targetPos: Vector3;
     ]
   },
   {
-   name: "lobby_5",
+   name: "webinar_l_5",
     steps: [
       {
 
@@ -544,7 +544,7 @@ let targetPos: Vector3;
     ]
   },
   {
-   name: "lobby_6",
+   name: "webinar_l_6",
     steps: [
       {
 
@@ -556,7 +556,7 @@ let targetPos: Vector3;
     ]
   },
   {
-   name: "lobby_7",
+   name: "webinar_l_7",
     steps: [
       {
 
@@ -568,7 +568,7 @@ let targetPos: Vector3;
     ]
   },
   {
-   name: "lobby_8",
+   name: "webinar_l_8",
     steps: [
       {
 
@@ -580,7 +580,7 @@ let targetPos: Vector3;
     ]
   },
   {
-   name: "lobby_9",
+   name: "webinar_l_9",
     steps: [
       {
 
@@ -592,7 +592,7 @@ let targetPos: Vector3;
     ]
   },
   {
-   name: "lobby_10",
+   name: "webinar_l_10",
     steps: [
       {
 
