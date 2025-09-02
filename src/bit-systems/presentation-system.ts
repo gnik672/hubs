@@ -92,6 +92,10 @@ maxWords: number = 10;
   Init(reset: boolean) {
     this.allowed = roomPropertiesReader.AllowPresentation;
 
+    if (!this.allowed) {
+      console.warn("Room not in presentation mode");
+      return;
+    }
     // presentationTranslationSystem.onFixedPanelTextUpdate = (text, from) => {
     //   console.log("Translation received for panel:", text, from);
     //   this.UpdateTranslation(text, from);
@@ -133,10 +137,7 @@ maxWords: number = 10;
       APP.scene!.removeEventListener("ask-toggle", this.OnToggleHand);
     }
 
-    if (!this.allowed) {
-      console.warn("Room not in presentation mode");
-      return;
-    }
+  
     console.log(1)
     APP.scene!.addEventListener("toggle_translation", this.ToggleSubtitles);
     APP.scene!.addEventListener("ask-toggle", this.OnToggleHand);
