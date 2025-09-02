@@ -62,6 +62,26 @@ export class TranslationSystem {
  
 }
 
+Deactivate() {
+  if (this.websocket) {
+    this.websocket.close();
+    this.websocket = null;
+  }
+
+  // Close listeners
+  for (const key in this.websocket_listeners) {
+    this.websocket_listeners[key].close();
+    delete this.websocket_listeners[key];
+  }
+
+  this.consumers = [];
+  this.targets = {};
+  this.wsActive = false;
+
+  console.log("[PresentationTranslationSystem] Deactivated");
+}
+
+
   Init() {
     this.targets = {};
     this.consumers = [];

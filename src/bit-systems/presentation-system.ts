@@ -94,6 +94,7 @@ maxWords: number = 10;
 
     if (!this.allowed) {
       console.warn("Room not in presentation mode");
+      presentationTranslationSystem.Deactivate()
       return;
     }
     // presentationTranslationSystem.onFixedPanelTextUpdate = (text, from) => {
