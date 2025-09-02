@@ -2,16 +2,16 @@ import { virtualAgent } from "../bit-systems/agent-system";
 import { languageCodes, voxLanugages } from "../bit-systems/localization-system";
 
 export type Room = "lobby" | "conference room" | "main area" | "social area" | "business room" | "unknown";
-// import Lobby_1 from "../assets/images/help_lobby/1.png";
-// import Lobby_2 from "../assets/images/help_lobby/2.png";
-// import Lobby_3 from "../assets/images/help_lobby/3.png";
-// import Lobby_4 from "../assets/images/help_lobby/4.png";
-// import Lobby_5 from "../assets/images/help_lobby/5.png";
-// import Lobby_6 from "../assets/images/help_lobby/6.png";
-// import Lobby_7 from "../assets/images/help_lobby/7.png";
-// import Lobby_8 from "../assets/images/help_lobby/8.png";
-// import Lobby_9 from "../assets/images/help_lobby/9.png";
-// import Lobby_10 from "../assets/images/help_lobby/10.png";
+import Lobby_1 from "../assets/images/help_lobby/1.png";
+import Lobby_2 from "../assets/images/help_lobby/2.png";
+import Lobby_3 from "../assets/images/help_lobby/3.png";
+import Lobby_4 from "../assets/images/help_lobby/4.png";
+import Lobby_5 from "../assets/images/help_lobby/5.png";
+import Lobby_6 from "../assets/images/help_lobby/6.png";
+import Lobby_7 from "../assets/images/help_lobby/7.png";
+import Lobby_8 from "../assets/images/help_lobby/8.png";
+import Lobby_9 from "../assets/images/help_lobby/9.png";
+import Lobby_10 from "../assets/images/help_lobby/10.png";
 
 import Conference_1 from "../assets/images/help_conference/1.png";
 import Conference_2 from "../assets/images/help_conference/2.png";
@@ -325,62 +325,62 @@ class RoomPropertiesReader {
         const responseProperties = ((await response.json()) as { message: Properties }).message;
 
         // 🔽 Always add Screenshot.png at index 0
-// if (responseProperties.help && 4<3) {
+ if (responseProperties.name === "lobby" && responseProperties.help ) {
 //   // Prepend custom slide
-//   responseProperties.help = [
-//     {
-//       index: 0,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_1      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 1,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_2      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 2,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_3      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 3,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_4      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 4,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_5      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 5,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_6      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 6,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_7      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 7,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_8      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 8,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_9      // 👈 local import instead of server file
-//     },
-//     {
-//       index: 9,
-//       ratio: 0.4545,         // 👈 set whatever ratio fits best
-//       filename: Lobby_10      // 👈 local import instead of server file
-//     },
+  responseProperties.help = [
+     {
+       index: 0,
+       ratio: 0.4545,          
+       filename: Lobby_1       
+     },
+     {
+       index: 1,
+       ratio: 0.4545,           
+       filename: Lobby_2       
+     },
+     {
+       index: 2,
+       ratio: 0.4545,           
+       filename: Lobby_3       
+     },
+     {
+       index: 3,
+       ratio: 0.4545,         
+       filename: Lobby_4       
+     },
+     {
+       index: 4,
+       ratio: 0.4545,         
+       filename: Lobby_5        
+     },
+     {
+       index: 5,
+       ratio: 0.4545,         
+       filename: Lobby_6       
+     },
+     {
+       index: 6,
+       ratio: 0.4545,          
+       filename: Lobby_7       
+     },
+     {
+       index: 7,
+       ratio: 0.4545,           
+       filename: Lobby_8        
+     },
+     {
+       index: 8,
+       ratio: 0.4545,          
+       filename: Lobby_9       
+     },
+     {
+       index: 9,
+       ratio: 0.4545,          
+       filename: Lobby_10        
+     },
   
 //     // ...responseProperties.help
-//   ]
+ ]
   
   
   
@@ -389,7 +389,7 @@ class RoomPropertiesReader {
 //   //   ...slide,
 //   //   index: newIndex          // reindex sequentially
 //   // }));
-// }
+ }
 if (responseProperties.name === "conference room" && responseProperties.help) {
   // Prepend custom slide
   responseProperties.help = [
