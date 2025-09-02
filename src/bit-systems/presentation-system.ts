@@ -461,6 +461,7 @@ maxWords: number = 10;
 
 
   AudienceEvent = async (e: { enabled: boolean }) => {
+    if(roomPropertiesReader.AllowPresentation){
     console.log("Mic state changed:", e);
   
     if (e.enabled) {
@@ -489,7 +490,7 @@ maxWords: number = 10;
       console.log("🎤 Stopping translation (mic off)");
       presentationTranslationSystem.PresentationTranscription(false);
       presentationTranslationSystem.StopSocket?.(); // Just in case
-    }
+    }}else{console.log("nothing")}
   };
 
   StartWaitingDots() {
