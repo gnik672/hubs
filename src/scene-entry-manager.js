@@ -83,7 +83,7 @@ export default class SceneEntryManager {
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
     // APP.scene.emit("room-properties-ready")
-    // logger.RegisterUser();
+    logger.RegisterUser();
     // oldTranslationSystem.Init(reset);
     translationSystem.Init();
     virtualAgent.Init(reset);
@@ -101,10 +101,10 @@ export default class SceneEntryManager {
 
 
     if (!reset) {
-      // logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
-      // logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
+    logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
+     logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
     }
-    console.log("eee")
+    // console.log("eee")
     // if (roomPropertiesReader?.AllowPresentation) {
     //   console.log("ffff")
     //   for (const [el, audio] of APP.audios.entries()) {
