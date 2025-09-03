@@ -101,8 +101,8 @@ export default class SceneEntryManager {
 
 
     if (!reset) {
-    logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
-     logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
+    // logger.AddAnnouncementInteraction("language", oldTranslationSystem.mylanguage);
+    //  logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
     }
     // console.log("eee")
     // if (roomPropertiesReader?.AllowPresentation) {
