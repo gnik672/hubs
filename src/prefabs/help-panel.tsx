@@ -59,7 +59,7 @@ export function HelpImagePanel(slides: HelpSlide[]) {
         clickRef: clickRef
       }}
       ref={panelRef}
-      followFov={{ offset: [0, 0.2, -1.9] }}
+      followFov={{ offset: [0, 0.2, -2.4] }}
       // scale={[1.5, 1.5, 1.5]}
       scale={[2.7, 2.7, 2.7]}
     >
