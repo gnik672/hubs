@@ -93,71 +93,92 @@ AFRAME.registerComponent("open-media-button", {
         // let newUrl
         if(this.src.includes("DSinvBh") ){
           if(username === "user-1" ||username === "user-2" ) {
+            return
             newUrl =  "DSinvBh"
           }
           if(username === "user-3" ||username === "user-4" ) {
+            return
             newUrl =   "vCAqAvY"
           }
           if(username === "user-5" ||username === "user-6" ) {
+            return
             newUrl =      "MZbYQFN"
           }
           if(username === "user-7" ||username === "user-8" ) {
+            return
             newUrl =      "DzM288m"
           }
           if(username === "user-9" ||username === "user-10" ) {
+            return
             newUrl =      "zKapQ9v"
           }  
 
           if(username === "user-11" ||username === "user-12" ) {
+            return
             newUrl =    "a9a9C6U"
              }
              if(username === "user-13" ||username === "user-14" ) {
+              return
                newUrl =     "5pUKqhb"
              }
              if(username === "user-15" ||username === "user-16" ) {
+              return
               newUrl =   "sY6HJki"
              }
              if(username === "user-17" ||username === "user-18" ) {
+              return
               newUrl =     "9wwPDe8"
              }
              if(username === "user-19" ||username === "user-20" ) {
+              return
               newUrl =      "hBEMigy"
              }  
 
          if(username === "user-21" ||username === "user-22" ) {
+          return
           newUrl =  "xKkxuwL"
            }
            if(username === "user-23" ||username === "user-24" ) {
+            return
              newUrl =   "ngXS8Dg"
            }
            if(username === "user-25" ||username === "user-26" ) {
+            return
             newUrl =    "Eo8WYHm"
            }
            if(username === "user-27" ||username === "user-28" ) {
+            return
             newUrl =     "P34XsVp"
            }
            if(username === "user-29" ||username === "user-30" ) {
+            return
             newUrl =     "6KRbEwB"
               }  
 
            if(username === "user-31" ||username === "user-32" ) {
+            return
             newUrl =   "VXyBdWu"
             }
                if(username === "user-33" ||username === "user-34" ) {
+                return
            newUrl =    "Arvck4f"
             }
            if(username === "user-35" ||username === "user-36" ) {
+            return
             newUrl =     "aFNyuny"
              }
             if(username === "user-37" ||username === "user-38" ) {
+              return
              newUrl =   "fkLMpzR"
              }
               if(username === "user-39" ||username === "user-40" ) {
+                return
               newUrl =   "Wrof4qm"
              }   
          }  
 
          if(this.src.includes("TfszbgC") ){
+          return
           if(username === "user-1" ||username === "user-2" || username === "user-3" ||username === "user-4" 
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10" || username === "presenter-1" || 
@@ -193,6 +214,7 @@ AFRAME.registerComponent("open-media-button", {
          }  
 
          if(this.src.includes("AxFm4cE") ){
+           
           if(username === "user-1" ||username === "user-2" || username === "user-3" ||username === "user-4" 
           || username === "user-5" ||username === "user-6" || username === "user-7" ||username === "user-8"
           || username === "user-9" ||username === "user-10"  || username === "presenter-1" || 
