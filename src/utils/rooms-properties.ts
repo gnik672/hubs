@@ -34,6 +34,7 @@ import SpanishRooms from "../assets/images/help_main_area/SpanishRoomNames.png";
 import Program from "../assets/images/help_main_area/ConferenceProgram.png";
 import Ways from "../assets/images/help_main_area/ways_2_ask.png";
 import How from "../assets/images/help_main_area/make_questions.png";
+import Correct from "../assets/images/help_main_area/correct.png";
 import Suggestions from "../assets/images/help_main_area/SuggestedQuestions.png";
 
 import Social_1 from "../assets/images/help_social/1.png";
@@ -461,7 +462,17 @@ class RoomPropertiesReader {
         filename:  How   
      }  
     ) 
-  }
+  }  
+  if(responseProperties.agent === true){
+    responseProperties.help.push( {
+      index: 0,
+       ratio: 0.4545,          
+        filename:  Correct 
+     }  
+    ) 
+  } 
+  
+    
   if(responseProperties.agent === true){
     responseProperties.help.push( {
       index: 0,
