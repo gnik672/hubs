@@ -3,15 +3,15 @@ import { languageCodes, voxLanugages } from "../bit-systems/localization-system"
 
 export type Room = "lobby" | "conference room" | "main area" | "social area" | "business room" | "unknown";
 import Lobby_1 from "../assets/images/help_lobby/1.png";
-import Lobby_2 from "../assets/images/help_lobby/2.png";
-import Lobby_3 from "../assets/images/help_lobby/3.png";
-import Lobby_4 from "../assets/images/help_lobby/4.png";
-import Lobby_5 from "../assets/images/help_lobby/5.png";
-import Lobby_6 from "../assets/images/help_lobby/6.png";
-import Lobby_7 from "../assets/images/help_lobby/7.png";
-import Lobby_8 from "../assets/images/help_lobby/8.png";
-import Lobby_9 from "../assets/images/help_lobby/9.png";
-import Lobby_10 from "../assets/images/help_lobby/10.png";
+// import Lobby_2 from "../assets/images/help_lobby/2.png";
+// import Lobby_3 from "../assets/images/help_lobby/3.png";
+// import Lobby_4 from "../assets/images/help_lobby/4.png";
+// import Lobby_5 from "../assets/images/help_lobby/5.png";
+// import Lobby_6 from "../assets/images/help_lobby/6.png";
+// import Lobby_7 from "../assets/images/help_lobby/7.png";
+// import Lobby_8 from "../assets/images/help_lobby/8.png";
+// import Lobby_9 from "../assets/images/help_lobby/9.png";
+// import Lobby_10 from "../assets/images/help_lobby/10.png";
 
 import Conference_1 from "../assets/images/help_conference/1.png";
 import Conference_2 from "../assets/images/help_conference/2.png";
@@ -24,6 +24,17 @@ import Business_2 from "../assets/images/help_business/2.png";
 import Business_3 from "../assets/images/help_business/3.png";
 import Business_4 from "../assets/images/help_business/4.png";
 
+
+import EnglishRooms from "../assets/images/help_main_area/EnglishRoomNames.png";
+import DutchRooms from "../assets/images/help_main_area/DutchRoomNames.png";
+import GermanRooms from "../assets/images/help_main_area/GermanRoomNames.png";
+import GreekRooms from "../assets/images/help_main_area/GreekRoomNames.png";
+import ItalianRooms from "../assets/images/help_main_area/ItalianRoomNames.png";
+import SpanishRooms from "../assets/images/help_main_area/SpanishRoomNames.png";
+import Program from "../assets/images/help_main_area/ConferenceProgram.png";
+import Ways from "../assets/images/help_main_area/ways_2_ask.png";
+import How from "../assets/images/help_main_area/make_questions.png";
+import Suggestions from "../assets/images/help_main_area/SuggestedQuestions.png";
 
 import Social_1 from "../assets/images/help_social/1.png";
 import Social_2 from "../assets/images/help_social/2.png"; 
@@ -333,51 +344,51 @@ class RoomPropertiesReader {
        ratio: 0.4545,          
        filename: Lobby_1       
      },
-     {
-       index: 1,
-       ratio: 0.4545,           
-       filename: Lobby_2       
-     },
-     {
-       index: 2,
-       ratio: 0.4545,           
-       filename: Lobby_3       
-     },
-     {
-       index: 3,
-       ratio: 0.4545,         
-       filename: Lobby_4       
-     },
-     {
-       index: 4,
-       ratio: 0.4545,         
-       filename: Lobby_5        
-     },
-     {
-       index: 5,
-       ratio: 0.4545,         
-       filename: Lobby_6       
-     },
-     {
-       index: 6,
-       ratio: 0.4545,          
-       filename: Lobby_7       
-     },
-     {
-       index: 7,
-       ratio: 0.4545,           
-       filename: Lobby_8        
-     },
-     {
-       index: 8,
-       ratio: 0.4545,          
-       filename: Lobby_9       
-     },
-     {
-       index: 9,
-       ratio: 0.4545,          
-       filename: Lobby_10        
-     },
+    //  {
+    //    index: 1,
+    //    ratio: 0.4545,           
+    //    filename: Lobby_2       
+    //  },
+    //  {
+    //    index: 2,
+    //    ratio: 0.4545,           
+    //    filename: Lobby_3       
+    //  },
+    //  {
+    //    index: 3,
+    //    ratio: 0.4545,         
+    //    filename: Lobby_4       
+    //  },
+    //  {
+    //    index: 4,
+    //    ratio: 0.4545,         
+    //    filename: Lobby_5        
+    //  },
+    //  {
+    //    index: 5,
+    //    ratio: 0.4545,         
+    //    filename: Lobby_6       
+    //  },
+    //  {
+    //    index: 6,
+    //    ratio: 0.4545,          
+    //    filename: Lobby_7       
+    //  },
+    //  {
+    //    index: 7,
+    //    ratio: 0.4545,           
+    //    filename: Lobby_8        
+    //  },
+    //  {
+    //    index: 8,
+    //    ratio: 0.4545,          
+    //    filename: Lobby_9       
+    //  },
+    //  {
+    //    index: 9,
+    //    ratio: 0.4545,          
+    //    filename: Lobby_10        
+    //  },
   
 //     // ...responseProperties.help
  ]
@@ -390,6 +401,197 @@ class RoomPropertiesReader {
 //   //   index: newIndex          // reindex sequentially
 //   // }));
  }
+ if (responseProperties.name === "main area" && responseProperties.help ) {
+  //   // Prepend custom slide
+  responseProperties.help = []
+  if(languageCodes[this.language] === "en"){
+    responseProperties.help.push( {
+         index: 0,
+         ratio: 0.4545,          
+         filename:  EnglishRooms     
+       },)
+  }
+  if(languageCodes[this.language] === "es"){
+    responseProperties.help.push( {
+         index: 0,
+         ratio: 0.4545,          
+         filename:  SpanishRooms    
+       },)
+  }
+  if(languageCodes[this.language] === "el"){
+    responseProperties.help.push( {
+         index: 0,
+         ratio: 0.4545,          
+         filename:  GreekRooms  
+       },)
+  }
+  if(languageCodes[this.language] === "nl"){
+    responseProperties.help.push( {
+         index: 0,
+         ratio: 0.4545,          
+         filename:  DutchRooms   
+       },)
+  }
+  if(languageCodes[this.language] === "it"){
+    responseProperties.help.push( {
+         index: 0,
+         ratio: 0.4545,          
+         filename:  ItalianRooms  
+       },)
+  }
+  if(languageCodes[this.language] === "de"){
+    responseProperties.help.push( {
+         index: 0,
+         ratio: 0.4545,          
+         filename:  GermanRooms 
+       },)
+  }
+  if(responseProperties.agent === true){
+    responseProperties.help.push({
+    index: 0,
+    ratio: 0.4545,          
+       filename:  Ways   
+   }, 
+    )    
+  }
+  if(responseProperties.agent === true){
+    responseProperties.help.push( {
+      index: 0,
+       ratio: 0.4545,          
+        filename:  How   
+     }  
+    ) 
+  }
+  if(responseProperties.agent === true){
+    responseProperties.help.push( {
+      index: 0,
+       ratio: 0.4545,          
+        filename:  Suggestions    
+     }  
+    ) 
+  }
+  if(responseProperties.agent === false){
+    responseProperties.help.push( {
+      index: 0,
+       ratio: 0.4545,          
+        filename:  Program    
+     }  
+    ) 
+  }
+
+ 
+ 
+
+
+  //   responseProperties.help = [
+  //      {
+  //        index: 0,
+  //        ratio: 0.4545,          
+  //        filename:  EnglishRooms     
+  //      },
+  //      {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:   DutchRooms      
+  //     },
+
+  //     {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:  GermanRooms      
+  //     },
+
+  //     {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:  GreekRooms     
+  //     },
+  //     {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:  ItalianRooms    
+  //     },
+
+  //     {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:  SpanishRooms     
+  //     },
+  //     {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:  Program    
+  //     },
+  //     {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:  Ways   
+  //     },
+
+  //     {
+  //       index: 0,
+  //       ratio: 0.4545,          
+  //       filename:  Suggestions    
+  //     },
+
+   
+  //     //  {
+  //     //    index: 1,
+  //     //    ratio: 0.4545,           
+  //     //    filename: Lobby_2       
+  //     //  },
+  //     //  {
+  //     //    index: 2,
+  //     //    ratio: 0.4545,           
+  //     //    filename: Lobby_3       
+  //     //  },
+  //     //  {
+  //     //    index: 3,
+  //     //    ratio: 0.4545,         
+  //     //    filename: Lobby_4       
+  //     //  },
+  //     //  {
+  //     //    index: 4,
+  //     //    ratio: 0.4545,         
+  //     //    filename: Lobby_5        
+  //     //  },
+  //     //  {
+  //     //    index: 5,
+  //     //    ratio: 0.4545,         
+  //     //    filename: Lobby_6       
+  //     //  },
+  //     //  {
+  //     //    index: 6,
+  //     //    ratio: 0.4545,          
+  //     //    filename: Lobby_7       
+  //     //  },
+  //     //  {
+  //     //    index: 7,
+  //     //    ratio: 0.4545,           
+  //     //    filename: Lobby_8        
+  //     //  },
+  //     //  {
+  //     //    index: 8,
+  //     //    ratio: 0.4545,          
+  //     //    filename: Lobby_9       
+  //     //  },
+  //     //  {
+  //     //    index: 9,
+  //     //    ratio: 0.4545,          
+  //     //    filename: Lobby_10        
+  //     //  },
+    
+  // //     // ...responseProperties.help
+  //  ]
+    
+    
+    
+    
+  //   // .map((slide, newIndex) => ({
+  //   //   ...slide,
+  //   //   index: newIndex          // reindex sequentially
+  //   // }));
+   }
 if (responseProperties.name === "conference room" && responseProperties.help) {
   // Prepend custom slide
   responseProperties.help = [
