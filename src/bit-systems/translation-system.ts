@@ -51,7 +51,8 @@ class TranslationTarget {
   // }
   UpdateText(eventData: any) {
     const newWords = eventData.message.split(/\s+/).filter((w: string) => w.length > 0);
-    this.buffer.push(...newWords);
+    // this.buffer.push(...newWords);
+    this.buffer = newWords
 
     // Keep only the most recent `maxWords` in buffer
     if (this.buffer.length > this.maxWords) {
@@ -61,6 +62,7 @@ class TranslationTarget {
     const currentLine = this.buffer.join(" ");
     APP.scene!.emit("update_avatar_panel", { id: this.id, message: currentLine });
   }
+  
 
   // flushBuffer() {
   //   if (this.messageBuffer.length === 0) {
@@ -194,38 +196,7 @@ export class TranslationSystem {
 
     //logic to start transcribing
   }
-
-  PresentationTranscription(start: boolean) {
-    console.log("Presentation transcription")
-    let flagMessage;
-    if (start) {
-      flagMessage = "Presenter: Starting to transcribe text";
-      this.OpenWs();
-    } else {
-      this.StopTranscription();
-      flagMessage = "Presenter: Stop transcribing text";
-    }
-
-    console.log(`Presentation Presenter: ${flagMessage}`);
-  }
-  AudienceListenSocket(presenterId:any) {
-    this.OpenAudienceWsListen(presenterId)
-    console.log("Presentation transcription") 
-  } 
-  AudienceTranscription(start: boolean) {
-    console.log("audience transcriptio")
-    let flagMessage;
-
-    if (start) {
-      flagMessage = "Audience: Starting to transcribe text";
-      this.OpenWs();
-    } else {
-      this.StopTranscription();
-      flagMessage = "Audience: Stop transcribing text";
-    }
-
-    console.log(`Presentation Audience: ${flagMessage}`);
-  }
+ 
 
   SendTranscription(message: string) {
     console.log(`sending transcribed message: ${message}`);
@@ -297,31 +268,7 @@ export class TranslationSystem {
     this.mylanguage = newLanguage;
     APP.store.update({ preferences: { locale: languageCodes[newLanguage] } });
     setLocale(languageCodes[newLanguage]);
-  }
-
-  SendAudioConfig() {
-    let processingArgs = {};
-
-    processingArgs = {
-      chunk_length_seconds: 3.0,
-      accumulation_chunk_length_seconds: 1.0,
-      chunk_offset_seconds: 0.1
-    };
-
-    const audioConfig = {
-      type: "config",
-      data: {
-        model_name: "openai/whisper-tiny",
-        language: languageCodes[this.mylanguage],
-        processing_args: processingArgs
-      }
-    };
-
-    const data = JSON.stringify(audioConfig);
-    console.log("audio_data_goerge");
-    console.log(data);
-    this.websocket?.send(data);
-  }
+  } 
 
   ProcessAudio(event: AudioProcessingEvent) {
     const inputSampleRate = this.context!.sampleRate;
@@ -442,6 +389,11 @@ this.OpenWsListen(targetId)
  
    ws.onopen = () => {
      console.log(`WebSocket opened for target ${targetId}`);
+ 
+     setTimeout(()=>{     this.targets[targetId].UpdateText({id: targetId ,  message:  "Buenos días." });},3200)
+     setTimeout(()=>{     this.targets[targetId].UpdateText({id: targetId ,  message:  "Soy Jorge. Mucho gusto." });},6600)
+     setTimeout(()=>{     this.targets[targetId].UpdateText({id: targetId ,  message:  "Sí, me parece bien." });},11800)
+    //  this.targets[targetId].UpdateText({id: targetId ,  message:  "eventDataNew.translation " });
    };
  
    
