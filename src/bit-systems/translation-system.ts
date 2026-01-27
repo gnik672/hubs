@@ -390,9 +390,8 @@ this.OpenWsListen(targetId)
    ws.onopen = () => {
      console.log(`WebSocket opened for target ${targetId}`);
  
-     setTimeout(()=>{     this.targets[targetId].UpdateText({id: targetId ,  message:  "Good morning." });},4200)
-     setTimeout(()=>{     this.targets[targetId].UpdateText({id: targetId ,  message:  "My name is Maria. Nice to meet you." });},8600)
-     setTimeout(()=>{     this.targets[targetId].UpdateText({id: targetId ,  message:  "Yes, sounds good." });},14801)
+     setTimeout(()=>{     this.targets[targetId].UpdateText({id: targetId ,  message:  "Good morning. Did you see the presentation?" });},4200)
+
     //  this.targets[targetId].UpdateText({id: targetId ,  message:  "eventDataNew.translation " });
    };
  
