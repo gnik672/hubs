@@ -480,7 +480,8 @@ maxWords: number = 10;
       await presentationTranslationSystem.PresentationTranscription(true);
   
       if (this.presenter === this.peerId && !this.blackSquareCanvas) addBlackSquareToCamera(this);
-      this.StartWaitingDots();
+      // this.StartWaitingDots();
+      this.StartFixedPanelWaitingDots()
       console.log("🎤 Starting translation socket with session ID:", this.presentationSessionId);
      presentationTranslationSystem.AudienceListenSocket(this.presentationSessionId);
   
