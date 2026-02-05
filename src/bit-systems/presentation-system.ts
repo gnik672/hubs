@@ -556,10 +556,10 @@ maxWords: number = 10;
   
     this.fixedPanelWaitingDotsInterval = setTimeout(() => {
       UpdateFixedPanelText([
-        { text: "Welcome to the conference", color: this.presenterColorLine1 },
-        { text: "", color: this.presenterColorLine2 }
+        // { text: "Goodmorning. Welcome to the conference.", color: this.presenterColorLine1 },
+        { text: "Goodmorning. Welcome to the conference.", color: this.presenterColorLine2 }
       ]);
-    }, 5000); // Wait 5 seconds before showing
+    }, 7000); // Wait 5 seconds before showing
   }
   
   // StopFixedPanelWaitingDots() {
