@@ -510,7 +510,7 @@ maxWords: number = 10;
       this.blackSquareCtx!.textBaseline = "middle";
       this.blackSquareCtx!.fillText(`${dots}`, 512, 64);
       this.blackSquareTexture!.needsUpdate = true;
-    }, 500); // every half second
+    }, 5000); // every half second
   }
   
   StopWaitingDots() {
@@ -535,24 +535,42 @@ maxWords: number = 10;
   //   }, 500);
   // }
 
+  // StartFixedPanelWaitingDots() {
+  //   this.StopFixedPanelWaitingDots(); // Prevent double intervals
+  //   this.fixedPanelDotStage = 0;
+  
+  //   this.fixedPanelWaitingDotsInterval = setInterval(() => {
+  //     const dots = ".".repeat((this.fixedPanelDotStage % 4) + 1);
+  //     this.fixedPanelDotStage++;
+  
+  //     UpdateFixedPanelText([
+  //       { text: "", color: this.presenterColorLine1 }, // empty top line
+  //       { text: dots, color: this.presenterColorLine2 } // dots in bottom line
+  //     ]);
+  //   }, 500);
+  // }
+
   StartFixedPanelWaitingDots() {
-    this.StopFixedPanelWaitingDots(); // Prevent double intervals
-    this.fixedPanelDotStage = 0;
+    this.StopFixedPanelWaitingDots(); // Prevent overlap
   
-    this.fixedPanelWaitingDotsInterval = setInterval(() => {
-      const dots = ".".repeat((this.fixedPanelDotStage % 4) + 1);
-      this.fixedPanelDotStage++;
-  
+    this.fixedPanelWaitingDotsInterval = setTimeout(() => {
       UpdateFixedPanelText([
-        { text: "", color: this.presenterColorLine1 }, // empty top line
-        { text: dots, color: this.presenterColorLine2 } // dots in bottom line
+        { text: "Welcome to the conference", color: this.presenterColorLine1 },
+        { text: "", color: this.presenterColorLine2 }
       ]);
-    }, 500);
+    }, 5000); // Wait 5 seconds before showing
   }
   
+  // StopFixedPanelWaitingDots() {
+  //   if (this.fixedPanelWaitingDotsInterval) {
+  //     clearInterval(this.fixedPanelWaitingDotsInterval);
+  //     this.fixedPanelWaitingDotsInterval = null;
+  //   }
+  // }
+
   StopFixedPanelWaitingDots() {
     if (this.fixedPanelWaitingDotsInterval) {
-      clearInterval(this.fixedPanelWaitingDotsInterval);
+      clearTimeout(this.fixedPanelWaitingDotsInterval);
       this.fixedPanelWaitingDotsInterval = null;
     }
   }
